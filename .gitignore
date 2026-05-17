@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# uv
+.uv/
+
+# Jupyter / Marimo
+.ipynb_checkpoints/
+*.ipynb
+
+# OS
+.DS_Store
+
+# papers
+/papers/
+
+# marimo
+__marimo__/

@@ -1,7 +1,11 @@
 import marimo
 
 __generated_with = "0.23.6"
-app = marimo.App(width="full", layout_file="layouts/presentation.slides.json", app_title="LeWorldModel")
+app = marimo.App(
+    width="full",
+    app_title="LeWorldModel",
+    layout_file="layouts/presentation.slides.json",
+)
 
 
 @app.cell
@@ -114,9 +118,115 @@ def outline_slide():
                     </div>
                     """
                 ),
+                mo.Html(
+                    '<div style="position:fixed; bottom:1.2rem; right:1.5rem; font-size:0.72rem; color:#bbb; letter-spacing:0.05em;">1</div>'
+                ),
             ],
             justify="center",
             align="start",
+            gap="0",
+        )
+
+    _()
+    return
+
+
+@app.cell
+def bibliography_slide_1():
+    def _():
+        import marimo as mo
+        import bibtexparser
+
+        SLIDE_NO = 2  # update once all content slides are in place
+        ENTRIES_PER_PAGE = 7
+
+        def clean(s):
+            return s.replace("{", "").replace("}", "").replace("\n", " ")
+
+        def render_page(entries):
+            rows = []
+            for i, entry in entries:
+                authors = clean(entry.get("author", ""))
+                year = clean(entry.get("year", ""))
+                title = clean(entry.get("title", ""))
+                venue = clean(entry.get("journal") or entry.get("booktitle") or "")
+                rows.append(
+                    f'<div style="margin-bottom:0.9rem;">'
+                    f'<span style="color:#aaa; font-size:0.78rem; margin-right:0.75rem;">[{i}]</span>'
+                    f'<span style="font-size:0.82rem; color:#333; line-height:1.7;">'
+                    f'{authors} ({year}). <em>{title}</em>. {venue}.'
+                    f'</span></div>'
+                )
+            slide_no_html = (
+                f'<div style="position:fixed; bottom:1.2rem; right:1.5rem; font-size:0.72rem; color:#bbb; letter-spacing:0.05em;">{SLIDE_NO}</div>'
+                if SLIDE_NO is not None else ""
+            )
+            return mo.vstack(
+                [
+                    mo.md(
+                        '<div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:1.8rem;">References</div>'
+                    ),
+                    mo.Html("".join(rows) + slide_no_html),
+                ],
+                align="start",
+                gap="0",
+            )
+
+        with open("references.bib") as f:
+            db = bibtexparser.load(f)
+
+        all_entries = list(enumerate(db.entries, 1))
+        return render_page(all_entries[:ENTRIES_PER_PAGE])
+
+    _()
+    return
+
+
+@app.cell
+def bibliography_slide_2():
+    def _():
+        import marimo as mo
+        import bibtexparser
+
+        SLIDE_NO = 3  # update once all content slides are in place
+        ENTRIES_PER_PAGE = 7
+
+        def clean(s):
+            return s.replace("{", "").replace("}", "").replace("\n", " ")
+
+        with open("references.bib") as f:
+            db = bibtexparser.load(f)
+
+        all_entries = list(enumerate(db.entries, 1))
+        page_entries = all_entries[ENTRIES_PER_PAGE : ENTRIES_PER_PAGE * 2]
+        mo.stop(not page_entries)
+
+        rows = []
+        for i, entry in page_entries:
+            authors = clean(entry.get("author", ""))
+            year = clean(entry.get("year", ""))
+            title = clean(entry.get("title", ""))
+            venue = clean(entry.get("journal") or entry.get("booktitle") or "")
+            rows.append(
+                f'<div style="margin-bottom:0.9rem;">'
+                f'<span style="color:#aaa; font-size:0.78rem; margin-right:0.75rem;">[{i}]</span>'
+                f'<span style="font-size:0.82rem; color:#333; line-height:1.7;">'
+                f'{authors} ({year}). <em>{title}</em>. {venue}.'
+                f'</span></div>'
+            )
+        slide_no_html = (
+            f'<div style="position:fixed; bottom:1.2rem; right:1.5rem; font-size:0.72rem; color:#bbb; letter-spacing:0.05em;">{SLIDE_NO}</div>'
+            if SLIDE_NO is not None else ""
+        )
+        return mo.vstack(
+            [
+                mo.md(
+                    '<div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:1.8rem;">References</div>'
+                ),
+                mo.Html("".join(rows) + slide_no_html),
+            ],
+            align="start",
+            justify="start",
             gap="0",
         )
 

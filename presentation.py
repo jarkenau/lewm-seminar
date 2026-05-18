@@ -1,7 +1,7 @@
 import marimo
 
 __generated_with = "0.23.6"
-app = marimo.App(width="full", layout_file="layouts/presentation.slides.json")
+app = marimo.App(width="full", layout_file="layouts/presentation.slides.json", app_title="LeWorldModel")
 
 
 @app.cell
@@ -65,6 +65,62 @@ def title_slide():
         justify="center",
         align="center",
     )
+    return
+
+
+@app.cell
+def outline_slide():
+    def _():
+        import marimo as mo
+        return mo.vstack(
+            [
+                mo.md(
+                    r"""
+                    <div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:2rem;">Outline</div>
+                    """
+                ),
+                mo.md(
+                    r"""
+                    <div style="font-size:1rem; color:#333;">
+                      <div style="margin-bottom:1.2rem;">
+                        <span style="color:#aaa; font-size:0.8rem; margin-right:1rem;">01</span><strong>Background &amp; State of the Art</strong>
+                        <div style="margin-left:2.8rem; margin-top:0.3rem; font-size:0.82rem; color:#666; line-height:1.8;">
+                          JEPA: predict in latent space, not pixel space<br>
+                          Representation collapse — the central challenge<br>
+                          How existing methods solve it and where they fall short
+                        </div>
+                      </div>
+                      <div style="margin-bottom:1.2rem;">
+                        <span style="color:#aaa; font-size:0.8rem; margin-right:1rem;">02</span><strong>LeWorldModel</strong>
+                        <div style="margin-left:2.8rem; margin-top:0.3rem; font-size:0.82rem; color:#666; line-height:1.8;">
+                          ViT-Tiny encoder + action-conditioned transformer predictor<br>
+                          SIGReg: one hyperparameter to prevent collapse<br>
+                          Latent planning via MPC + CEM
+                        </div>
+                      </div>
+                      <div style="margin-bottom:1.2rem;">
+                        <span style="color:#aaa; font-size:0.8rem; margin-right:1rem;">03</span><strong>Experiments</strong>
+                        <div style="margin-left:2.8rem; margin-top:0.3rem; font-size:0.82rem; color:#666; line-height:1.8;">
+                          Task performance and planning speed across multiple benchmarks<br>
+                          Physics emerges in latent space
+                        </div>
+                      </div>
+                      <div>
+                        <span style="color:#aaa; font-size:0.8rem; margin-right:1rem;">04</span><strong>Discussion</strong>
+                        <div style="margin-left:2.8rem; margin-top:0.3rem; font-size:0.82rem; color:#666; line-height:1.8;">
+                          Authors' claims, personal assessment, open questions
+                        </div>
+                      </div>
+                    </div>
+                    """
+                ),
+            ],
+            justify="center",
+            align="start",
+            gap="0",
+        )
+
+    _()
     return
 
 

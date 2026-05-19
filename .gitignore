@@ -29,3 +29,6 @@ env/
 
 # marimo
 __marimo__/
+
+# Manim renders
+assets/*

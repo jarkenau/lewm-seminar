@@ -8,8 +8,22 @@ The talk is structured into four parts: motivation & related work, architecture 
 
 ## Tooling
 
-- **Slides** — [Marimo](https://marimo.io/) reactive notebooks (`presentation.py`)
-- **Animations** — [Manim Community](https://www.manim.community/) (`animations/`)
+- **Slides** — [Marimo](https://marimo.io/) reactive notebooks
+- **Animations** — [Manim Community](https://www.manim.community/)
+
+## Dependencies
+
+In addition to the Python packages managed by `uv`, you need **ffmpeg** installed system-wide:
+
+```bash
+# macOS
+brew install ffmpeg
+
+# Ubuntu / Debian
+sudo apt install ffmpeg
+```
+
+Manim uses ffmpeg to stitch animation frames into video. The slide deck renders animations on first load and caches them under `assets/` — no pre-rendered videos need to be committed.
 
 ## Running the slides
 

@@ -2,7 +2,7 @@
 # requires-python = ">=3.11"
 # dependencies = [
 #   "marimo>=0.23.6",
-#   "bibtexparser>=1.4.0",
+#   "bibtexparser>=1.4.0,<2.0",
 # ]
 # ///
 import marimo

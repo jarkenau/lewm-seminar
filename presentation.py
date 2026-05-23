@@ -3,7 +3,7 @@ import marimo
 __generated_with = "0.23.6"
 app = marimo.App(
     width="full",
-    app_title="LeWorldModel",
+    app_title="World Models Seminar",
     layout_file="layouts/presentation.slides.json",
 )
 
@@ -74,7 +74,7 @@ with app.setup:
         _b64 = base64.b64encode(_out.read_bytes()).decode()
         import marimo as mo
         return mo.Html(
-            f'<video autoplay loop controls style="width:100%;">'
+            f'<video autoplay loop controls style="max-width:95%; max-height:45vh; width:auto; height:auto; display:block; margin:0 auto;">'
             f'<source src="data:video/mp4;base64,{_b64}" type="video/mp4">'
             f'</video>'
         )

@@ -48,27 +48,28 @@ with app.setup:
             "high_quality": "1080p60",
             "fourk_quality": "2160p60",
         }
-        _assets = pathlib.Path(__file__).parent / "assets"
+        _root = pathlib.Path(__file__).parent
         _res_dir = _quality_to_dir[quality]
-        _out = _assets / "videos" / _res_dir / f"{scene_cls.__name__}.mp4"
-        _out.parent.mkdir(parents=True, exist_ok=True)
-
-        # Detect if the source file is newer than the cached render
+        _scene_name = scene_cls.__name__
         _source = pathlib.Path(inspect.getfile(scene_cls))
+        _source_stem = _source.stem
+        _out = _root / "media" / "videos" / _source_stem / _res_dir / f"{_scene_name}.mp4"
+
+        # Re-render if missing or source file is newer than the cached render
         _stale = _out.exists() and _source.stat().st_mtime > _out.stat().st_mtime
 
         if not _out.exists() or _stale:
-            manim_config.media_dir = str(_assets)
+            manim_config.media_dir = str(_root / "media")
+            manim_config.input_file = str(_source)
             manim_config.quality = quality
             manim_config.preview = False
-            try:
-                scene_cls().render()
-            except Exception:
-                _list = _assets / "videos" / _res_dir / "partial_movie_files" / scene_cls.__name__ / "partial_movie_file_list.txt"
-                subprocess.run(
-                    ["ffmpeg", "-f", "concat", "-safe", "0", "-i", str(_list), "-c", "copy", str(_out)],
-                    check=True,
-                )
+            scene_cls().render()
+
+        if not _out.exists():
+            raise FileNotFoundError(
+                f"Render succeeded but output not found at expected path:\n{_out}\n"
+                f"Check that the scene class name matches the file stem."
+            )
 
         _b64 = base64.b64encode(_out.read_bytes()).decode()
         import marimo as mo

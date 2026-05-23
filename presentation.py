@@ -1,3 +1,10 @@
+# /// script
+# requires-python = ">=3.11"
+# dependencies = [
+#   "marimo>=0.23.6",
+#   "bibtexparser>=1.4.0",
+# ]
+# ///
 import marimo
 
 __generated_with = "0.23.6"
@@ -40,7 +47,7 @@ with app.setup:
             Write,
         )
 
-    _VIDEO_STYLE = "max-width:95%; max-height:45vh; width:auto; height:auto; display:block; margin:0 auto;"
+    VIDEO_STYLE = "max-width:95%; max-height:45vh; width:auto; height:auto; display:block; margin:0 auto;"
 
     def render_scene(scene_cls, quality="high_quality"):
         import base64
@@ -81,7 +88,7 @@ with app.setup:
             _b64 = base64.b64encode(_out.read_bytes()).decode()
             import marimo as mo
             return mo.Html(
-                f'<video autoplay loop controls style="{_VIDEO_STYLE}">'
+                f'<video autoplay loop controls style="{VIDEO_STYLE}">'
                 f'<source src="data:video/mp4;base64,{_b64}" type="video/mp4">'
                 f'</video>'
             )
@@ -90,7 +97,7 @@ with app.setup:
             _rel = f"media/videos/{_source_stem}/{_res_dir}/{_scene_name}.mp4"
             import marimo as mo
             return mo.Html(
-                f'<video autoplay loop controls style="{_VIDEO_STYLE}">'
+                f'<video autoplay loop controls style="{VIDEO_STYLE}">'
                 f'<source src="{_rel}" type="video/mp4">'
                 f'</video>'
             )
@@ -228,7 +235,7 @@ def jepa_principle_animation_slide():
         _video = render_scene(JEPATraining)
     else:
         _video = _mo.Html(
-            f'<video autoplay loop controls style="{_VIDEO_STYLE}">'
+            f'<video autoplay loop controls style="{VIDEO_STYLE}">'
             '<source src="media/videos/jepa_training/1080p60/JEPATraining.mp4" type="video/mp4">'
             '</video>'
         )

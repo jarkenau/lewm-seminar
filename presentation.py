@@ -151,7 +151,7 @@ def outline_slide():
             [
                 mo.md(
                     r"""
-                    <div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:2rem;">Outline</div>
+                    <div style="font-size:1.7rem; font-weight:700; color:#111; padding-top:2.5rem; margin-bottom:2rem;">Outline</div>
                     """
                 ),
                 mo.md(
@@ -193,7 +193,6 @@ def outline_slide():
                     '<div style="position:fixed; bottom:1.2rem; right:1.5rem; font-size:0.72rem; color:#bbb; letter-spacing:0.05em;">1</div>'
                 ),
             ],
-            justify="center",
             align="start",
             gap="0",
         )
@@ -247,7 +246,7 @@ def representation_collapse_question():
                     [
                         mo.md(
                             r"""
-                            <div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:0.4rem;">
+                            <div style="font-size:1.7rem; font-weight:700; color:#111; padding-top:2.5rem; margin-bottom:0.4rem;">
                               Representation Collapse
                             </div>
                             <div style="font-size:0.78rem; letter-spacing:0.1em; color:#aaa; margin-bottom:2rem;">
@@ -308,7 +307,7 @@ def representation_collapse_answer():
                     [
                         mo.md(
                             r"""
-                            <div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:0.4rem;">
+                            <div style="font-size:1.7rem; font-weight:700; color:#111; padding-top:2.5rem; margin-bottom:0.4rem;">
                               Representation Collapse
                             </div>
                             <div style="font-size:0.78rem; letter-spacing:0.1em; color:#aaa; margin-bottom:2rem;">
@@ -381,7 +380,7 @@ def bibliography_slide_1(mo):
             )
             return mo.vstack(
                 [
-                    mo.md('<div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:1.8rem;">References</div>'),
+                    mo.md('<div style="font-size:1.7rem; font-weight:700; color:#111; padding-top:2.5rem; margin-bottom:1.8rem;">References</div>'),
                     mo.Html("".join(rows) + slide_no_html),
                 ],
                 align="start",
@@ -435,7 +434,7 @@ def bibliography_slide_2(mo):
         )
         return mo.vstack(
             [
-                mo.md('<div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:1.8rem;">References</div>'),
+                mo.md('<div style="font-size:1.7rem; font-weight:700; color:#111; padding-top:2.5rem; margin-bottom:1.8rem;">References</div>'),
                 mo.Html("".join(rows) + slide_no_html),
             ],
             align="start",

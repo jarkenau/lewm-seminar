@@ -37,6 +37,7 @@ with app.setup:
 
     def render_scene(scene_cls, quality="high_quality"):
         import base64
+        import inspect
         import pathlib
         import subprocess
         from manim import config as manim_config
@@ -52,7 +53,11 @@ with app.setup:
         _out = _assets / "videos" / _res_dir / f"{scene_cls.__name__}.mp4"
         _out.parent.mkdir(parents=True, exist_ok=True)
 
-        if not _out.exists():
+        # Detect if the source file is newer than the cached render
+        _source = pathlib.Path(inspect.getfile(scene_cls))
+        _stale = _out.exists() and _source.stat().st_mtime > _out.stat().st_mtime
+
+        if not _out.exists() or _stale:
             manim_config.media_dir = str(_assets)
             manim_config.quality = quality
             manim_config.preview = False
@@ -199,147 +204,11 @@ def outline_slide():
 
 @app.cell
 def jepa_principle_animation_slide():
-    def _():
-        import random
-
-        class JEPAPrincipleAnimation(Scene):
-            def construct(self):
-                self.camera.background_color = WHITE
-
-                BLUE   = ManimColor("#1565C0")
-                GREEN  = ManimColor("#2E7D32")
-                PURPLE = ManimColor("#7B3F9E")
-                DARK   = ManimColor("#222222")
-                RED_C  = ManimColor("#C62828")
-
-                # ── helpers ────────────────────────────────────────────
-
-                def pixel_frame(seed, label_text):
-                    random.seed(seed)
-                    grays = ["#cccccc","#aaaaaa","#888888","#666666",
-                             "#eeeeee","#bbbbbb","#999999","#dddddd"]
-                    cs = 0.3
-                    cells = VGroup(*[
-                        Rectangle(
-                            width=cs, height=cs,
-                            fill_color=ManimColor(random.choice(grays)),
-                            fill_opacity=1.0,
-                            stroke_width=0.4,
-                            stroke_color=ManimColor("#999999"),
-                        ).move_to(RIGHT * c * cs + DOWN * r * cs)
-                        for r in range(4) for c in range(4)
-                    ])
-                    cells.move_to([0, 0, 0])
-                    border = Rectangle(width=4*cs, height=4*cs, color=DARK, stroke_width=2.0)
-                    lbl = Text(label_text, color=DARK, font_size=18).next_to(border, DOWN, buff=0.1)
-                    return VGroup(cells, border, lbl)
-
-                def encoder_box():
-                    box = RoundedRectangle(
-                        width=1.5, height=0.52, corner_radius=0.08,
-                        fill_color=ManimColor("#EDE7F6"), fill_opacity=1.0,
-                        color=PURPLE, stroke_width=2.0,
-                    )
-                    lbl = Text("Encoder", color=PURPLE, font_size=16).move_to(box)
-                    return VGroup(box, lbl)
-
-                def latent_vec(label_text, color):
-                    bars = VGroup(*[
-                        Rectangle(
-                            width=0.32, height=0.16,
-                            fill_color=color,
-                            fill_opacity=0.35 + 0.06 * (k % 5),
-                            stroke_width=0.5,
-                            stroke_color=color,
-                        )
-                        for k in range(8)
-                    ]).arrange(DOWN, buff=0.035)
-                    lbl = Text(label_text, color=color, font_size=22).next_to(bars, DOWN, buff=0.08)
-                    return VGroup(bars, lbl)
-
-                def pred_box():
-                    box = RoundedRectangle(
-                        width=1.7, height=0.52, corner_radius=0.08,
-                        fill_color=ManimColor("#E8F5E9"), fill_opacity=1.0,
-                        color=GREEN, stroke_width=2.0,
-                    )
-                    lbl = Text("Predictor", color=GREEN, font_size=16).move_to(box)
-                    return VGroup(box, lbl)
-
-                # ── objects ────────────────────────────────────────────
-
-                fi    = pixel_frame(42, "frame i")
-                fi1   = pixel_frame(99, "frame i+1")
-                enci  = encoder_box()
-                enci1 = encoder_box()
-                lati  = latent_vec(r"z_i",             BLUE)
-                lati1 = latent_vec(r"z_{i+1}",         BLUE)
-                lhat  = latent_vec(r"\hat{z}_{i+1}",   GREEN)
-                pred  = pred_box()
-
-                # ── layout ─────────────────────────────────────────────
-
-                LX, RX         = -4.5, 5.0
-                TOP_Y, ENC_Y   =  2.5,  0.7
-                LAT_Y          = -1.5
-                PRED_X, HAT_X  = -1.0,  2.2
-                LOSS_Y         = -3.3
-
-                fi.move_to([LX, TOP_Y, 0])
-                enci.move_to([LX, ENC_Y, 0])
-                lati.move_to([LX, LAT_Y, 0])
-
-                fi1.move_to([RX, TOP_Y, 0])
-                enci1.move_to([RX, ENC_Y, 0])
-                lati1.move_to([RX, LAT_Y, 0])
-
-                pred.move_to([PRED_X, LAT_Y, 0])
-                lhat.move_to([HAT_X,  LAT_Y, 0])
-
-                # ── arrows ─────────────────────────────────────────────
-
-                a_fi_enc    = Arrow(fi[1].get_bottom(),    enci[0].get_top(),    color=PURPLE, stroke_width=2.5, buff=0.07)
-                a_enc_lati  = Arrow(enci[0].get_bottom(),  lati[0].get_top(),    color=BLUE,   stroke_width=2.5, buff=0.07)
-                a_fi1_enc   = Arrow(fi1[1].get_bottom(),   enci1[0].get_top(),   color=PURPLE, stroke_width=2.5, buff=0.07)
-                a_enc_lati1 = Arrow(enci1[0].get_bottom(), lati1[0].get_top(),   color=BLUE,   stroke_width=2.5, buff=0.07)
-                a_lati_pred = Arrow(lati[0].get_right(),   pred[0].get_left(),   color=GREEN,  stroke_width=2.5, buff=0.07)
-                a_pred_hat  = Arrow(pred[0].get_right(),   lhat[0].get_left(),   color=GREEN,  stroke_width=2.5, buff=0.07)
-
-                loss = Text(
-                    "L = ||z(i+1) - z_hat(i+1)||",
-                    color=RED_C, font_size=26,
-                )
-                loss.move_to([(HAT_X + RX) / 2, LOSS_Y, 0])
-
-                a_lati1_loss = Arrow(lati1[0].get_bottom(), loss.get_top() + LEFT  * 0.6, color=RED_C, stroke_width=2.0, buff=0.07)
-                a_lhat_loss  = Arrow(lhat[0].get_bottom(),  loss.get_top() + RIGHT * 0.6, color=RED_C, stroke_width=2.0, buff=0.07)
-
-                # ── animate ────────────────────────────────────────────
-
-                self.play(FadeIn(fi), FadeIn(fi1))
-                self.wait(0.3)
-
-                self.play(FadeIn(enci), FadeIn(enci1))
-                self.play(GrowArrow(a_fi_enc), GrowArrow(a_fi1_enc))
-                self.wait(0.2)
-
-                self.play(GrowArrow(a_enc_lati), GrowArrow(a_enc_lati1))
-                self.play(FadeIn(lati), FadeIn(lati1))
-                self.wait(0.4)
-
-                self.play(FadeIn(pred))
-                self.play(GrowArrow(a_lati_pred))
-                self.play(GrowArrow(a_pred_hat))
-                self.play(FadeIn(lhat))
-                self.wait(0.4)
-
-                self.play(GrowArrow(a_lati1_loss), GrowArrow(a_lhat_loss))
-                self.play(Write(loss))
-                self.wait(1.0)
-
-        return render_scene(JEPAPrincipleAnimation)
-
-    _()
+    import sys as _sys
+    _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+    from animations.jepa_training import JEPATraining
+    _video = render_scene(JEPATraining)
+    _video
     return
 
 

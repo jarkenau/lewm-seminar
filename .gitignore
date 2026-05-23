@@ -30,5 +30,17 @@ env/
 # marimo
 __marimo__/
 
-# Manim renders
-assets/*
+# Manim intermediate artifacts (ignore specific dirs, keep final 1080p renders)
+media/Tex/
+media/images/
+media/texts/
+media/videos/test_*/
+media/videos/*/480p15/
+media/videos/*/720p30/
+media/videos/*/partial_movie_files/
+media/videos/*/*/partial_movie_files/
+
+# assets — ignore everything except notebook-facing 1080p video cache
+assets/jepa_training.mp4
+assets/videos/*/480p15/
+assets/videos/*/720p30/

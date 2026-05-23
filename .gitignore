@@ -32,7 +32,8 @@ __marimo__/
 
 # Manim intermediate artifacts — keep only final 1080p renders
 media/Tex/
-media/images/
+media/images/*.png
+!media/images/jepa_final_frame.png
 media/texts/
 media/videos/test_*/
 media/videos/*/480p15/

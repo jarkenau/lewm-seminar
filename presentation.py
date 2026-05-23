@@ -214,6 +214,143 @@ def jepa_principle_animation_slide():
 
 
 @app.cell
+def representation_collapse_question():
+    def _():
+        import base64
+        import pathlib
+        import marimo as mo
+
+        img_b64 = base64.b64encode(
+            (pathlib.Path(__file__).parent / "media/images/jepa_final_frame.png").read_bytes()
+        ).decode()
+
+        def right_col():
+            return mo.vstack(
+                [
+                    mo.md(
+                        r"""
+                        <div style="font-size:0.72rem; letter-spacing:0.08em;
+                                    color:#bbb; margin-bottom:0.5rem; text-align:center;">
+                          JEPA ARCHITECTURE
+                        </div>
+                        """
+                    ),
+                    mo.Html(f'<img src="data:image/png;base64,{img_b64}" style="width:100%; border-radius:4px;" />'),
+                ],
+                align="center",
+                gap="0",
+            )
+
+        return mo.hstack(
+            [
+                mo.vstack(
+                    [
+                        mo.md(
+                            r"""
+                            <div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:0.4rem;">
+                              Representation Collapse
+                            </div>
+                            <div style="font-size:0.78rem; letter-spacing:0.1em; color:#aaa; margin-bottom:2rem;">
+                              THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES
+                            </div>
+                            <div style="font-size:1.35rem; color:#111; line-height:1.6; margin-top:1rem;">
+                              What is the easiest way a model could achieve
+                              <br><strong>(near-)perfect prediction loss?</strong>
+                            </div>
+                            """
+                        ),
+                    ],
+                    align="start",
+                    gap="0",
+                ),
+                right_col(),
+            ],
+            widths=[1, 1],
+            gap="3rem",
+            align="start",
+        )
+
+    _()
+    return
+
+
+@app.cell
+def representation_collapse_answer():
+    def _():
+        import base64
+        import pathlib
+        import marimo as mo
+
+        img_b64 = base64.b64encode(
+            (pathlib.Path(__file__).parent / "media/images/jepa_final_frame.png").read_bytes()
+        ).decode()
+
+        def right_col():
+            return mo.vstack(
+                [
+                    mo.md(
+                        r"""
+                        <div style="font-size:0.72rem; letter-spacing:0.08em;
+                                    color:#bbb; margin-bottom:0.5rem; text-align:center;">
+                          JEPA ARCHITECTURE
+                        </div>
+                        """
+                    ),
+                    mo.Html(f'<img src="data:image/png;base64,{img_b64}" style="width:100%; border-radius:4px;" />'),
+                ],
+                align="center",
+                gap="0",
+            )
+
+        return mo.hstack(
+            [
+                mo.vstack(
+                    [
+                        mo.md(
+                            r"""
+                            <div style="font-size:1.7rem; font-weight:700; color:#111; margin-bottom:0.4rem;">
+                              Representation Collapse
+                            </div>
+                            <div style="font-size:0.78rem; letter-spacing:0.1em; color:#aaa; margin-bottom:2rem;">
+                              THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES
+                            </div>
+                            <div style="font-size:1rem; color:#333;">
+                              <div style="margin-bottom:1.6rem;">
+                                <span style="color:#aaa; font-size:0.9rem; margin-right:1rem;">01</span>
+                                <strong style="font-size:1.2rem;">Complete Collapse</strong>
+                                <div style="margin-left:2.8rem; margin-top:0.5rem; font-size:1.05rem; color:#444; line-height:1.8;">
+                                  The encoder maps all inputs to the same point in embedding space.<br>
+                                  The predictor trivially satisfies the loss without learning anything.
+                                </div>
+                              </div>
+                              <div>
+                                <span style="color:#aaa; font-size:0.9rem; margin-right:1rem;">02</span>
+                                <strong style="font-size:1.2rem;">Dimensional Collapse</strong>
+                                <div style="margin-left:2.8rem; margin-top:0.5rem; font-size:1.05rem; color:#444; line-height:1.8;">
+                                  Inputs map into a low-dimensional subspace of the full embedding space.<br>
+                                  Loss looks fine — but representations carry far less information than intended.
+                                </div>
+                              </div>
+                            </div>
+                            """
+                        ),
+                    ],
+                    align="start",
+                    gap="0",
+                ),
+                right_col(),
+            ],
+            widths=[1, 1],
+            gap="3rem",
+            align="start",
+        )
+
+
+    _()
+    return
+
+
+@app.cell
 def bibliography_slide_1(mo):
     def _():
         import bibtexparser

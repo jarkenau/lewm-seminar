@@ -8,39 +8,45 @@ app = marimo.App(
 )
 
 with app.setup:
-    from manim import (
-        BOLD,
-        BLACK,
-        ITALIC,
-        WHITE,
-        GRAY,
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT,
-        TAU,
-        ManimColor,
-        Scene,
-        Text,
-        VGroup,
-        Circle,
-        Rectangle,
-        RoundedRectangle,
-        Arrow,
-        CurvedArrow,
-        GrowArrow,
-        FadeIn,
-        FadeOut,
-        Create,
-        Write,
-    )
+    import sys as _sys
+
+    _WASM = _sys.platform == "emscripten"
+
+    if not _WASM:
+        from manim import (
+            BOLD,
+            BLACK,
+            ITALIC,
+            WHITE,
+            GRAY,
+            UP,
+            DOWN,
+            LEFT,
+            RIGHT,
+            TAU,
+            ManimColor,
+            Scene,
+            Text,
+            VGroup,
+            Circle,
+            Rectangle,
+            RoundedRectangle,
+            Arrow,
+            CurvedArrow,
+            GrowArrow,
+            FadeIn,
+            FadeOut,
+            Create,
+            Write,
+        )
+
+    _VIDEO_STYLE = "max-width:95%; max-height:45vh; width:auto; height:auto; display:block; margin:0 auto;"
 
     def render_scene(scene_cls, quality="high_quality"):
         import base64
         import inspect
         import pathlib
-        import subprocess
-        from manim import config as manim_config
+        import sys
 
         _quality_to_dir = {
             "low_quality": "480p15",
@@ -55,29 +61,39 @@ with app.setup:
         _source_stem = _source.stem
         _out = _root / "media" / "videos" / _source_stem / _res_dir / f"{_scene_name}.mp4"
 
-        # Re-render if missing or source file is newer than the cached render
-        _stale = _out.exists() and _source.stat().st_mtime > _out.stat().st_mtime
+        if sys.platform != "emscripten":
+            # Re-render if missing or source file is newer than the cached render
+            _stale = _out.exists() and _source.stat().st_mtime > _out.stat().st_mtime
+            if not _out.exists() or _stale:
+                from manim import config as manim_config
+                manim_config.media_dir = str(_root / "media")
+                manim_config.input_file = str(_source)
+                manim_config.quality = quality
+                manim_config.preview = False
+                scene_cls().render()
 
-        if not _out.exists() or _stale:
-            manim_config.media_dir = str(_root / "media")
-            manim_config.input_file = str(_source)
-            manim_config.quality = quality
-            manim_config.preview = False
-            scene_cls().render()
+            if not _out.exists():
+                raise FileNotFoundError(
+                    f"Render succeeded but output not found at expected path:\n{_out}\n"
+                    f"Check that the scene class name matches the file stem."
+                )
 
-        if not _out.exists():
-            raise FileNotFoundError(
-                f"Render succeeded but output not found at expected path:\n{_out}\n"
-                f"Check that the scene class name matches the file stem."
+            _b64 = base64.b64encode(_out.read_bytes()).decode()
+            import marimo as mo
+            return mo.Html(
+                f'<video autoplay loop controls style="{_VIDEO_STYLE}">'
+                f'<source src="data:video/mp4;base64,{_b64}" type="video/mp4">'
+                f'</video>'
             )
-
-        _b64 = base64.b64encode(_out.read_bytes()).decode()
-        import marimo as mo
-        return mo.Html(
-            f'<video autoplay loop controls style="max-width:95%; max-height:45vh; width:auto; height:auto; display:block; margin:0 auto;">'
-            f'<source src="data:video/mp4;base64,{_b64}" type="video/mp4">'
-            f'</video>'
-        )
+        else:
+            # WASM: video served as a static file copied alongside the HTML in CI
+            _rel = f"media/videos/{_source_stem}/{_res_dir}/{_scene_name}.mp4"
+            import marimo as mo
+            return mo.Html(
+                f'<video autoplay loop controls style="{_VIDEO_STYLE}">'
+                f'<source src="{_rel}" type="video/mp4">'
+                f'</video>'
+            )
 
 
 @app.cell
@@ -205,9 +221,17 @@ def outline_slide():
 @app.cell
 def jepa_principle_animation_slide():
     import sys as _sys
-    _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
-    from animations.jepa_training import JEPATraining
-    _video = render_scene(JEPATraining)
+    import marimo as _mo
+    if _sys.platform != "emscripten":
+        _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+        from animations.jepa_training import JEPATraining
+        _video = render_scene(JEPATraining)
+    else:
+        _video = _mo.Html(
+            f'<video autoplay loop controls style="{_VIDEO_STYLE}">'
+            '<source src="media/videos/jepa_training/1080p60/JEPATraining.mp4" type="video/mp4">'
+            '</video>'
+        )
     _video
     return
 
@@ -215,13 +239,18 @@ def jepa_principle_animation_slide():
 @app.cell
 def representation_collapse_question():
     def _():
-        import base64
-        import pathlib
+        import sys
         import marimo as mo
 
-        img_b64 = base64.b64encode(
-            (pathlib.Path(__file__).parent / "media/images/jepa_final_frame.png").read_bytes()
-        ).decode()
+        if sys.platform != "emscripten":
+            import base64
+            import pathlib
+            img_b64 = base64.b64encode(
+                (pathlib.Path(__file__).parent / "media/images/jepa_final_frame.png").read_bytes()
+            ).decode()
+            img_tag = f'<img src="data:image/png;base64,{img_b64}" style="width:100%; border-radius:4px;" />'
+        else:
+            img_tag = '<img src="media/images/jepa_final_frame.png" style="width:100%; border-radius:4px;" />'
 
         def right_col():
             return mo.vstack(
@@ -234,7 +263,7 @@ def representation_collapse_question():
                         </div>
                         """
                     ),
-                    mo.Html(f'<img src="data:image/png;base64,{img_b64}" style="width:100%; border-radius:4px;" />'),
+                    mo.Html(img_tag),
                 ],
                 align="center",
                 gap="0",
@@ -276,13 +305,18 @@ def representation_collapse_question():
 @app.cell
 def representation_collapse_answer():
     def _():
-        import base64
-        import pathlib
+        import sys
         import marimo as mo
 
-        img_b64 = base64.b64encode(
-            (pathlib.Path(__file__).parent / "media/images/jepa_final_frame.png").read_bytes()
-        ).decode()
+        if sys.platform != "emscripten":
+            import base64
+            import pathlib
+            img_b64 = base64.b64encode(
+                (pathlib.Path(__file__).parent / "media/images/jepa_final_frame.png").read_bytes()
+            ).decode()
+            img_tag = f'<img src="data:image/png;base64,{img_b64}" style="width:100%; border-radius:4px;" />'
+        else:
+            img_tag = '<img src="media/images/jepa_final_frame.png" style="width:100%; border-radius:4px;" />'
 
         def right_col():
             return mo.vstack(
@@ -295,7 +329,7 @@ def representation_collapse_answer():
                         </div>
                         """
                     ),
-                    mo.Html(f'<img src="data:image/png;base64,{img_b64}" style="width:100%; border-radius:4px;" />'),
+                    mo.Html(img_tag),
                 ],
                 align="center",
                 gap="0",
@@ -387,8 +421,14 @@ def bibliography_slide_1(mo):
                 gap="0",
             )
 
-        with open("references.bib") as f:
-            db = bibtexparser.load(f)
+        import sys, io
+        if sys.platform == "emscripten":
+            from pyodide.http import open_url
+            _bib_text = open_url("references.bib").read()
+        else:
+            with open("references.bib") as f:
+                _bib_text = f.read()
+        db = bibtexparser.load(io.StringIO(_bib_text))
 
         all_entries = list(enumerate(db.entries, 1))
         return render_page(all_entries[:ENTRIES_PER_PAGE])
@@ -408,8 +448,14 @@ def bibliography_slide_2(mo):
         def clean(s):
             return s.replace("{", "").replace("}", "").replace("\n", " ")
 
-        with open("references.bib") as f:
-            db = bibtexparser.load(f)
+        import sys, io
+        if sys.platform == "emscripten":
+            from pyodide.http import open_url
+            _bib_text = open_url("references.bib").read()
+        else:
+            with open("references.bib") as f:
+                _bib_text = f.read()
+        db = bibtexparser.load(io.StringIO(_bib_text))
 
         all_entries = list(enumerate(db.entries, 1))
         page_entries = all_entries[ENTRIES_PER_PAGE : ENTRIES_PER_PAGE * 2]

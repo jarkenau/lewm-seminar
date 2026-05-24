@@ -3,7 +3,8 @@ name = "lewm-seminar"
 version = "0.1.0"
 requires-python = ">=3.11"
 dependencies = [
-    "marimo>=0.23.6",
+    "marimo>=0.23.7",
     "manim>=0.20.1",
     "bibtexparser>=1.4.0",
+    "playwright>=1.60.0",
 ]

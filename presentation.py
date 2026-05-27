@@ -50,6 +50,22 @@ with app.setup:
 
     VIDEO_STYLE = "width:100%;height:auto;display:block;"
 
+    SECTION = {
+        1: {"bg": "#DBEAFE", "border": "#3B82F6", "text": "#1E40AF", "label": "01 · Background & State of the Art"},
+        2: {"bg": "#D1FAE5", "border": "#10B981", "text": "#065F46", "label": "02 · LeWorldModel"},
+        3: {"bg": "#FEF3C7", "border": "#F59E0B", "text": "#78350F", "label": "03 · Experiments"},
+        4: {"bg": "#EDE9FE", "border": "#8B5CF6", "text": "#4C1D95", "label": "04 · Discussion"},
+    }
+
+    def section_strip(num):
+        import marimo as mo
+        c = SECTION[num]
+        return mo.Html(
+            f'<div style="position:fixed;top:1rem;left:1.5rem;z-index:100;">'
+            f'<span style="font-size:0.7rem;font-weight:700;color:{c["text"]};letter-spacing:0.1em;text-transform:uppercase;">'
+            f'{c["label"]}</span></div>'
+        )
+
     def render_scene(scene_cls, quality="high_quality"):
         import base64
         import inspect
@@ -131,15 +147,43 @@ def title_slide():
 def outline_slide():
     def _():
         import marimo as mo
+
+        def _entry(num, title, bullets):
+            c = SECTION[num]
+            items = "".join(
+                f'<li style="margin:0.25rem 0;font-size:1.2rem;color:#374151;">{b}</li>'
+                for b in bullets
+            )
+            return mo.Html(
+                f'<div style="padding:0.25rem 0;">'
+                f'<div style="font-weight:700;color:{c["text"]};font-size:1.6rem;margin-bottom:0.3rem;">{title}</div>'
+                f'<ul style="margin:0;padding-left:1.1rem;">{items}</ul>'
+                f'</div>'
+            )
+
         return mo.vstack(
             [
                 mo.md("# Outline"),
-                mo.md("### 01 Background & State of the Art\n- JEPA: predict in latent space, not pixel space\n- Representation collapse — the central challenge\n- How existing methods solve it and where they fall short"),
-                mo.md("### 02 LeWorldModel\n- ViT-Tiny encoder + action-conditioned transformer predictor\n- SIGReg: one hyperparameter to prevent collapse\n- Latent planning via MPC + CEM"),
-                mo.md("### 03 Experiments\n- Task performance and planning speed across multiple benchmarks\n- Physics emerges in latent space"),
-                mo.md("### 04 Discussion\n- Authors' claims, personal assessment, open questions"),
+                _entry(1, "01 · Background & State of the Art", [
+                    "JEPA: predict in latent space, not pixel space",
+                    "Representation collapse — the central challenge",
+                    "How existing methods solve it and where they fall short",
+                ]),
+                _entry(2, "02 · LeWorldModel", [
+                    "ViT-Tiny encoder + action-conditioned transformer predictor",
+                    "SIGReg: one hyperparameter to prevent collapse",
+                    "Latent planning via MPC + CEM",
+                ]),
+                _entry(3, "03 · Experiments", [
+                    "Task performance and planning speed across multiple benchmarks",
+                    "Physics emerges in latent space",
+                ]),
+                _entry(4, "04 · Discussion", [
+                    "Authors' claims, personal assessment, open questions",
+                ]),
             ],
             align="start",
+            gap="0.5rem",
         )
     _()
     return
@@ -159,7 +203,7 @@ def jepa_principle_animation_slide():
             '<source src="media/videos/jepa_training/1080p60/JEPATraining.mp4" type="video/mp4">'
             '</video>'
         )
-    _video
+    _mo.vstack([section_strip(1), _video])
     return
 
 
@@ -175,28 +219,33 @@ def representation_collapse_question():
         else:
             img_src = "media/images/jepa_final_frame.png"
 
-        return mo.hstack(
-            [
-                mo.vstack(
-                    [
-                        mo.md("# Representation Collapse"),
-                        mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
-                        mo.md("What is the easiest way a model could achieve **(near-)perfect prediction loss?**"),
-                    ],
-                    align="start",
-                ),
-                mo.vstack(
-                    [
-                        mo.md("*JEPA ARCHITECTURE*"),
-                        mo.image(img_src),
-                    ],
-                    align="center",
-                ),
-            ],
-            widths=[1, 1],
-            gap="3rem",
-            align="start",
-        )
+        return mo.vstack([
+            section_strip(1),
+            mo.hstack(
+                [
+                    mo.vstack(
+                        [
+                            mo.md("## Representation Collapse"),
+                            mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
+                            mo.md("&nbsp;"),
+                            mo.md("&nbsp;"), 
+                            mo.md("What is the easiest way a model could achieve **(near-)perfect prediction loss?**"),
+                        ],
+                        align="start",
+                    ),
+                    mo.vstack(
+                        [
+                            mo.md("*JEPA ARCHITECTURE*"),
+                            mo.image(img_src),
+                        ],
+                        align="center",
+                    ),
+                ],
+                widths=[1, 1],
+                gap="3rem",
+                align="start",
+            ),
+        ])
     _()
     return
 
@@ -213,38 +262,42 @@ def representation_collapse_answer():
         else:
             img_src = "media/images/jepa_final_frame.png"
 
-        return mo.hstack(
-            [
-                mo.vstack(
-                    [
-                        mo.md("# Representation Collapse"),
-                        mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
-                        mo.md("""
+        return mo.vstack([
+            section_strip(1),
+            mo.hstack(
+                [
+                    mo.vstack(
+                        [
+                            mo.md("## Representation Collapse"),
+                            mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
+                            mo.md("&nbsp;"), 
+                            mo.md("""
     **01 Complete Collapse**
 
-    The encoder maps all inputs to the same point in embedding space.
-    The predictor trivially satisfies the loss without learning anything.
+    - All inputs collapse to a single point in embedding space.
+    - Predictor achieves zero loss without learning anything.
 
     **02 Dimensional Collapse**
 
-    Inputs map into a low-dimensional subspace of the full embedding space.
-    Loss looks fine — but representations carry far less information than intended.
-                        """),
-                    ],
-                    align="start",
-                ),
-                mo.vstack(
-                    [
-                        mo.md("*JEPA ARCHITECTURE*"),
-                        mo.image(img_src),
-                    ],
-                    align="center",
-                ),
-            ],
-            widths=[1, 1],
-            gap="3rem",
-            align="start",
-        )
+    - Embeddings span only a low-dimensional subspace.
+    - Loss looks fine — but representations are impoverished.
+                            """),
+                        ],
+                        align="start",
+                    ),
+                    mo.vstack(
+                        [
+                            mo.md("*JEPA ARCHITECTURE*"),
+                            mo.image(img_src),
+                        ],
+                        align="center",
+                    ),
+                ],
+                widths=[1, 1],
+                gap="3rem",
+                align="start",
+            ),
+        ])
     _()
     return
 
@@ -317,6 +370,16 @@ def bibliography_slide_2(mo):
         return mo.vstack([mo.md("\n".join(lines))], align="start")
 
     _()
+    return
+
+
+@app.cell
+def _():
+    return
+
+
+@app.cell
+def _():
     return
 
 

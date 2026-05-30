@@ -3,6 +3,9 @@
   "data": {
     "cells": [
       {},
+      {
+        "speakerNotes": "  - Pre-print released March 2026\n  - Co-authored by Yann LeCun \u2014 one of the founding figures of modern deep learning\n  - 2018 Turing Award winner (shared with Bengio & Hinton) for contributions to deep learning\n  - Vocal critic of LLMs: argues autoregressive next-token prediction is the wrong path to true intelligence\n  - In 2022: 60-page position paper outlining his vision for autonomous machine intelligence\n  - Central idea: the Joint-Embedding Predictive Architecture (JEPA) \u2014 predict in latent space, not pixel space"
+      },
       {},
       {},
       {},

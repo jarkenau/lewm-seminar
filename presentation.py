@@ -77,6 +77,75 @@ with app.setup:
             f'{num}</span></div>'
         )
 
+    # Single source of truth for citations: the works cited in the slides, in
+    # reference order. Each entry is a BibTeX key from references.bib. The
+    # bibliography renders *exactly* these (and only these), numbered by their
+    # position here, and inline markers use the same numbers via cite() — so
+    # the two never drift. To cite a new work: add its key here (and to
+    # references.bib) and drop a cite("key") in the slide.
+    CITED = [
+        "maes_leworldmodel_2026",   # LeWM — the paper
+        "assran_i-jepa_2023",       # I-JEPA
+        "bardes_v-jepa_2024",       # V-JEPA
+        "assran_v-jepa_2025",       # V-JEPA 2
+        "munim_echojepa_2026",      # Echo-JEPA
+        "dong_brain-jepa_2024",     # Brain-JEPA
+        "micheli_iris_2023",        # IRIS
+        "alonso_diamond_2024",      # DIAMOND
+        "decart_oasis_2024",        # OASIS
+        "hafner_dreamer4_2025",     # Dreamer 4
+        "bruce_genie_2024",         # Genie
+        "zhou_dino-wm_2024",        # DINO-WM
+        "sobal_pldm_2025",          # PLDM
+        "bardes_vicreg_2022",       # VICReg
+    ]
+
+    def cite(key):
+        # Citation number for a BibTeX key, from its position in CITED.
+        return CITED.index(key) + 1 if key in CITED else "?"
+
+    def _abbrev_authors(raw):
+        import re
+        authors = [a.strip() for a in re.split(r"\s+and\s+", raw)]
+        out = []
+        for a in authors:
+            if "," in a:
+                last, first = a.split(",", 1)
+                last, first = last.strip(), first.strip()
+            else:
+                parts = a.split()
+                last, first = parts[-1], " ".join(parts[:-1])
+            initials = ". ".join(p[0] for p in first.split() if p)
+            initials = initials + "." if initials else ""
+            out.append(f"{initials} {last}".strip())
+        if len(out) > 6:
+            return ", ".join(out[:6]) + " et al."
+        return (", ".join(out[:-1]) + ", and " + out[-1]) if len(out) > 1 else (out[0] if out else "")
+
+    def format_ref_ieee(i, entry):
+        # Returns an HTML string — one bibliography entry in IEEE style.
+        def clean(s): return s.replace("{","").replace("}","").replace("\n"," ").strip()
+        import re
+        authors  = _abbrev_authors(clean(entry.get("author", "")))
+        title    = clean(entry.get("title", ""))
+        year     = clean(entry.get("year", ""))
+        venue    = clean(entry.get("journal") or entry.get("booktitle") or "")
+        url      = entry.get("url", "").strip()
+        note     = clean(entry.get("note", ""))
+        arxiv_m  = re.search(r"arXiv:([\d.]+)", note)
+        arxiv_id = arxiv_m.group(1) if arxiv_m else ""
+
+        venue_str  = f"<em>{venue}</em>" if venue else (f"arXiv:{arxiv_id}" if arxiv_id else "")
+        venue_part = f"{venue_str}, " if venue_str else ""
+        link_html  = (f' <a href="{url}" style="color:#3B82F6;">arXiv:{arxiv_id}</a>'
+                      if arxiv_id and url else
+                      f' <a href="{url}" style="color:#3B82F6;">link</a>' if url else "")
+        return (
+            f'<p style="margin:0.35rem 0;font-size:0.95rem;line-height:1.45;color:#1E293B;">'
+            f'<strong>[{i}]</strong> {authors}, &ldquo;{title},&rdquo; {venue_part}{year}.{link_html}'
+            f'</p>'
+        )
+
     def sota_table(headers, rows, aligns=None, section=1):
         # Styled HTML table rendered as raw HTML so it escapes Marimo's green
         # zebra-striping / yellow hover on markdown tables. Rows have no
@@ -368,13 +437,17 @@ def sota_target_task_slide():
                 [
                     ["Self-supervised representation learning",
                      "Predict masked latent patches — no actions, no planning",
-                     "I-JEPA, V-JEPA / V-JEPA 2, Echo-/Brain-JEPA"],
+                     f"I-JEPA [{cite('assran_i-jepa_2023')}], V-JEPA [{cite('bardes_v-jepa_2024')}] / "
+                     f"V-JEPA 2 [{cite('assran_v-jepa_2025')}], Echo-JEPA [{cite('munim_echojepa_2026')}] / "
+                     f"Brain-JEPA [{cite('dong_brain-jepa_2024')}]"],
                     ["Generative world models",
                      "Action-conditioned pixel-space simulators, often reward-based, for RL &amp; games",
-                     "IRIS, DIAMOND, OASIS, DreamerV4, Genie"],
+                     f"IRIS [{cite('micheli_iris_2023')}], DIAMOND [{cite('alonso_diamond_2024')}], "
+                     f"OASIS [{cite('decart_oasis_2024')}], DreamerV4 [{cite('hafner_dreamer4_2025')}], "
+                     f"Genie [{cite('bruce_genie_2024')}]"],
                     ["Latent action-conditioned world models",
                      "Predict dynamics in latent space, plan by imagination",
-                     "DINO-WM, PLDM"],
+                     f"DINO-WM [{cite('zhou_dino-wm_2024')}], PLDM [{cite('sobal_pldm_2025')}]"],
                 ],
             ),
         ], align="start")
@@ -404,7 +477,7 @@ def sota_anticollapse_slide():
                     ["Frozen pretrained encoder",
                      "Encoder is fixed, so it cannot collapse",
                      "Bounded by pretraining knowledge; not end-to-end"],
-                    ["Explicit regularization (VICReg)",
+                    [f"Explicit regularization (VICReg [{cite('bardes_vicreg_2022')}])",
                      "Variance / covariance penalty terms",
                      "Training instabilities; up to 6 loss hyperparameters"],
                 ],
@@ -428,11 +501,11 @@ def sota_summary_slide():
                 ["Method", "Target task", "Anti-collapse",
                  "End-to-end", "Reward-free", "Loss hyperparams"],
                 [
-                    ["V-JEPA 2", "Representation learning", "EMA + stop-grad", "✓", "—", "—"],
-                    ["DreamerV4", "Generative control", "Reconstruction", "✓", "✗", "—"],
-                    ["DINO-WM", "Latent control", "Frozen encoder", "✗", "✓", "—"],
-                    ["PLDM", "Latent control", "VICReg", "✓", "✓", "6"],
-                    ["LeWM", "Latent control", "SIGReg", "✓", "✓", "1"],
+                    [f"V-JEPA 2 [{cite('assran_v-jepa_2025')}]", "Representation learning", "EMA + stop-grad", "✓", "—", "—"],
+                    [f"DreamerV4 [{cite('hafner_dreamer4_2025')}]", "Generative control", "Reconstruction", "✓", "✗", "—"],
+                    [f"DINO-WM [{cite('zhou_dino-wm_2024')}]", "Latent control", "Frozen encoder", "✗", "✓", "—"],
+                    [f"PLDM [{cite('sobal_pldm_2025')}]", "Latent control", f"VICReg [{cite('bardes_vicreg_2022')}]", "✓", "✓", "6"],
+                    [f"LeWM [{cite('maes_leworldmodel_2026')}]", "Latent control", "SIGReg", "✓", "✓", "1"],
                 ],
                 aligns=["left", "left", "left", "center", "center", "center"],
             ),
@@ -454,9 +527,6 @@ def bibliography_slide_1(mo):
 
         ENTRIES_PER_PAGE = 7
 
-        def clean(s):
-            return s.replace("{", "").replace("}", "").replace("\n", " ")
-
         import sys, io
         if sys.platform == "emscripten":
             from pyodide.http import open_url
@@ -466,16 +536,15 @@ def bibliography_slide_1(mo):
                 _bib_text = f.read()
         db = bibtexparser.load(io.StringIO(_bib_text))
 
-        all_entries = list(enumerate(db.entries, 1))
-        lines = ["# References\n"]
-        for i, entry in all_entries[:ENTRIES_PER_PAGE]:
-            authors = clean(entry.get("author", ""))
-            year = clean(entry.get("year", ""))
-            title = clean(entry.get("title", ""))
-            venue = clean(entry.get("journal") or entry.get("booktitle") or "")
-            lines.append(f"**[{i}]** {authors} ({year}). *{title}*. {venue}.\n")
+        # Only the works cited in the slides, numbered by their position in CITED.
+        by_key = {e.get("ID"): e for e in db.entries}
+        cited_entries = [(i, by_key[k]) for i, k in enumerate(CITED, 1) if k in by_key]
 
-        return mo.vstack([page_number(7), mo.md("\n".join(lines))], align="start")
+        items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
+        return mo.vstack([
+            page_number(7),
+            mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
+        ], align="start")
 
     _()
     return
@@ -488,9 +557,6 @@ def bibliography_slide_2(mo):
 
         ENTRIES_PER_PAGE = 7
 
-        def clean(s):
-            return s.replace("{", "").replace("}", "").replace("\n", " ")
-
         import sys, io
         if sys.platform == "emscripten":
             from pyodide.http import open_url
@@ -500,26 +566,19 @@ def bibliography_slide_2(mo):
                 _bib_text = f.read()
         db = bibtexparser.load(io.StringIO(_bib_text))
 
-        all_entries = list(enumerate(db.entries, 1))
-        page_entries = all_entries[ENTRIES_PER_PAGE : ENTRIES_PER_PAGE * 2]
+        # Only the works cited in the slides, numbered by their position in CITED.
+        by_key = {e.get("ID"): e for e in db.entries}
+        cited_entries = [(i, by_key[k]) for i, k in enumerate(CITED, 1) if k in by_key]
+        page_entries = cited_entries[ENTRIES_PER_PAGE : ENTRIES_PER_PAGE * 2]
         mo.stop(not page_entries)
 
-        lines = ["# References (cont.)\n"]
-        for i, entry in page_entries:
-            authors = clean(entry.get("author", ""))
-            year = clean(entry.get("year", ""))
-            title = clean(entry.get("title", ""))
-            venue = clean(entry.get("journal") or entry.get("booktitle") or "")
-            lines.append(f"**[{i}]** {authors} ({year}). *{title}*. {venue}.\n")
-
-        return mo.vstack([page_number(8), mo.md("\n".join(lines))], align="start")
+        items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
+        return mo.vstack([
+            page_number(8),
+            mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
+        ], align="start")
 
     _()
-    return
-
-
-@app.cell
-def _():
     return
 
 

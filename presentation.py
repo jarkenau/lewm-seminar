@@ -66,6 +66,17 @@ with app.setup:
             f'{c["label"]}</span></div>'
         )
 
+    def page_number(num):
+        # Slide number in the bottom-right corner. Numbering starts at 1 on the
+        # first content slide (after the title and outline slides) so viewers
+        # can reference slides during Q&A.
+        import marimo as mo
+        return mo.Html(
+            f'<div style="position:fixed;bottom:1rem;right:1.75rem;z-index:100;">'
+            f'<span style="font-size:1.25rem;font-weight:600;color:#64748B;">'
+            f'{num}</span></div>'
+        )
+
     def sota_table(headers, rows, aligns=None, section=1):
         # Styled HTML table rendered as raw HTML so it escapes Marimo's green
         # zebra-striping / yellow hover on markdown tables. Rows have no
@@ -241,7 +252,7 @@ def jepa_principle_animation_slide():
             '<source src="media/videos/jepa_training/1080p60/JEPATraining.mp4" type="video/mp4">'
             '</video>'
         )
-    _mo.vstack([section_strip(1), _video])
+    _mo.vstack([section_strip(1), page_number(1), _video])
     return
 
 
@@ -259,6 +270,7 @@ def representation_collapse_question():
 
         return mo.vstack([
             section_strip(1),
+            page_number(2),
             mo.hstack(
                 [
                     mo.vstack(
@@ -266,7 +278,7 @@ def representation_collapse_question():
                             mo.md("## Representation Collapse"),
                             mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
                             mo.md("&nbsp;"),
-                            mo.md("&nbsp;"), 
+                            mo.md("&nbsp;"),
                             mo.md("What is the easiest way a model could achieve **(near-)perfect prediction loss?**"),
                         ],
                         align="start",
@@ -302,13 +314,14 @@ def representation_collapse_answer():
 
         return mo.vstack([
             section_strip(1),
+            page_number(3),
             mo.hstack(
                 [
                     mo.vstack(
                         [
                             mo.md("## Representation Collapse"),
                             mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
-                            mo.md("&nbsp;"), 
+                            mo.md("&nbsp;"),
                             mo.md("""
     **01 Complete Collapse**
 
@@ -346,6 +359,7 @@ def sota_target_task_slide():
         import marimo as mo
         return mo.vstack([
             section_strip(1),
+            page_number(4),
             mo.md("## State of the Art — by *Target Task*"),
             mo.md("*WHAT PROBLEM IS THE WORLD MODEL ASKED TO SOLVE?*"),
             mo.md("&nbsp;"),
@@ -374,6 +388,7 @@ def sota_anticollapse_slide():
         import marimo as mo
         return mo.vstack([
             section_strip(1),
+            page_number(5),
             mo.md("## State of the Art — by *Anti-Collapse Strategy*"),
             mo.md("*HOW DOES EACH METHOD AVOID REPRESENTATION COLLAPSE?*"),
             mo.md("&nbsp;"),
@@ -405,6 +420,7 @@ def sota_summary_slide():
         import marimo as mo
         return mo.vstack([
             section_strip(1),
+            page_number(6),
             mo.md("## State of the Art — Where LeWM Fits"),
             mo.md("*TWO AXES, ONE GAP*"),
             mo.md("&nbsp;"),
@@ -459,7 +475,7 @@ def bibliography_slide_1(mo):
             venue = clean(entry.get("journal") or entry.get("booktitle") or "")
             lines.append(f"**[{i}]** {authors} ({year}). *{title}*. {venue}.\n")
 
-        return mo.vstack([mo.md("\n".join(lines))], align="start")
+        return mo.vstack([page_number(7), mo.md("\n".join(lines))], align="start")
 
     _()
     return
@@ -496,7 +512,7 @@ def bibliography_slide_2(mo):
             venue = clean(entry.get("journal") or entry.get("booktitle") or "")
             lines.append(f"**[{i}]** {authors} ({year}). *{title}*. {venue}.\n")
 
-        return mo.vstack([mo.md("\n".join(lines))], align="start")
+        return mo.vstack([page_number(8), mo.md("\n".join(lines))], align="start")
 
     _()
     return

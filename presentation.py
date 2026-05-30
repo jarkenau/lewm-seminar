@@ -66,6 +66,44 @@ with app.setup:
             f'{c["label"]}</span></div>'
         )
 
+    def sota_table(headers, rows, aligns=None, section=1):
+        # Styled HTML table rendered as raw HTML so it escapes Marimo's green
+        # zebra-striping / yellow hover on markdown tables. Rows have no
+        # background by default and tint to the section colour on hover.
+        import marimo as mo
+        c = SECTION[section]
+        aligns = aligns or ["left"] * len(headers)
+
+        head = "".join(
+            f'<th style="text-align:{a};padding:0.6rem 1rem;'
+            f'border-bottom:2px solid #CBD5E1;font-weight:700;color:#374151;'
+            f'font-size:1.15rem;">{h}</th>'
+            for h, a in zip(headers, aligns)
+        )
+        body = ""
+        for row in rows:
+            cells = "".join(
+                f'<td style="text-align:{a};padding:0.6rem 1rem;'
+                f'border-bottom:1px solid #E5E7EB;">{cell}</td>'
+                for cell, a in zip(row, aligns)
+            )
+            body += f"<tr>{cells}</tr>"
+
+        # Hover highlight in the section colour (background tint + text shade).
+        style = (
+            "<style>"
+            ".sota-table tbody tr{transition:background-color .12s ease;}"
+            f".sota-table tbody tr:hover{{background:{c['bg']} !important;}}"
+            f".sota-table tbody tr:hover td{{color:{c['text']};font-weight:600;}}"
+            "</style>"
+        )
+        return mo.Html(
+            style
+            + '<table class="sota-table" style="border-collapse:collapse;'
+            'width:100%;font-size:1.3rem;line-height:1.5;color:#374151;">'
+            f'<thead><tr>{head}</tr></thead><tbody>{body}</tbody></table>'
+        )
+
     def render_scene(scene_cls, quality="high_quality"):
         import base64
         import inspect
@@ -298,6 +336,97 @@ def representation_collapse_answer():
                 align="start",
             ),
         ])
+    _()
+    return
+
+
+@app.cell
+def sota_target_task_slide():
+    def _():
+        import marimo as mo
+        return mo.vstack([
+            section_strip(1),
+            mo.md("## State of the Art — by *Target Task*"),
+            mo.md("*WHAT PROBLEM IS THE WORLD MODEL ASKED TO SOLVE?*"),
+            mo.md("&nbsp;"),
+            sota_table(
+                ["Family", "What it does", "Representative work"],
+                [
+                    ["Self-supervised representation learning",
+                     "Predict masked latent patches — no actions, no planning",
+                     "I-JEPA, V-JEPA / V-JEPA 2, Echo-/Brain-JEPA"],
+                    ["Generative world models",
+                     "Action-conditioned pixel-space simulators, often reward-based, for RL &amp; games",
+                     "IRIS, DIAMOND, OASIS, DreamerV4, Genie"],
+                    ["Latent action-conditioned world models",
+                     "Predict dynamics in latent space, plan by imagination",
+                     "DINO-WM, PLDM"],
+                ],
+            ),
+        ], align="start")
+    _()
+    return
+
+
+@app.cell
+def sota_anticollapse_slide():
+    def _():
+        import marimo as mo
+        return mo.vstack([
+            section_strip(1),
+            mo.md("## State of the Art — by *Anti-Collapse Strategy*"),
+            mo.md("*HOW DOES EACH METHOD AVOID REPRESENTATION COLLAPSE?*"),
+            mo.md("&nbsp;"),
+            sota_table(
+                ["Strategy", "Mechanism", "Limitation"],
+                [
+                    ["Generative reconstruction",
+                     "Pixel target is fixed — collapse impossible by construction",
+                     "Wastes capacity modelling irrelevant pixel detail"],
+                    ["EMA + stop-gradient",
+                     "Asymmetric self-distillation from a moving-average teacher",
+                     "No well-defined objective — purely heuristic"],
+                    ["Frozen pretrained encoder",
+                     "Encoder is fixed, so it cannot collapse",
+                     "Bounded by pretraining knowledge; not end-to-end"],
+                    ["Explicit regularization (VICReg)",
+                     "Variance / covariance penalty terms",
+                     "Training instabilities; up to 6 loss hyperparameters"],
+                ],
+            ),
+        ], align="start")
+    _()
+    return
+
+
+@app.cell
+def sota_summary_slide():
+    def _():
+        import marimo as mo
+        return mo.vstack([
+            section_strip(1),
+            mo.md("## State of the Art — Where LeWM Fits"),
+            mo.md("*TWO AXES, ONE GAP*"),
+            mo.md("&nbsp;"),
+            sota_table(
+                ["Method", "Target task", "Anti-collapse",
+                 "End-to-end", "Reward-free", "Loss hyperparams"],
+                [
+                    ["V-JEPA 2", "Representation learning", "EMA + stop-grad", "✓", "—", "—"],
+                    ["DreamerV4", "Generative control", "Reconstruction", "✓", "✗", "—"],
+                    ["DINO-WM", "Latent control", "Frozen encoder", "✗", "✓", "—"],
+                    ["PLDM", "Latent control", "VICReg", "✓", "✓", "6"],
+                    ["LeWM", "Latent control", "SIGReg", "✓", "✓", "1"],
+                ],
+                aligns=["left", "left", "left", "center", "center", "center"],
+            ),
+            mo.md("&nbsp;"),
+            mo.md(
+                "**LeWM** is the only method that is *task-agnostic, reward-free, "
+                "end-to-end from pixels,* **and** trained with a single, provably "
+                "collapse-free regularizer."
+            ),
+        ], align="start")
     _()
     return
 

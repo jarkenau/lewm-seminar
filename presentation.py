@@ -249,7 +249,7 @@ def title_slide():
             mo.md("# LeWorldModel"),    
             mo.md("###Stable End-to-End Joint-Embedding Predictive Architecture from Pixels"),
             mo.md("&nbsp;"),
-            mo.md("Lucas Maes · Quentin Le Lidec · Damien Scieur  Yann LeCun · Randall Balestriero"),
+            mo.md("Lucas Maes · Quentin Le Lidec · Damien Scieur · Yann LeCun · Randall Balestriero"),
             mo.md("*Mila / Université de Montréal · NYU · Samsung SAIL · Brown University*"),
             mo.md("[arXiv 2603.19312](https://arxiv.org/abs/2603.19312)"),
             mo.md("---"),

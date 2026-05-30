@@ -521,6 +521,62 @@ def sota_summary_slide():
 
 
 @app.cell
+def outline_recap_after_sota():
+    # Recap of the outline shown at the 01 → 02 boundary. Section 01 is grayed
+    # out (done) and 02 is flagged "up next", giving anyone who has drifted a
+    # beat to re-orient before the main contributions begin.
+    def _():
+        import marimo as mo
+
+        def _entry(num, title, bullets, *, done=False):
+            c = SECTION[num]
+            if done:
+                title_color, bullet_color, opacity = "#9CA3AF", "#9CA3AF", "0.5"
+                mark = '<span style="color:#9CA3AF;">&#10003;</span> '
+            else:
+                title_color, bullet_color, opacity = c["text"], "#374151", "1"
+                mark = ""
+            items = "".join(
+                f'<li style="margin:0.25rem 0;font-size:1.2rem;color:{bullet_color};">{b}</li>'
+                for b in bullets
+            )
+            return mo.Html(
+                f'<div style="padding:0.25rem 0;opacity:{opacity};">'
+                f'<div style="font-weight:700;color:{title_color};font-size:1.6rem;margin-bottom:0.3rem;">'
+                f'{mark}{title}</div>'
+                f'<ul style="margin:0;padding-left:1.1rem;">{items}</ul>'
+                f'</div>'
+            )
+
+        return mo.vstack(
+            [
+                mo.md("# Outline"),
+                _entry(1, "01 · Background & State of the Art", [
+                    "JEPA: predict in latent space, not pixel space",
+                    "Representation collapse — the central challenge",
+                    "How existing methods solve it and where they fall short",
+                ], done=True),
+                _entry(2, "02 · LeWorldModel", [
+                    "ViT-Tiny encoder + action-conditioned transformer predictor",
+                    "SIGReg: one hyperparameter to prevent collapse",
+                    "Latent planning via MPC + CEM",
+                ]),
+                _entry(3, "03 · Experiments", [
+                    "Task performance and planning speed across multiple benchmarks",
+                    "Physics emerges in latent space",
+                ]),
+                _entry(4, "04 · Discussion", [
+                    "Authors' claims, personal assessment, open questions",
+                ]),
+            ],
+            align="start",
+            gap="0.5rem",
+        )
+    _()
+    return
+
+
+@app.cell
 def bibliography_slide_1(mo):
     def _():
         import bibtexparser

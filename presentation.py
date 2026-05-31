@@ -188,6 +188,7 @@ with app.setup:
         import base64
         import inspect
         import pathlib
+        import subprocess
         import sys
 
         _quality_to_dir = {
@@ -195,6 +196,12 @@ with app.setup:
             "medium_quality": "720p30",
             "high_quality": "1080p60",
             "fourk_quality": "2160p60",
+        }
+        _quality_to_flag = {
+            "low_quality": "-ql",
+            "medium_quality": "-qm",
+            "high_quality": "-qh",
+            "fourk_quality": "-qk",
         }
         _root = pathlib.Path(__file__).parent
         _res_dir = _quality_to_dir[quality]
@@ -204,20 +211,24 @@ with app.setup:
         _out = _root / "media" / "videos" / _source_stem / _res_dir / f"{_scene_name}.mp4"
 
         if sys.platform != "emscripten":
-            # Re-render if missing or source file is newer than the cached render
+            # Re-render via CLI subprocess if missing or stale — the CLI is the
+            # only reliable way to get output at the expected path.
             _stale = _out.exists() and _source.stat().st_mtime > _out.stat().st_mtime
             if not _out.exists() or _stale:
-                from manim import config as manim_config
-                manim_config.media_dir = str(_root / "media")
-                manim_config.input_file = str(_source)
-                manim_config.quality = quality
-                manim_config.preview = False
-                scene_cls().render()
+                subprocess.run(
+                    [sys.executable, "-m", "manim",
+                     _quality_to_flag[quality], str(_source), _scene_name],
+                    cwd=str(_root),
+                    check=True,
+                    capture_output=True,
+                )
 
             if not _out.exists():
-                raise FileNotFoundError(
-                    f"Render succeeded but output not found at expected path:\n{_out}\n"
-                    f"Check that the scene class name matches the file stem."
+                import marimo as mo
+                return mo.callout(
+                    mo.md(f"Video not found: `{_out.name}` — "
+                          f"run `manim -qh {_source.name} {_scene_name}` to render it."),
+                    kind="warn",
                 )
 
             _b64 = base64.b64encode(_out.read_bytes()).decode()
@@ -590,69 +601,25 @@ def lewm_architecture_animation_slide():
             '<source src="media/videos/lewm_architecture/1080p60/LeWMArchitecture.mp4" type="video/mp4">'
             '</video>'
         )
-    _mo.vstack([section_strip(2), page_number(1), _video])
+    _mo.vstack([section_strip(2), page_number(7), _video])
     return
 
 
 @app.cell
 def vit_encoder_slide(mo):
-    def _():
-        # ── Zoom-in badge matching EMBED_COLOR from lewm_architecture.py ────
-        BADGE_COLOR = "#4A90D9"
-        badge_html = (
-            f'<span style="display:inline-flex;align-items:center;justify-content:center;'
-            f'width:1.6rem;height:1.6rem;border-radius:50%;background:{BADGE_COLOR};'
-            f'color:white;font-weight:700;font-size:0.95rem;vertical-align:middle;'
-            f'margin-right:0.5rem;">1</span>'
+    import sys as _sys
+    if _sys.platform != "emscripten":
+        _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+        from animations.vit_tiny_encoder import ViTTinyEncoder
+        _video = render_scene(ViTTinyEncoder)
+    else:
+        _video = mo.Html(
+            f'<video autoplay muted loop style="{VIDEO_STYLE}">'
+            '<source src="media/videos/vit_tiny_encoder/1080p60/ViTTinyEncoder.mp4" type="video/mp4">'
+            '</video>'
         )
-        return mo.vstack([
-            section_strip(2),
-            page_number(2),
-            mo.Html(
-                f'<h2 style="margin-bottom:0.25rem;">'
-                f'{badge_html}ViT-Tiny Encoder'
-                f'</h2>'
-            ),
-            mo.md("*HOW OBSERVATIONS BECOME LATENT VECTORS*"),
-            mo.md("&nbsp;"),
-            mo.hstack(
-                [
-                    mo.vstack(
-                        [
-                            mo.md("""
-    **Patch Tokenisation**
 
-    - TODO: patch size, sequence length
-
-    **Transformer Backbone**
-
-    - TODO: depth, heads, embed dim
-
-    **Output**
-
-    - TODO: CLS token vs. mean pooling, output shape
-
-    **Key design choice**
-
-    - TODO: why ViT-Tiny? parameter budget vs. capacity trade-off
-                            """),
-                        ],
-                        align="start",
-                    ),
-                    mo.vstack(
-                        [
-                            mo.md("*TODO: figure — ViT patch grid / architecture diagram*"),
-                            # mo.image(img_src),  # swap in when figure is ready
-                        ],
-                        align="center",
-                    ),
-                ],
-                widths=[1, 1],
-                gap="3rem",
-                align="start",
-            ),
-        ], align="start")
-    _()
+    mo.vstack([section_strip(2), page_number(8), _video])
     return
 
 
@@ -678,7 +645,7 @@ def bibliography_slide_1(mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
         return mo.vstack([
-            page_number(7),
+            page_number(9),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
         ], align="start")
 
@@ -710,11 +677,16 @@ def bibliography_slide_2(mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
         return mo.vstack([
-            page_number(8),
+            page_number(10),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
         ], align="start")
 
     _()
+    return
+
+
+@app.cell
+def _():
     return
 
 

@@ -98,6 +98,7 @@ with app.setup:
         "zhou_dino-wm_2024",        # DINO-WM
         "sobal_pldm_2025",          # PLDM
         "bardes_vicreg_2022",       # VICReg
+        "dosovitskiy_vit_2021",     # ViT
     ]
 
     def cite(key):
@@ -619,7 +620,16 @@ def vit_encoder_slide(mo):
             '</video>'
         )
 
-    mo.vstack([section_strip(2), page_number(8), _video])
+    mo.vstack([
+        section_strip(2),
+        page_number(8),
+        _video,
+        mo.Html(
+            f'<div style="text-align:right;font-size:0.9rem;color:#000000;margin-top:0.25rem;">'
+            f'ViT architecture: Dosovitskiy et al. [{cite("dosovitskiy_vit_2021")}]'
+            f'</div>'
+        ),
+    ])
     return
 
 

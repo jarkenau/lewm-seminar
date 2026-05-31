@@ -68,13 +68,15 @@ the Marimo slides.
 ├── assets/                    # Pre-rendered videos + static figures
 │   └── *.mp4
 └── papers/                    # Key reference PDFs
-    ├── 2603_19312v2.pdf        # LeWorldModel (main paper)
-    ├── 2512_10942v2.pdf        # V-JEPA 2
+    ├── 2603.19312v2.pdf        # LeWorldModel (main paper)
+    ├── 2506.09985v1.pdf        # V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning
     ├── 10356_a_path_towards_autonomous_mach.pdf  # LeCun 2022
-    ├── 1803_10122v4.pdf        # Ha & Schmidhuber World Models
-    ├── 2511_08544v3.pdf        # LeJEPA
-    ├── 2506_09985v1.pdf        # (additional reference)
-    ├── 2508_10104v1.pdf        # DINOv3
+    ├── 1803.10122v4.pdf        # Ha & Schmidhuber World Models
+    ├── 2511.08544v3.pdf        # LeJEPA
+    ├── 2411.04983v2.pdf        # DINO-WM: World Models on Pre-trained Visual Features enable Zero-shot Planning
+    ├── 2508.10104v1.pdf        # DINOv3
+    ├── 2010.11929v2.pdf        # ViT: An Image is Worth 16x16 Words (Dosovitskiy et al.)
+    ├── 2604.03208v1.pdf        # Hierarchical Planning with Latent World Models
     └── SWM_Introduction.pdf    # Example seminar format
 ```
 

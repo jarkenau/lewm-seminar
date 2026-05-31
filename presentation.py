@@ -435,12 +435,44 @@ def representation_collapse_answer():
 
 
 @app.cell
-def sota_target_task_slide():
+def sota_anticollapse_slide():
     def _():
         import marimo as mo
         return mo.vstack([
             section_strip(1),
             page_number(4),
+            mo.md("## State of the Art — by *Anti-Collapse Strategy*"),
+            mo.md("*HOW DOES EACH METHOD AVOID REPRESENTATION COLLAPSE?*"),
+            mo.md("&nbsp;"),
+            sota_table(
+                ["Strategy", "Mechanism", "Limitation"],
+                [
+                    ["Generative reconstruction",
+                     "Pixel target is fixed — collapse impossible by construction",
+                     "Wastes capacity modelling irrelevant pixel detail"],
+                    ["EMA + stop-gradient",
+                     "Asymmetric self-distillation from a moving-average teacher",
+                     "No well-defined objective — purely heuristic"],
+                    ["Frozen pretrained encoder",
+                     "Encoder is fixed, so it cannot collapse",
+                     "Bounded by pretraining knowledge; not end-to-end"],
+                    [f"Explicit regularization (VICReg [{cite('bardes_vicreg_2022')}])",
+                     "Variance / covariance penalty terms",
+                     "Training instabilities; up to 6 loss hyperparameters"],
+                ],
+            ),
+        ], align="start")
+    _()
+    return
+
+
+@app.cell
+def sota_target_task_slide():
+    def _():
+        import marimo as mo
+        return mo.vstack([
+            section_strip(1),
+            page_number(5),
             mo.md("## State of the Art — by *Target Task*"),
             mo.md("*WHAT PROBLEM IS THE WORLD MODEL ASKED TO SOLVE?*"),
             mo.md("&nbsp;"),
@@ -460,38 +492,6 @@ def sota_target_task_slide():
                     ["Latent action-conditioned world models",
                      "Predict dynamics in latent space, plan by imagination",
                      f"DINO-WM [{cite('zhou_dino-wm_2024')}], PLDM [{cite('sobal_pldm_2025')}]"],
-                ],
-            ),
-        ], align="start")
-    _()
-    return
-
-
-@app.cell
-def sota_anticollapse_slide():
-    def _():
-        import marimo as mo
-        return mo.vstack([
-            section_strip(1),
-            page_number(5),
-            mo.md("## State of the Art — by *Anti-Collapse Strategy*"),
-            mo.md("*HOW DOES EACH METHOD AVOID REPRESENTATION COLLAPSE?*"),
-            mo.md("&nbsp;"),
-            sota_table(
-                ["Strategy", "Mechanism", "Limitation"],
-                [
-                    ["Generative reconstruction",
-                     "Pixel target is fixed — collapse impossible by construction",
-                     "Wastes capacity modelling irrelevant pixel detail"],
-                    ["EMA + stop-gradient",
-                     "Asymmetric self-distillation from a moving-average teacher",
-                     "No well-defined objective — purely heuristic"],
-                    ["Frozen pretrained encoder",
-                     "Encoder is fixed, so it cannot collapse",
-                     "Bounded by pretraining knowledge; not end-to-end"],
-                    [f"Explicit regularization (VICReg [{cite('bardes_vicreg_2022')}])",
-                     "Variance / covariance penalty terms",
-                     "Training instabilities; up to 6 loss hyperparameters"],
                 ],
             ),
         ], align="start")
@@ -692,11 +692,6 @@ def bibliography_slide_2(mo):
         ], align="start")
 
     _()
-    return
-
-
-@app.cell
-def _():
     return
 
 

@@ -97,6 +97,7 @@ def make_cropped_patch_cell(scene_elems, grid_cell_center, grid_cell_size,
 class ViTTinyEncoder(Scene):
     def construct(self):
         self.camera.background_color = WHITE
+        Text.set_default(font="DejaVu Sans")
 
         TEXT_COLOR      = "#1a1a1a"
         BOX_STROKE      = "#2d2d2d"
@@ -227,18 +228,8 @@ class ViTTinyEncoder(Scene):
         e_rect = RoundedRectangle(width=E_W, height=E_H, corner_radius=0.08,
                                   fill_color=EMBED_COLOR, fill_opacity=0.42,
                                   stroke_color=EMBED_COLOR, stroke_width=2.5)
-        e_grid = VGroup(*[
-            seg for k in range(1, 3) for seg in [
-                Line(LEFT*E_W/2 + RIGHT*k*E_W/3 + DOWN*E_H/2,
-                     LEFT*E_W/2 + RIGHT*k*E_W/3 + UP*E_H/2,
-                     stroke_color=WHITE, stroke_width=0.7, stroke_opacity=0.5),
-                Line(DOWN*E_H/2 + UP*k*E_H/3 + LEFT*E_W/2,
-                     DOWN*E_H/2 + UP*k*E_H/3 + RIGHT*E_W/2,
-                     stroke_color=WHITE, stroke_width=0.7, stroke_opacity=0.5),
-            ]
-        ])
-        e_lbl = MathTex(r"E", font_size=22, color=WHITE)
-        e_group = VGroup(e_rect, e_grid, e_lbl)
+        e_lbl = MathTex(r"E", font_size=22, color=BLACK)
+        e_group = VGroup(e_rect, e_lbl)
         e_group.move_to(flat_centers[0])
 
         # Formula + D=192 stacked on the right
@@ -252,14 +243,26 @@ class ViTTinyEncoder(Scene):
         right_panel = VGroup(formula, d_label).arrange(DOWN, buff=0.22, aligned_edge=LEFT)
         right_panel.next_to(embed_boxes, RIGHT, buff=0.45)
 
+        # Pre-build arrows so they can grow patch-by-patch during the E sweep
+        proj_arrows = [
+            Arrow(
+                np.array([flat_centers[i][0], flat_y + PATCH_SIZE / 2 + 0.04, 0.0]),
+                embed_boxes[i].get_bottom() + DOWN * 0.04,
+                buff=0.0, stroke_color=BLACK, stroke_width=1.5,
+                tip_length=0.12, color=BLACK,
+            )
+            for i in range(N)
+        ]
+
         self.play(FadeIn(e_group), Write(formula), run_time=0.5)
         self.wait(0.15)
 
-        # E slides patch-by-patch; token + vector representation appear together
+        # E slides patch-by-patch; arrow + embed box + vector lines appear together
         for i in range(N):
             if i > 0:
                 self.play(e_group.animate.move_to(flat_centers[i]), run_time=0.20)
             self.play(
+                GrowArrow(proj_arrows[i]),
                 GrowFromCenter(embed_boxes[i]),
                 FadeIn(token_visuals[i]),
                 run_time=0.26,
@@ -276,7 +279,7 @@ class ViTTinyEncoder(Scene):
         cls_box = Rectangle(width=PATCH_SIZE, height=EMB_H,
                             fill_color=CLS_COLOR, fill_opacity=0.25,
                             stroke_color=CLS_COLOR, stroke_width=2.5).move_to(cls_pos)
-        cls_text  = Text("[CLS]", font_size=13, color=CLS_COLOR, weight=BOLD).move_to(cls_pos)
+        cls_text  = Text("[CLS]", font_size=13, color=CLS_COLOR, weight=BOLD, font="DejaVu Sans").move_to(cls_pos)
         cls_label = Text("class token", font_size=14, color=CLS_COLOR)
         cls_label.next_to(cls_box, LEFT, buff=0.2)
 
@@ -286,46 +289,114 @@ class ViTTinyEncoder(Scene):
 
         # ── Stage 6: Positional encoding ──────────────────────────────────────
         all_token_boxes = [cls_box] + list(embed_boxes)
+        N_tok = len(all_token_boxes)
 
-        pe_highlights = VGroup(*[
-            tok.copy().set_stroke(color=PE_COLOR, width=3.5).set_fill(opacity=0)
+        # Row of PE vectors sits above the embed row, with a 0.20-unit gap for "+"
+        PE_BOX_H = EMB_H
+        pe_y = emb_y + EMB_H / 2 + 0.20 + PE_BOX_H / 2   # ≈ −0.33
+
+        pe_centers = [np.array([tok.get_center()[0], pe_y, 0.0]) for tok in all_token_boxes]
+
+        pe_boxes = VGroup(*[
+            Rectangle(width=PATCH_SIZE, height=PE_BOX_H,
+                      fill_color=PE_COLOR, fill_opacity=0.20,
+                      stroke_color=PE_COLOR, stroke_width=2).move_to(c)
+            for c in pe_centers
+        ])
+        pe_labels = VGroup(*[
+            MathTex(r"e_{" + str(i) + r"}", font_size=13, color=PE_COLOR).move_to(pe_centers[i])
+            for i in range(N_tok)
+        ])
+
+        plus_y = (emb_y + EMB_H / 2 + pe_y - PE_BOX_H / 2) / 2
+        plus_signs = VGroup(*[
+            MathTex(r"+", font_size=16, color=PE_COLOR).move_to(
+                np.array([tok.get_center()[0], plus_y, 0.0])
+            )
             for tok in all_token_boxes
         ])
 
-        wave = VMobject()
-        wave.set_points_smoothly([
-            np.array([-0.35 + i * 0.07, 0.18 * np.sin(i * 0.9), 0]) for i in range(11)
-        ])
-        wave.set_stroke(color=PE_COLOR, width=2.5)
-        plus = MathTex(r"+", color=PE_COLOR, font_size=28)
-        pe_icon = VGroup(wave, plus).arrange(RIGHT, buff=0.15)
-        pe_desc = Text("Positional Encoding", font_size=16, color=PE_COLOR)
-        pe_full = VGroup(pe_icon, pe_desc).arrange(RIGHT, buff=0.2)
-        pe_full.next_to(embed_boxes, UP, buff=0.35)
+        pe_title = Text("Positional Encoding", font_size=15, color=PE_COLOR, weight=BOLD, font="DejaVu Sans")
+        pe_title.next_to(pe_boxes, UP, buff=0.18)
 
-        self.play(FadeIn(pe_full), run_time=0.5)
-        self.play(LaggedStart(*[Create(h) for h in pe_highlights], lag_ratio=0.06), run_time=0.8)
+        # Reuse the Stage-4 right-panel position for the PE formula
+        pe_formula = MathTex(
+            r"\mathbf{z}_i \leftarrow \mathbf{z}_i + e_i^{\mathrm{pos}}",
+            font_size=18, color=PE_COLOR,
+        )
+        pe_dim = MathTex(
+            r"E_{\mathrm{pos}} \in \mathbb{R}^{(N{+}1)\times 192}",
+            font_size=14, color=PE_COLOR,
+        )
+        pe_right_panel = VGroup(pe_formula, pe_dim).arrange(DOWN, buff=0.18, aligned_edge=LEFT)
+        pe_right_panel.move_to(right_panel.get_center())
+
+        # Step 1: swap Stage-4 formula panel → PE boxes appear
+        self.play(
+            FadeOut(right_panel),
+            FadeIn(pe_title),
+            LaggedStart(*[FadeIn(pe_boxes[i]) for i in range(N_tok)], lag_ratio=0.05),
+            LaggedStart(*[FadeIn(pe_labels[i]) for i in range(N_tok)], lag_ratio=0.05),
+            run_time=0.8,
+        )
+        self.wait(0.2)
+
+        # Step 2: "+" connectors and formula
+        self.play(
+            LaggedStart(*[FadeIn(plus_signs[i]) for i in range(N_tok)], lag_ratio=0.04),
+            Write(pe_formula),
+            run_time=0.7,
+        )
+        self.play(Write(pe_dim), run_time=0.4)
+        self.wait(0.2)
+
+        # Step 3: PE boxes collapse into tokens; tokens light up green
+        self.play(
+            *[pe_boxes[i].animate.move_to(all_token_boxes[i].get_center())
+              for i in range(N_tok)],
+            *[pe_labels[i].animate.move_to(all_token_boxes[i].get_center())
+              for i in range(N_tok)],
+            *[FadeOut(plus_signs[i]) for i in range(N_tok)],
+            run_time=0.55,
+        )
+        self.play(
+            *[FadeOut(pe_boxes[i]) for i in range(N_tok)],
+            *[FadeOut(pe_labels[i]) for i in range(N_tok)],
+            *[all_token_boxes[i].animate.set_stroke(color=PE_COLOR, width=3.5)
+              for i in range(N_tok)],
+            FadeOut(pe_title),
+            FadeOut(pe_right_panel),
+            run_time=0.4,
+        )
         self.wait(0.3)
 
         # ── Stage 7: Transformer Encoder ──────────────────────────────────────
+        # Width: from left edge of CLS to right edge of last patch token
+        left_edge  = embed_boxes[0].get_left()[0] - (PATCH_SIZE + GAP)
+        right_edge = embed_boxes[-1].get_right()[0]
+        tok_width  = right_edge - left_edge
+        tok_cx     = (left_edge + right_edge) / 2
+
+        transformer_label    = Text("Transformer Encoder",                  font_size=16, color=TRANSFORMER_COLOR)
+        transformer_sublabel = Text("ViT-Tiny: 12 layers, d=192, heads=3", font_size=13, color=TRANSFORMER_COLOR)
+        label_group = VGroup(transformer_label, transformer_sublabel).arrange(DOWN, buff=0.12)
+
+        box_height = label_group.get_height() + 0.3
         transformer_box = RoundedRectangle(
-            width=9.2, height=1.0, corner_radius=0.2,
+            width=tok_width, height=box_height, corner_radius=0.2,
             fill_color=TRANSFORMER_COLOR, fill_opacity=0.12,
             stroke_color=TRANSFORMER_COLOR, stroke_width=2.5,
-        ).move_to(UP * 0.75)
+        ).move_to(np.array([tok_cx, 0.0, 0.0]))
 
-        transformer_label = Text(
-            "Transformer Encoder  (ViT-Tiny: 12 layers, d=192, heads=3)",
-            font_size=16, color=TRANSFORMER_COLOR,
-        ).move_to(transformer_box.get_center())
+        label_group.move_to(transformer_box.get_center())
 
         up_arrows = VGroup(*[
             Arrow(
                 tok.get_top() + UP * 0.05,
                 transformer_box.get_bottom()
                 + RIGHT * (tok.get_center()[0] - transformer_box.get_center()[0]),
-                buff=0.05, stroke_color=ARROW_COLOR, stroke_width=1.8,
-                tip_length=0.14, color=ARROW_COLOR,
+                buff=0.05, stroke_color=ARROW_COLOR, stroke_width=1.2,
+                tip_length=0.10, color=ARROW_COLOR,
                 max_stroke_width_to_length_ratio=999,
             )
             for tok in all_token_boxes
@@ -333,26 +404,68 @@ class ViTTinyEncoder(Scene):
 
         self.play(LaggedStart(*[GrowArrow(a) for a in up_arrows], lag_ratio=0.04), run_time=0.8)
         self.play(FadeIn(transformer_box), Write(transformer_label), run_time=0.9)
+        self.play(FadeIn(transformer_sublabel), run_time=0.5)
         self.wait(0.3)
 
-        # ── Stage 8: Latent output z ──────────────────────────────────────────
-        out_arrow = Arrow(
-            transformer_box.get_top() + UP * 0.05,
-            transformer_box.get_top() + UP * 0.9,
-            buff=0.05, stroke_color=ARROW_COLOR, stroke_width=2.5,
-            tip_length=0.2, color=ARROW_COLOR,
+        # ── Stage 8: Extract [CLS] token ──────────────────────────────────────
+        top_c = transformer_box.get_top()
+
+        cls_extract_arrow = Arrow(
+            top_c + UP * 0.05, top_c + UP * 0.30,
+            buff=0.0, stroke_color=ARROW_COLOR, stroke_width=2.0,
+            tip_length=0.14, color=ARROW_COLOR,
+        )
+        cls_out_box = Rectangle(
+            width=PATCH_SIZE * 1.8, height=EMB_H,
+            fill_color=CLS_COLOR, fill_opacity=0.25,
+            stroke_color=CLS_COLOR, stroke_width=2.5,
+        ).move_to(top_c + UP * (0.30 + 0.05 + EMB_H / 2))
+        cls_out_text = Text("[CLS]", font_size=13, color=CLS_COLOR, weight=BOLD, font="DejaVu Sans").move_to(cls_out_box)
+        cls_extract_label = Text("extract [CLS] token", font_size=13, color=CLS_COLOR)
+        cls_extract_label.next_to(cls_out_box, RIGHT, buff=0.2)
+
+        self.play(GrowArrow(cls_extract_arrow), run_time=0.4)
+        self.play(FadeIn(cls_out_box), Write(cls_out_text), run_time=0.6)
+        self.play(FadeIn(cls_extract_label), run_time=0.4)
+        self.wait(0.3)
+
+        # ── Stage 9: 1-layer MLP + BatchNorm → z_t ────────────────────────────
+        MLP_COLOR = "#C0392B"
+        cls_top = cls_out_box.get_top()
+
+        mlp_arrow = Arrow(
+            cls_top + UP * 0.05, cls_top + UP * 0.25,
+            buff=0.0, stroke_color=ARROW_COLOR, stroke_width=2.0,
+            tip_length=0.14, color=ARROW_COLOR,
+        )
+        mlp_box = RoundedRectangle(
+            width=3.0, height=0.62, corner_radius=0.15,
+            fill_color=MLP_COLOR, fill_opacity=0.12,
+            stroke_color=MLP_COLOR, stroke_width=2.5,
+        ).move_to(cls_top + UP * (0.25 + 0.05 + 0.31))
+        mlp_label = Text("1-layer MLP + BatchNorm", font_size=13, color=MLP_COLOR).move_to(mlp_box)
+        mlp_side_label = Text("(LeWM-specific projection)", font_size=11, color=MLP_COLOR)
+        mlp_side_label.next_to(mlp_box, RIGHT, buff=0.2)
+
+        mlp_top = mlp_box.get_top()
+        mlp_out_arrow = Arrow(
+            mlp_top + UP * 0.05, mlp_top + UP * 0.25,
+            buff=0.0, stroke_color=ARROW_COLOR, stroke_width=2.0,
+            tip_length=0.14, color=ARROW_COLOR,
         )
         latent_box = RoundedRectangle(
-            width=5.5, height=0.65, corner_radius=0.15,
+            width=3.0, height=0.62, corner_radius=0.15,
             fill_color=EMBED_COLOR, fill_opacity=0.20,
             stroke_color=EMBED_COLOR, stroke_width=2.5,
-        ).next_to(out_arrow, UP, buff=0.05)
+        ).move_to(mlp_top + UP * (0.25 + 0.05 + 0.31))
+        latent_label = MathTex(r"z_t \in \mathbb{R}^{D}", color=EMBED_COLOR, font_size=24)
+        latent_label.move_to(latent_box)
+        latent_desc = Text("final latent", font_size=13, color=EMBED_COLOR)
+        latent_desc.next_to(latent_box, RIGHT, buff=0.2)
 
-        latent_label = MathTex(r"z \in \mathbb{R}^{D}", color=EMBED_COLOR, font_size=26)
-        latent_label.move_to(latent_box.get_center())
-        latent_desc = Text("Latent representation", font_size=16, color=EMBED_COLOR)
-        latent_desc.next_to(latent_box, RIGHT, buff=0.25)
-
-        self.play(GrowArrow(out_arrow), run_time=0.5)
+        self.play(GrowArrow(mlp_arrow), run_time=0.4)
+        self.play(FadeIn(mlp_box), Write(mlp_label), run_time=0.7)
+        self.play(FadeIn(mlp_side_label), run_time=0.4)
+        self.play(GrowArrow(mlp_out_arrow), run_time=0.4)
         self.play(FadeIn(latent_box), Write(latent_label), FadeIn(latent_desc), run_time=0.8)
         self.wait(1.5)

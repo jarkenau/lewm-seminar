@@ -112,7 +112,15 @@ class ViTTinyEncoder(Scene):
             "ViT-Tiny Encoder: Patch-based Image Encoding",
             font_size=26, color=TEXT_COLOR,
         ).to_edge(UP, buff=0.3)
-        self.play(Write(title), run_time=0.8)
+
+        BADGE_COLOR = "#4A90D9"
+        badge_circle = Circle(radius=0.22, fill_color=BADGE_COLOR, fill_opacity=1,
+                              stroke_color=WHITE, stroke_width=2)
+        badge_text = Text("1", font_size=22, color=WHITE, weight=BOLD).move_to(badge_circle.get_center())
+        badge = VGroup(badge_circle, badge_text)
+        badge.next_to(title, LEFT, buff=0.25)
+
+        self.play(Write(title), FadeIn(badge), run_time=0.8)
         self.wait(0.2)
 
         # ── Stage 1: Input PushT image ────────────────────────────────────────

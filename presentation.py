@@ -589,6 +589,11 @@ def outline_recap_after_sota():
 
 
 @app.cell
+def _():
+    return
+
+
+@app.cell
 def lewm_architecture_animation_slide():
     import sys as _sys
     import marimo as _mo
@@ -633,9 +638,9 @@ def vit_encoder_slide(mo):
     return
 
 
-@app.cell
-def bibliography_slide_1(mo):
-    def _():
+app._unparsable_cell(
+    r"""
+    1def _():
         import bibtexparser
 
         ENTRIES_PER_PAGE = 7
@@ -660,7 +665,9 @@ def bibliography_slide_1(mo):
         ], align="start")
 
     _()
-    return
+    """,
+    name="bibliography_slide_1"
+)
 
 
 @app.cell

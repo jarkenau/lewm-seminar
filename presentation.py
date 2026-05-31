@@ -595,6 +595,68 @@ def lewm_architecture_animation_slide():
 
 
 @app.cell
+def vit_encoder_slide(mo):
+    def _():
+        # ── Zoom-in badge matching EMBED_COLOR from lewm_architecture.py ────
+        BADGE_COLOR = "#4A90D9"
+        badge_html = (
+            f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+            f'width:1.6rem;height:1.6rem;border-radius:50%;background:{BADGE_COLOR};'
+            f'color:white;font-weight:700;font-size:0.95rem;vertical-align:middle;'
+            f'margin-right:0.5rem;">1</span>'
+        )
+        return mo.vstack([
+            section_strip(2),
+            page_number(2),
+            mo.Html(
+                f'<h2 style="margin-bottom:0.25rem;">'
+                f'{badge_html}ViT-Tiny Encoder'
+                f'</h2>'
+            ),
+            mo.md("*HOW OBSERVATIONS BECOME LATENT VECTORS*"),
+            mo.md("&nbsp;"),
+            mo.hstack(
+                [
+                    mo.vstack(
+                        [
+                            mo.md("""
+    **Patch Tokenisation**
+
+    - TODO: patch size, sequence length
+
+    **Transformer Backbone**
+
+    - TODO: depth, heads, embed dim
+
+    **Output**
+
+    - TODO: CLS token vs. mean pooling, output shape
+
+    **Key design choice**
+
+    - TODO: why ViT-Tiny? parameter budget vs. capacity trade-off
+                            """),
+                        ],
+                        align="start",
+                    ),
+                    mo.vstack(
+                        [
+                            mo.md("*TODO: figure — ViT patch grid / architecture diagram*"),
+                            # mo.image(img_src),  # swap in when figure is ready
+                        ],
+                        align="center",
+                    ),
+                ],
+                widths=[1, 1],
+                gap="3rem",
+                align="start",
+            ),
+        ], align="start")
+    _()
+    return
+
+
+@app.cell
 def bibliography_slide_1(mo):
     def _():
         import bibtexparser

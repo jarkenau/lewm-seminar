@@ -1,0 +1,358 @@
+from manim import *
+import numpy as np
+
+# ── PushT geometry (shared with lewm_architecture.py) ─────────────────────────
+GREEN_FILL, GREEN_STROKE = "#9FE6A0", "#5FB070"
+GRAY_FILL,  GRAY_STROKE  = "#8194B4", "#5E6E8C"
+EEF_BLUE = "#3B6FD6"
+
+GOAL_POS  = np.array([ 0.16,  0.11, 0.0])
+GOAL_ANG  = -16 * DEGREES
+START_POS = np.array([-0.20, -0.17, 0.0])
+START_ANG =  26 * DEGREES
+
+
+def make_T(fill, stroke, opacity):
+    pts = [[-0.6, 0.6, 0], [0.6, 0.6, 0], [0.6, 0.3, 0],
+           [0.15, 0.3, 0], [0.15, -0.6, 0], [-0.15, -0.6, 0],
+           [-0.15, 0.3, 0], [-0.6, 0.3, 0]]
+    T = Polygon(*pts, stroke_color=stroke, stroke_width=2,
+                fill_color=fill, fill_opacity=opacity)
+    T.scale(0.30)
+    return T
+
+
+def make_pusht(progress):
+    """PushT state centred near origin (no final shift)."""
+    green = make_T(GREEN_FILL, GREEN_STROKE, 0.5)
+    green.rotate(GOAL_ANG).shift(GOAL_POS)
+
+    block_p = np.clip((progress - 0.3) / 0.7, 0.0, 1.0)
+    pos = START_POS + (GOAL_POS - START_POS) * block_p
+    ang = START_ANG + (GOAL_ANG - START_ANG) * block_p
+    gray = make_T(GRAY_FILL, GRAY_STROKE, 1.0)
+    gray.rotate(ang).shift(pos)
+
+    push_dir = GOAL_POS - START_POS
+    theta = np.arctan2(push_dir[1], push_dir[0])
+    a = theta + np.clip(progress / 0.4, 0.0, 1.0) * np.pi
+    eef = Dot(radius=0.05, color=EEF_BLUE, fill_opacity=1)
+    eef.move_to(pos + 0.17 * np.array([np.cos(a), np.sin(a), 0.0]))
+
+    return VGroup(green, gray, eef)
+
+
+def pusht_scaled(img_center, img_size, progress=0.3):
+    """PushT scene scaled to fit img_size and centred at img_center."""
+    grp = make_pusht(progress)
+    span = max(grp.get_width(), grp.get_height())
+    if span > 0:
+        grp.scale(img_size * 0.78 / span)
+    grp.move_to(img_center)
+    return grp
+
+
+def make_cropped_patch_cell(scene_elems, grid_cell_center, grid_cell_size,
+                            flat_center, flat_size, stroke_color="#2d2d2d"):
+    """
+    Crop scene_elems (positioned at image scale) to one grid cell, then
+    translate + scale the result to flat_center / flat_size.
+    """
+    gc = np.array(grid_cell_center)
+    hs = grid_cell_size / 2
+
+    clip_rect = Rectangle(width=grid_cell_size, height=grid_cell_size,
+                          fill_opacity=0, stroke_width=0).move_to(gc)
+
+    cropped = VGroup()
+    for elem in scene_elems:
+        if isinstance(elem, Dot):
+            dc = np.array(elem.get_center())
+            if (gc[0] - hs <= dc[0] <= gc[0] + hs and
+                    gc[1] - hs <= dc[1] <= gc[1] + hs):
+                cropped.add(elem.copy())
+        else:
+            try:
+                inter = Intersection(elem.copy(), clip_rect.copy())
+                inter.set_fill(elem.get_fill_color(),
+                               opacity=elem.get_fill_opacity())
+                inter.set_stroke(elem.get_stroke_color(),
+                                 width=elem.get_stroke_width(),
+                                 opacity=elem.get_stroke_opacity())
+                if inter.get_num_points() > 0:
+                    cropped.add(inter)
+            except Exception:
+                pass
+
+    # Move from grid-cell position to flat-patch position, then scale
+    cropped.shift(np.array(flat_center) - gc)
+    scale = flat_size / grid_cell_size
+    cropped.scale(scale, about_point=np.array(flat_center))
+
+    bg = Square(side_length=flat_size, fill_color=WHITE, fill_opacity=1,
+                stroke_color=stroke_color, stroke_width=1.5).move_to(flat_center)
+    return VGroup(bg, cropped)
+
+
+class ViTTinyEncoder(Scene):
+    def construct(self):
+        self.camera.background_color = WHITE
+
+        TEXT_COLOR      = "#1a1a1a"
+        BOX_STROKE      = "#2d2d2d"
+        ARROW_COLOR     = "#444444"
+        EMBED_COLOR     = "#E8704A"
+        PE_COLOR        = "#5BA85A"
+        CLS_COLOR       = "#7D3C98"
+        TRANSFORMER_COLOR = "#2E4057"
+
+        # ── Title ─────────────────────────────────────────────────────────────
+        title = Text(
+            "ViT-Tiny Encoder: Patch-based Image Encoding",
+            font_size=26, color=TEXT_COLOR,
+        ).to_edge(UP, buff=0.3)
+        self.play(Write(title), run_time=0.8)
+        self.wait(0.2)
+
+        # ── Stage 1: Input PushT image ────────────────────────────────────────
+        IMG_SIZE   = 2.0
+        img_center = np.array([-5.0, -0.4, 0.0])
+
+        img_border = Square(side_length=IMG_SIZE,
+                            fill_color=WHITE, fill_opacity=1,
+                            stroke_color=BOX_STROKE, stroke_width=2).move_to(img_center)
+        img_state  = pusht_scaled(img_center, IMG_SIZE, progress=0.3)
+
+        self.play(FadeIn(img_border), run_time=0.3)
+        self.play(FadeIn(img_state), run_time=0.6)
+        self.wait(0.4)
+
+        # ── Stage 2: 3×3 grid overlay ─────────────────────────────────────────
+        cell = IMG_SIZE / 3
+        grid_lines = VGroup()
+        lx, rx = img_center[0] - IMG_SIZE/2, img_center[0] + IMG_SIZE/2
+        by, ty = img_center[1] - IMG_SIZE/2, img_center[1] + IMG_SIZE/2
+        for i in [1, 2]:
+            x = lx + i * cell
+            grid_lines.add(Line([x, by, 0], [x, ty, 0],
+                                stroke_color=BOX_STROKE, stroke_width=1.0))
+            y = by + i * cell
+            grid_lines.add(Line([lx, y, 0], [rx, y, 0],
+                                stroke_color=BOX_STROKE, stroke_width=1.0))
+
+        n_patches_label = MathTex(r"14 \times 14 \text{ patches}", font_size=15, color=TEXT_COLOR)
+        n_patches_label.next_to(img_border, UP, buff=0.12)
+
+        self.play(Create(grid_lines), FadeIn(n_patches_label), run_time=0.7)
+        self.wait(0.4)
+
+        # ── Stage 3: Flatten patches into a row ───────────────────────────────
+        PATCH_SIZE = 0.54
+        GAP        = 0.08
+        flat_y     = -2.4
+        N          = 9
+
+        # Grid cell centres (row-major)
+        grid_cell_centers = [
+            np.array([lx + (col + 0.5) * cell, ty - (row + 0.5) * cell, 0.0])
+            for row in range(3) for col in range(3)
+        ]
+        FLAT_X_OFFSET = 1.5
+        flat_centers = [
+            np.array([(i - 4) * (PATCH_SIZE + GAP) + FLAT_X_OFFSET, flat_y, 0.0])
+            for i in range(N)
+        ]
+
+        # Build properly cropped flat patches using Intersection
+        scene_elems = list(img_state)   # [green_T, gray_T, eef]
+        flat_cells = VGroup(*[
+            make_cropped_patch_cell(
+                scene_elems=scene_elems,
+                grid_cell_center=grid_cell_centers[i],
+                grid_cell_size=cell,
+                flat_center=flat_centers[i],
+                flat_size=PATCH_SIZE,
+            )
+            for i in range(N)
+        ])
+
+        # Ghost outlines at grid positions (source for the fly-out animation)
+        src_copies = VGroup(*[
+            Square(side_length=cell, fill_color=WHITE, fill_opacity=0.4,
+                   stroke_color="#888888", stroke_width=1.0).move_to(grid_cell_centers[i])
+            for i in range(N)
+        ])
+
+        # Animate each patch flying from its grid position to the flat row
+        self.play(
+            LaggedStart(
+                *[TransformFromCopy(src_copies[i], flat_cells[i]) for i in range(N)],
+                lag_ratio=0.08,
+            ),
+            run_time=1.4,
+        )
+        self.wait(0.3)
+
+        # ── Stage 4: E sweeps over flat patches → patch embeddings ───────────
+        EMB_H = 0.42
+        emb_y = -0.95
+
+        embed_boxes = VGroup(*[
+            Rectangle(width=PATCH_SIZE, height=EMB_H,
+                      fill_color=EMBED_COLOR, fill_opacity=0.25,
+                      stroke_color=EMBED_COLOR, stroke_width=2).move_to(
+                np.array([(i - 4) * (PATCH_SIZE + GAP) + FLAT_X_OFFSET, emb_y, 0.0]))
+            for i in range(N)
+        ])
+
+        # Pre-build per-token vector visuals (lines + ⋮) so they appear immediately
+        N_VEC_LINES = 3
+        token_visuals = []          # one VGroup per token: (lines, vdots)
+        for box in embed_boxes:
+            bc = box.get_center()
+            bw = box.get_width() - 0.08
+            bh = box.get_height()
+            lines = VGroup(*[
+                Line([bc[0] - bw/2, bc[1] - bh/2 + k*bh/(N_VEC_LINES+1), 0],
+                     [bc[0] + bw/2, bc[1] - bh/2 + k*bh/(N_VEC_LINES+1), 0],
+                     stroke_color=EMBED_COLOR, stroke_width=0.5, stroke_opacity=0.55)
+                for k in range(1, N_VEC_LINES + 1)
+            ])
+            vdots = MathTex(r"\vdots", color=EMBED_COLOR, font_size=13)
+            vdots.next_to(box, DOWN, buff=0.04)
+            token_visuals.append(VGroup(lines, vdots))
+
+        # Matrix E visual — a small kernel that slides over every flat patch
+        E_W, E_H = PATCH_SIZE + 0.16, 0.68
+        e_rect = RoundedRectangle(width=E_W, height=E_H, corner_radius=0.08,
+                                  fill_color=EMBED_COLOR, fill_opacity=0.42,
+                                  stroke_color=EMBED_COLOR, stroke_width=2.5)
+        e_grid = VGroup(*[
+            seg for k in range(1, 3) for seg in [
+                Line(LEFT*E_W/2 + RIGHT*k*E_W/3 + DOWN*E_H/2,
+                     LEFT*E_W/2 + RIGHT*k*E_W/3 + UP*E_H/2,
+                     stroke_color=WHITE, stroke_width=0.7, stroke_opacity=0.5),
+                Line(DOWN*E_H/2 + UP*k*E_H/3 + LEFT*E_W/2,
+                     DOWN*E_H/2 + UP*k*E_H/3 + RIGHT*E_W/2,
+                     stroke_color=WHITE, stroke_width=0.7, stroke_opacity=0.5),
+            ]
+        ])
+        e_lbl = MathTex(r"E", font_size=22, color=WHITE)
+        e_group = VGroup(e_rect, e_grid, e_lbl)
+        e_group.move_to(flat_centers[0])
+
+        # Formula + D=192 stacked on the right
+        formula = MathTex(
+            r"z_i", r"=", r"E", r"\cdot", r"\mathrm{vec}(p_i)",
+            font_size=22, color=TEXT_COLOR,
+        )
+        formula[0].set_color(EMBED_COLOR)
+        formula[2].set_color(EMBED_COLOR)
+        d_label = MathTex(r"D = 192", font_size=20, color=EMBED_COLOR)
+        right_panel = VGroup(formula, d_label).arrange(DOWN, buff=0.22, aligned_edge=LEFT)
+        right_panel.next_to(embed_boxes, RIGHT, buff=0.45)
+
+        self.play(FadeIn(e_group), Write(formula), run_time=0.5)
+        self.wait(0.15)
+
+        # E slides patch-by-patch; token + vector representation appear together
+        for i in range(N):
+            if i > 0:
+                self.play(e_group.animate.move_to(flat_centers[i]), run_time=0.20)
+            self.play(
+                GrowFromCenter(embed_boxes[i]),
+                FadeIn(token_visuals[i]),
+                run_time=0.26,
+            )
+
+        self.play(FadeOut(e_group), run_time=0.35)
+        self.play(Write(d_label), run_time=0.35)
+        self.wait(0.3)
+
+        # ── Stage 5: [CLS] token ──────────────────────────────────────────────
+        cls_x   = embed_boxes[0].get_center()[0] - (PATCH_SIZE + GAP)
+        cls_pos = np.array([cls_x, emb_y, 0.0])
+
+        cls_box = Rectangle(width=PATCH_SIZE, height=EMB_H,
+                            fill_color=CLS_COLOR, fill_opacity=0.25,
+                            stroke_color=CLS_COLOR, stroke_width=2.5).move_to(cls_pos)
+        cls_text  = Text("[CLS]", font_size=13, color=CLS_COLOR, weight=BOLD).move_to(cls_pos)
+        cls_label = Text("class token", font_size=14, color=CLS_COLOR)
+        cls_label.next_to(cls_box, LEFT, buff=0.2)
+
+        self.play(FadeIn(cls_box), Write(cls_text), run_time=0.7)
+        self.play(FadeIn(cls_label), run_time=0.4)
+        self.wait(0.3)
+
+        # ── Stage 6: Positional encoding ──────────────────────────────────────
+        all_token_boxes = [cls_box] + list(embed_boxes)
+
+        pe_highlights = VGroup(*[
+            tok.copy().set_stroke(color=PE_COLOR, width=3.5).set_fill(opacity=0)
+            for tok in all_token_boxes
+        ])
+
+        wave = VMobject()
+        wave.set_points_smoothly([
+            np.array([-0.35 + i * 0.07, 0.18 * np.sin(i * 0.9), 0]) for i in range(11)
+        ])
+        wave.set_stroke(color=PE_COLOR, width=2.5)
+        plus = MathTex(r"+", color=PE_COLOR, font_size=28)
+        pe_icon = VGroup(wave, plus).arrange(RIGHT, buff=0.15)
+        pe_desc = Text("Positional Encoding", font_size=16, color=PE_COLOR)
+        pe_full = VGroup(pe_icon, pe_desc).arrange(RIGHT, buff=0.2)
+        pe_full.next_to(embed_boxes, UP, buff=0.35)
+
+        self.play(FadeIn(pe_full), run_time=0.5)
+        self.play(LaggedStart(*[Create(h) for h in pe_highlights], lag_ratio=0.06), run_time=0.8)
+        self.wait(0.3)
+
+        # ── Stage 7: Transformer Encoder ──────────────────────────────────────
+        transformer_box = RoundedRectangle(
+            width=9.2, height=1.0, corner_radius=0.2,
+            fill_color=TRANSFORMER_COLOR, fill_opacity=0.12,
+            stroke_color=TRANSFORMER_COLOR, stroke_width=2.5,
+        ).move_to(UP * 0.75)
+
+        transformer_label = Text(
+            "Transformer Encoder  (ViT-Tiny: 12 layers, d=192, heads=3)",
+            font_size=16, color=TRANSFORMER_COLOR,
+        ).move_to(transformer_box.get_center())
+
+        up_arrows = VGroup(*[
+            Arrow(
+                tok.get_top() + UP * 0.05,
+                transformer_box.get_bottom()
+                + RIGHT * (tok.get_center()[0] - transformer_box.get_center()[0]),
+                buff=0.05, stroke_color=ARROW_COLOR, stroke_width=1.8,
+                tip_length=0.14, color=ARROW_COLOR,
+                max_stroke_width_to_length_ratio=999,
+            )
+            for tok in all_token_boxes
+        ])
+
+        self.play(LaggedStart(*[GrowArrow(a) for a in up_arrows], lag_ratio=0.04), run_time=0.8)
+        self.play(FadeIn(transformer_box), Write(transformer_label), run_time=0.9)
+        self.wait(0.3)
+
+        # ── Stage 8: Latent output z ──────────────────────────────────────────
+        out_arrow = Arrow(
+            transformer_box.get_top() + UP * 0.05,
+            transformer_box.get_top() + UP * 0.9,
+            buff=0.05, stroke_color=ARROW_COLOR, stroke_width=2.5,
+            tip_length=0.2, color=ARROW_COLOR,
+        )
+        latent_box = RoundedRectangle(
+            width=5.5, height=0.65, corner_radius=0.15,
+            fill_color=EMBED_COLOR, fill_opacity=0.20,
+            stroke_color=EMBED_COLOR, stroke_width=2.5,
+        ).next_to(out_arrow, UP, buff=0.05)
+
+        latent_label = MathTex(r"z \in \mathbb{R}^{D}", color=EMBED_COLOR, font_size=26)
+        latent_label.move_to(latent_box.get_center())
+        latent_desc = Text("Latent representation", font_size=16, color=EMBED_COLOR)
+        latent_desc.next_to(latent_box, RIGHT, buff=0.25)
+
+        self.play(GrowArrow(out_arrow), run_time=0.5)
+        self.play(FadeIn(latent_box), Write(latent_label), FadeIn(latent_desc), run_time=0.8)
+        self.wait(1.5)

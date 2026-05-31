@@ -577,6 +577,24 @@ def outline_recap_after_sota():
 
 
 @app.cell
+def lewm_architecture_animation_slide():
+    import sys as _sys
+    import marimo as _mo
+    if _sys.platform != "emscripten":
+        _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+        from animations.lewm_architecture import LeWMArchitecture
+        _video = render_scene(LeWMArchitecture)
+    else:
+        _video = _mo.Html(
+            f'<video autoplay muted style="{VIDEO_STYLE}">'
+            '<source src="media/videos/lewm_architecture/1080p60/LeWMArchitecture.mp4" type="video/mp4">'
+            '</video>'
+        )
+    _mo.vstack([section_strip(2), page_number(1), _video])
+    return
+
+
+@app.cell
 def bibliography_slide_1(mo):
     def _():
         import bibtexparser
@@ -635,16 +653,6 @@ def bibliography_slide_2(mo):
         ], align="start")
 
     _()
-    return
-
-
-@app.cell
-def _():
-    return
-
-
-@app.cell
-def _():
     return
 
 

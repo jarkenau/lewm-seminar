@@ -39,8 +39,8 @@ with Manim (Community Edition). Animations are pre-rendered to video (`.mp4`) an
 the Marimo slides.
 
 - Animation source files live in `animations/` as individual Python scripts, one per concept.
-- Render with: `manim -pql animations/<scene>.py <SceneName>` (low quality for iteration,
-  `-pqh` for final render).
+- Render with: `.venv/bin/manim -pql animations/<scene>.py <SceneName>` (low quality for
+  iteration, `-pqh` for final render). Manim is installed in the project venv, not global PATH.
 - Output lands in `media/videos/` by default; copy final renders to `assets/` for embedding.
 - Each animation file should contain exactly one `Scene` subclass with a descriptive name.
 

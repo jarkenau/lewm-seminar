@@ -61,7 +61,7 @@ with app.setup:
         import marimo as mo
         c = SECTION[num]
         return mo.Html(
-            f'<div style="position:fixed;top:1rem;left:1.5rem;z-index:100;">'
+            f'<div style="position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:100;">'
             f'<span style="font-size:0.7rem;font-weight:700;color:{c["text"]};letter-spacing:0.1em;text-transform:uppercase;">'
             f'{c["label"]}</span></div>'
         )
@@ -101,6 +101,7 @@ with app.setup:
         "dosovitskiy_vit_2021",     # ViT
         "ba_layer_normalization_2016",  # Layer Normalization
         "peebles_dit_2022",             # DiT — AdaLN origin
+        "balestriero_lejepa_2025",      # LeJEPA — SIGReg origin
     ]
 
     def cite(key):
@@ -731,6 +732,143 @@ def adaln_why_lewm_slide(mo):
 
 
 @app.cell
+def sigreg_optimal_distribution_slide(mo):
+    _SIG = "#10B981"
+
+    _heading = mo.Html(
+        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
+        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
+        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
+        f'<h2 style="margin:0;line-height:1.2;">Why Isotropic Gaussian?</h2>'
+        f'</div>'
+    )
+
+    _left = mo.vstack([
+        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">Two lemmas against anisotropy</h3>'),
+        mo.md(
+            "**Lemma 1 — Anisotropy amplifies bias**\n\n"
+            "Whenever $\\lambda_K > \\lambda_1$ (covariance eigenvalues differ), there always exists "
+            "a downstream task for which anisotropic embeddings produce **higher estimation bias**.\n\n"
+            "**Lemma 2 — Anisotropy amplifies variance**\n\n"
+            "The OLS estimation variance $\\text{tr}(\\text{Var}(\\hat{\\beta}))$ is minimised if and "
+            "only if $\\text{Cov}(Z) \\propto I$ — all eigenvalues must be equal."
+        ),
+        mo.md("&nbsp;"),
+        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">Consequence for collapse</h3>'),
+        mo.md(
+            "- **Complete collapse** → $\\text{Var}(Z) = 0$ — violates isotropy\n"
+            "- **Dimensional collapse** → $\\text{rank}(\\text{Cov}(Z)) < d$ — violates isotropy\n"
+            "- Both failure modes are ruled out by enforcing $\\mathcal{N}(0, I)$"
+        ),
+    ], align="start")
+
+    _right = mo.vstack([
+        mo.Html(
+            f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Theorem 1'
+            f'&nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">'
+            f'LeJEPA [{cite("balestriero_lejepa_2025")}]</span></h3>'
+        ),
+        mo.md(
+            "Among all distributions with fixed total variance, the **isotropic Gaussian "
+            "$\\mathcal{N}(0, I)$ uniquely minimises the integrated squared bias** across "
+            "downstream probing tasks — for both linear probes (OLS) and nonlinear probes ($k$-NN, kernel)."
+        ),
+        mo.md("&nbsp;"),
+        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The target distribution</h3>'),
+        mo.md(r"$$z_t \;\sim\; \mathcal{N}(0,\; I_d)$$"),
+        mo.md(
+            "This turns anti-collapse from a **heuristic constraint** into a "
+            "**theoretically grounded distributional objective**: enforce $\\mathcal{N}(0, I)$ "
+            "and collapse is provably impossible."
+        ),
+    ], align="start")
+
+    mo.vstack([
+        section_strip(2),
+        page_number(11),
+        _heading,
+        mo.md("*THE THEORETICALLY OPTIMAL TARGET FOR ANY DOWNSTREAM TASK*"),
+        mo.md("&nbsp;"),
+        mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
+    ], align="start")
+    return
+
+
+@app.cell
+def sigreg_mechanism_slide(mo):
+    import sys as _sys
+    if _sys.platform != "emscripten":
+        _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+        from animations.sigreg_collapse import SIGRegVisualization
+        _video = render_scene(SIGRegVisualization)
+    else:
+        _video = mo.Html(
+            f'<video autoplay muted loop style="{VIDEO_STYLE}">'
+            '<source src="media/videos/sigreg_collapse/1080p60/SIGRegVisualization.mp4"'
+            ' type="video/mp4"></video>'
+        )
+
+    _SIG = "#10B981"
+
+    _heading = mo.Html(
+        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
+        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
+        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
+        f'<h2 style="margin:0;line-height:1.2;">SIGReg: Enforcing the Gaussian Target</h2>'
+        f'</div>'
+    )
+
+    _left = mo.vstack([
+        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The sketching algorithm</h3>'),
+        mo.md(
+            "**Step 1** — Sample $M$ random unit-norm directions:\n\n"
+            "$$\\boldsymbol{u}^{(m)} \\sim \\mathcal{U}(S^{d-1}), \\quad m = 1, \\ldots, M$$\n\n"
+            "**Step 2** — Project embeddings $Z \\in \\mathbb{R}^{N \\times d}$ onto each direction:\n\n"
+            "$$\\boldsymbol{h}^{(m)} = Z\\,\\boldsymbol{u}^{(m)} \\in \\mathbb{R}^N$$\n\n"
+            "**Step 3** — Apply a normality test $T$ to each projection and average:\n\n"
+            "$$\\text{SIGReg}(Z) \\triangleq \\frac{1}{M}\\sum_{m=1}^{M} T\\!\\left(\\boldsymbol{h}^{(m)}\\right)$$\n\n"
+            "By the **Cramér–Wold theorem**: matching all 1-D marginals "
+            "$\\Leftrightarrow$ matching the full $d$-dimensional joint distribution."
+        ),
+    ], align="start")
+
+    _right = mo.vstack([
+        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The normality test: Epps–Pulley</h3>'),
+        mo.md(r"$$T = N\!\int_{-\infty}^{\infty} \!\left|\hat{\varphi}_X(t) - e^{-t^2/2}\right|^2 e^{-t^2/2}\,\mathrm{d}t$$"),
+        mo.md(
+            "Compares the **empirical characteristic function** $\\hat{\\varphi}_X(t)$ against "
+            "the Gaussian CF $e^{-t^2/2}$. Bounded gradients: "
+            "$|\\partial T/\\partial z_i| \\leq 4\\sigma^2/N$ — stable by construction.\n\n"
+            "Unlike moment tests (exploding gradients) or CDF tests (require sorting), "
+            "EP is $\\mathcal{O}(N)$, differentiable, and DDP-friendly."
+        ),
+        mo.md("&nbsp;"),
+        mo.Html(
+            f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Full LeWM objective'
+            f'&nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">'
+            f'[{cite("maes_leworldmodel_2026")}]</span></h3>'
+        ),
+        mo.md(r"$$\mathcal{L}_\text{LeWM} = \underbrace{\|\hat{z}_{t+1} - z_{t+1}\|_2^2}_{\mathcal{L}_\text{pred}} + \lambda\;\text{SIGReg}(Z)$$"),
+        mo.md(
+            "$\\lambda = 0.1$, $M = 1024$ (insensitive) — "
+            "**1 effective hyperparameter** vs 6 in PLDM. "
+            "No stop-gradient, no EMA, no teacher–student."
+        ),
+    ], align="start")
+
+    mo.vstack([
+        section_strip(2),
+        page_number(12),
+        _heading,
+        _video,
+        mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
+    ], align="start")
+    return
+
+
+@app.cell
 def bibliography_slide_1(mo):
     def _():
         import bibtexparser
@@ -752,7 +890,7 @@ def bibliography_slide_1(mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
         return mo.vstack([
-            page_number(11),
+            page_number(13),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
         ], align="start")
 
@@ -784,16 +922,11 @@ def bibliography_slide_2(mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
         return mo.vstack([
-            page_number(12),
+            page_number(14),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
         ], align="start")
 
     _()
-    return
-
-
-@app.cell
-def _():
     return
 
 

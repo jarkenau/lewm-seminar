@@ -779,7 +779,7 @@ def bibliography_slide_2(mo):
         # Only the works cited in the slides, numbered by their position in CITED.
         by_key = {e.get("ID"): e for e in db.entries}
         cited_entries = [(i, by_key[k]) for i, k in enumerate(CITED, 1) if k in by_key]
-        page_entries = cited_entries[ENTRIES_PER_PAGE : ENTRIES_PER_PAGE * 2]
+        page_entries = cited_entries[ENTRIES_PER_PAGE:]
         mo.stop(not page_entries)
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
@@ -789,6 +789,11 @@ def bibliography_slide_2(mo):
         ], align="start")
 
     _()
+    return
+
+
+@app.cell
+def _():
     return
 
 

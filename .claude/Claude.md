@@ -77,6 +77,7 @@ the Marimo slides.
     ├── 2508.10104v1.pdf        # DINOv3
     ├── 2010.11929v2.pdf        # ViT: An Image is Worth 16x16 Words (Dosovitskiy et al.)
     ├── 2604.03208v1.pdf        # Hierarchical Planning with Latent World Models
+    ├── 2212.09748v2.pdf        # DiT: Scalable Diffusion Models with Transformers (Peebles & Xie) — AdaLN origin
     └── SWM_Introduction.pdf    # Example seminar format
 ```
 
@@ -91,10 +92,22 @@ When working on this project, keep the following distinctions precise:
 | **JEPA** | Joint Embedding Predictive Architecture — predicts in *latent* space, not pixel space |
 | **LeWM** | The main paper: a JEPA-based world model with action conditioning for MBRL |
 | **SIGReg** | VICReg-inspired non-contrastive regularizer used to prevent collapse in LeWM |
-| **AdaLN** | Adaptive Layer Norm used to inject action embeddings into the predictor transformer |
+| **AdaLN** | Adaptive Layer Norm used to inject action embeddings into the predictor transformer. Implemented as `ConditionalBlock` in `module.py` (repo: lucas-maes/le-wm): a single `SiLU → Linear(dim, 6*dim)` zero-initialized MLP outputs 6 vectors (shift/scale/gate for attention and MLP sublayers). LayerNorm uses `elementwise_affine=False`; modulation is `x*(1+scale)+shift`; gates zero the residual at init. |
 | **MPC + CEM** | Model Predictive Control with Cross-Entropy Method — inference-time planning in latent space |
 | **Anti-collapse** | Keeping latent representations from collapsing to a constant — JEPA's alternative to negative pairs |
 | **Generative WM** | World models that reconstruct pixels (DreamerV3, IRIS, DIAMOND) — contrasted with LeWM |
+
+---
+
+## Official Implementation
+
+The official LeWM source code is at **https://github.com/lucas-maes/le-wm**. Key files:
+
+- `module.py` — `ConditionalBlock` (AdaLN-Zero), `ARPredictor`, `SIGReg`, `Embedder`, `MLP`
+- `jepa.py` — top-level `JEPA` class wiring encoder, predictor, action encoder, projectors
+- `train.py` — training loop
+- `eval.py` — latent planning / MPC-CEM evaluation
+- `config/` — Hydra configs for hyperparameters
 
 ---
 

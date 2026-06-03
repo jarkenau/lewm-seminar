@@ -99,6 +99,8 @@ with app.setup:
         "sobal_pldm_2025",          # PLDM
         "bardes_vicreg_2022",       # VICReg
         "dosovitskiy_vit_2021",     # ViT
+        "ba_layer_normalization_2016",  # Layer Normalization
+        "peebles_dit_2022",             # DiT — AdaLN origin
     ]
 
     def cite(key):
@@ -638,12 +640,102 @@ def vit_encoder_slide(mo):
     return
 
 
-app._unparsable_cell(
-    r"""
-    1def _():
+@app.cell
+def adaln_formulas_slide(mo):
+    import sys as _sys
+    import pathlib as _pathlib
+
+    _ACTION = "#8E6FBF"
+
+    _heading = mo.Html(
+        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
+        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_ACTION};'
+        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">2</span>'
+        f'<h2 style="margin:0;line-height:1.2;">Action Conditioning via AdaLN-Zero</h2>'
+        f'</div>'
+    )
+
+    _standard_ln = mo.vstack([
+        mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Standard LN &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Ba et al. [{cite("ba_layer_normalization_2016")}]</span></h3>'),
+        mo.md(r"$$y = \gamma \cdot \frac{x - \mu}{\sigma} + \beta$$"),
+        mo.md(
+            "- $\\gamma, \\beta$ are **fixed** learned parameters\n"
+            "- Same for every input — no external conditioning"
+        ),
+    ], align="start")
+
+    _adaptive_ln = mo.vstack([
+        mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">AdaLN-Zero &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Peebles & Xie [{cite("peebles_dit_2022")}]</span></h3>'),
+        mo.md(r"$$y = \underbrace{(1+\Sigma(c))}_{\text{scale}} \cdot \frac{x-\mu}{\sigma} + \underbrace{\Delta(c)}_{\text{shift}}, \qquad x \leftarrow x + \underbrace{G(c)}_{\text{gate}} \cdot \text{sublayer}(y)$$"),
+        mo.md(r"$$[\Delta,\;\Sigma,\;G]_{\text{attn}},\;[\Delta,\;\Sigma,\;G]_{\text{mlp}} = \text{SiLU}(c)\,W + b, \quad W\!=\!0,\;b\!=\!0$$"),
+        mo.md(
+            "- $\\Delta, \\Sigma, G$ **generated from conditioning signal** $c$ (the action)\n"
+            "- **6 outputs** per block: shift / scale / gate for both attention & MLP\n"
+            "- **Zero-init**: $W=0, b=0$ → block is identity at the start of training"
+        ),
+    ], align="start")
+
+    if _sys.platform != "emscripten":
+        _img_src = (_pathlib.Path(__file__).parent / "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png").read_bytes()
+    else:
+        _img_src = "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png"
+
+    mo.vstack([
+        section_strip(2),
+        page_number(9),
+        _heading,
+        mo.md("*HOW THE ACTION EMBEDDING MODULATES EVERY PREDICTOR LAYER*"),
+        mo.md("&nbsp;"),
+        mo.hstack([
+            mo.vstack([_standard_ln, mo.md("&nbsp;"), _adaptive_ln], align="start"),
+            mo.image(_img_src),
+        ], widths=[1, 1], gap="2rem", align="start"),
+    ])
+    return
+
+
+@app.cell
+def adaln_why_lewm_slide(mo):
+    _ACTION = "#8E6FBF"
+
+    _heading = mo.Html(
+        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
+        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_ACTION};'
+        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">2</span>'
+        f'<h2 style="margin:0;line-height:1.2;">Why AdaLN-Zero in LeWM?</h2>'
+        f'</div>'
+    )
+
+    mo.vstack([
+        section_strip(2),
+        page_number(10),
+        _heading,
+        mo.md("*THREE DESIGN CHOICES AND THEIR CONSEQUENCES*"),
+        mo.md("&nbsp;"),
+        mo.md(
+            "**01 Why scale + shift — not concatenation or addition?**\n\n"
+            "- *Concatenation*: action token is tiny compared to patch embeddings — signal drowned out\n"
+            "- *Addition*: shifts features uniformly but no multiplicative gating over content\n"
+            "- *AdaLN*: rescales every token via $(1{+}\\Sigma(c))$ then shifts — "
+            "action has **full, per-feature influence** over all patches\n\n"
+            "**02 Why zero-init?**\n\n"
+            "- At init: $W{=}0 \\Rightarrow G{=}0$ → predictor is a **pure residual stream (identity)**\n"
+            "- Encoder has learned nothing useful yet — random conditioning would destabilise gradients\n"
+            "- Conditioning grows in progressively as representations mature → "
+            "**stable end-to-end training from pixels**"
+        ),
+    ], align="start")
+    return
+
+
+@app.cell
+def bibliography_slide_1(mo):
+    def _():
         import bibtexparser
 
-        ENTRIES_PER_PAGE = 7
+        ENTRIES_PER_PAGE = 8
 
         import sys, io
         if sys.platform == "emscripten":
@@ -660,14 +752,12 @@ app._unparsable_cell(
 
         items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
         return mo.vstack([
-            page_number(9),
+            page_number(11),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
         ], align="start")
 
     _()
-    """,
-    name="bibliography_slide_1"
-)
+    return
 
 
 @app.cell
@@ -675,7 +765,7 @@ def bibliography_slide_2(mo):
     def _():
         import bibtexparser
 
-        ENTRIES_PER_PAGE = 7
+        ENTRIES_PER_PAGE = 8
 
         import sys, io
         if sys.platform == "emscripten":
@@ -694,7 +784,7 @@ def bibliography_slide_2(mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
         return mo.vstack([
-            page_number(10),
+            page_number(12),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
         ], align="start")
 

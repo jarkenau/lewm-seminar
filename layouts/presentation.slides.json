@@ -15,7 +15,14 @@
       {},
       {},
       {},
+      {
+        "speakerNotes": "- Explain action conditioning with an actual task\n- T-Task: Goal to "
+      },
       {},
+      {},
+      {
+        "speakerNotes": "- Activations shifts as weights update -> internal covariate shift\n- Normalization layers stabilize by rescaling activations to a constant range\n- In LayerNorm, only the scale and shift are learned parameters -> Same for every input that passes through\n- Adaptive layer normalization keeps the math, but generates the scale and shift dynamically from a conditioning signal\n- Conditioning vector a is fed through a small MLP that outputs scale and shift\n- Just concatenating -> tiny action vector vs large state embedding. \n- Adding -> We want to have a multiplicative effect -> Not just scale it\n"
+      },
       {},
       {}
     ],

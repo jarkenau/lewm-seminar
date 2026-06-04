@@ -924,20 +924,309 @@ def outline_recap_after_lewm():
 
 
 @app.cell
-def bibliography_slide_1(mo):
+def _bib_text_cell():
+    BIB_TEXT = """
+    @misc{maes_leworldmodel_2026,
+    	title = {{LeWorldModel}: {Stable} {End}-to-{End} {Joint}-{Embedding} {Predictive} {Architecture} from {Pixels}},
+    	shorttitle = {{LeWorldModel}},
+    	url = {http://arxiv.org/abs/2603.19312},
+    	doi = {10.48550/arXiv.2603.19312},
+    	abstract = {Joint Embedding Predictive Architectures (JEPAs) offer a compelling framework for learning world models in compact latent spaces, yet existing methods remain fragile, relying on complex multi-term losses, exponential moving averages, pre-trained encoders, or auxiliary supervision to avoid representation collapse. In this work, we introduce LeWorldModel (LeWM), the first JEPA that trains stably end-to-end from raw pixels using only two loss terms: a next-embedding prediction loss and a regularizer enforcing Gaussian-distributed latent embeddings. This reduces tunable loss hyperparameters from six to one compared to the only existing end-to-end alternative. With {\\textasciitilde}15M parameters trainable on a single GPU in a few hours, LeWM plans up to 48x faster than foundation-model-based world models while remaining competitive across diverse 2D and 3D control tasks. Beyond control, we show that LeWM's latent space encodes meaningful physical structure through probing of physical quantities. Surprise evaluation confirms that the model reliably detects physically implausible events.},
+    	urldate = {2026-04-29},
+    	publisher = {arXiv},
+    	author = {Maes, Lucas and Lidec, Quentin Le and Scieur, Damien and LeCun, Yann and Balestriero, Randall},
+    	month = mar,
+    	year = {2026},
+    	note = {arXiv:2603.19312 [cs]},
+    	keywords = {Computer Science - Artificial Intelligence, Computer Science - Machine Learning},
+    	file = {Full Text PDF:/Users/julian/Zotero/storage/JXWAAKII/Maes et al. - 2026 - LeWorldModel Stable End-to-End Joint-Embedding Predictive Architecture from Pixels.pdf:application/pdf;Snapshot:/Users/julian/Zotero/storage/RCDFNTWS/2603.html:text/html},
+    }
+
+    @article{lecun_path_nodate,
+    	title = {A {Path} {Towards} {Autonomous} {Machine} {Intelligence} {Version} 0.9.2, 2022-06-27},
+    	abstract = {How could machines learn as eﬃciently as humans and animals? How could machines learn to reason and plan? How could machines learn representations of percepts and action plans at multiple levels of abstraction, enabling them to reason, predict, and plan at multiple time horizons? This position paper proposes an architecture and training paradigms with which to construct autonomous intelligent agents. It combines concepts such as conﬁgurable predictive world model, behavior driven through intrinsic motivation, and hierarchical joint embedding architectures trained with self-supervised learning.},
+    	language = {en},
+    	author = {LeCun, Yann},
+    	file = {PDF:/Users/julian/Zotero/storage/3GY34T4M/LeCun - A Path Towards Autonomous Machine Intelligence Version 0.9.2, 2022-06-27.pdf:application/pdf},
+    }
+
+    @misc{chen_vl-jepa_2026,
+    	title = {{VL}-{JEPA}: {Joint} {Embedding} {Predictive} {Architecture} for {Vision}-language},
+    	shorttitle = {{VL}-{JEPA}},
+    	url = {http://arxiv.org/abs/2512.10942},
+    	doi = {10.48550/arXiv.2512.10942},
+    	abstract = {We introduce VL-JEPA, a vision-language model built on a Joint Embedding Predictive Architecture (JEPA). Instead of autoregressively generating tokens as in classical VLMs, VL-JEPA predicts continuous embeddings of the target texts. By learning in an abstract representation space, the model focuses on task-relevant semantics while abstracting away surface-level linguistic variability. In a strictly controlled comparison against standard token-space VLM training with the same vision encoder and training data, VL-JEPA achieves stronger performance while having 50\\% fewer trainable parameters. At inference time, a lightweight text decoder is invoked only when needed to translate VL-JEPA predicted embeddings into text. We show that VL-JEPA natively supports selective decoding that reduces the number of decoding operations by 2.85x while maintaining similar performance compared to non-adaptive uniform decoding. Beyond generation, the VL-JEPA's embedding space naturally supports open-vocabulary classification, text-to-video retrieval, and discriminative VQA without any architecture modification. On eight video classification and eight video retrieval datasets, the average performance VL-JEPA surpasses that of CLIP, SigLIP2, and Perception Encoder. At the same time, the model achieves comparable performance as classical VLMs (InstructBLIP, QwenVL) on four VQA datasets: GQA, TallyQA, POPE and POPEv2, despite only having 1.6B parameters.},
+    	urldate = {2026-05-04},
+    	publisher = {arXiv},
+    	author = {Chen, Delong and Shukor, Mustafa and Moutakanni, Theo and Chung, Willy and Yu, Jade and Kasarla, Tejaswi and Bang, Yejin and Bolourchi, Allen and LeCun, Yann and Fung, Pascale},
+    	month = feb,
+    	year = {2026},
+    	note = {arXiv:2512.10942 [cs]},
+    	keywords = {Computer Science - Computer Vision and Pattern Recognition},
+    	file = {Full Text PDF:/Users/julian/Zotero/storage/ZI44Y5XT/Chen et al. - 2026 - VL-JEPA Joint Embedding Predictive Architecture for Vision-language.pdf:application/pdf;Snapshot:/Users/julian/Zotero/storage/7PYUYUH7/2512.html:text/html},
+    }
+
+    @misc{balestriero_lejepa_2025,
+    	title = {{LeJEPA}: {Provable} and {Scalable} {Self}-{Supervised} {Learning} {Without} the {Heuristics}},
+    	shorttitle = {{LeJEPA}},
+    	url = {http://arxiv.org/abs/2511.08544},
+    	doi = {10.48550/arXiv.2511.08544},
+    	abstract = {Learning manipulable representations of the world and its dynamics is central to AI. Joint-Embedding Predictive Architectures (JEPAs) offer a promising blueprint, but lack of practical guidance and theory has led to ad-hoc R\\&D. We present a comprehensive theory of JEPAs and instantiate it in \\{{\\textbackslash}bf LeJEPA\\}, a lean, scalable, and theoretically grounded training objective. First, we identify the isotropic Gaussian as the optimal distribution that JEPAs' embeddings should follow to minimize downstream prediction risk. Second, we introduce a novel objective--\\{{\\textbackslash}bf Sketched Isotropic Gaussian Regularization\\} (SIGReg)--to constrain embeddings to reach that ideal distribution. Combining the JEPA predictive loss with SIGReg yields LeJEPA with numerous theoretical and practical benefits: (i) single trade-off hyperparameter, (ii) linear time and memory complexity, (iii) stability across hyper-parameters, architectures (ResNets, ViTs, ConvNets) and domains, (iv) heuristics-free, e.g., no stop-gradient, no teacher-student, no hyper-parameter schedulers, and (v) distributed training-friendly implementation requiring only \\${\\textbackslash}approx\\$50 lines of code. Our empirical validation covers 10+ datasets, 60+ architectures, all with varying scales and domains. As an example, using imagenet-1k for pretraining and linear evaluation with frozen backbone, LeJEPA reaches 79{\\textbackslash}\\% with a ViT-H/14. We hope that the simplicity and theory-friendly ecosystem offered by LeJEPA will reestablish self-supervised pre-training as a core pillar of AI research ({\\textbackslash}href\\{https://github.com/rbalestr-lab/lejepa\\}\\{GitHub repo\\}).},
+    	urldate = {2026-05-04},
+    	publisher = {arXiv},
+    	author = {Balestriero, Randall and LeCun, Yann},
+    	month = nov,
+    	year = {2025},
+    	note = {arXiv:2511.08544 [cs]},
+    	keywords = {Computer Science - Artificial Intelligence, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning, Statistics - Machine Learning},
+    	file = {Full Text PDF:/Users/julian/Zotero/storage/9DKKPNNA/Balestriero and LeCun - 2025 - LeJEPA Provable and Scalable Self-Supervised Learning Without the Heuristics.pdf:application/pdf;Snapshot:/Users/julian/Zotero/storage/RUB3Z3RV/2511.html:text/html},
+    }
+
+    @article{matsuo_deep_2022,
+    	title = {Deep learning, reinforcement learning, and world models},
+    	volume = {152},
+    	issn = {08936080},
+    	url = {https://linkinghub.elsevier.com/retrieve/pii/S0893608022001150},
+    	doi = {10.1016/j.neunet.2022.03.037},
+    	abstract = {Deep learning (DL) and reinforcement learning (RL) methods seem to be a part of indispensable factors to achieve human-level or super-human AI systems. On the other hand, both DL and RL have strong connections with our brain functions and with neuroscientific findings. In this review, we summarize talks and discussions in the ‘‘Deep Learning and Reinforcement Learning’’ session of the symposium, International Symposium on Artificial Intelligence and Brain Science. In this session, we discussed whether we can achieve comprehensive understanding of human intelligence based on the recent advances of deep learning and reinforcement learning algorithms. Speakers contributed to provide talks about their recent studies that can be key technologies to achieve human-level intelligence.},
+    	language = {en},
+    	urldate = {2026-05-04},
+    	journal = {Neural Networks},
+    	author = {Matsuo, Yutaka and LeCun, Yann and Sahani, Maneesh and Precup, Doina and Silver, David and Sugiyama, Masashi and Uchibe, Eiji and Morimoto, Jun},
+    	month = aug,
+    	year = {2022},
+    	pages = {267--275},
+    	file = {PDF:/Users/julian/Zotero/storage/J245CKJR/Matsuo et al. - 2022 - Deep learning, reinforcement learning, and world models.pdf:application/pdf},
+    }
+
+    @misc{nam_causal-jepa_2026,
+    	title = {Causal-{JEPA}: {Learning} {World} {Models} through {Object}-{Level} {Latent} {Interventions}},
+    	shorttitle = {Causal-{JEPA}},
+    	url = {http://arxiv.org/abs/2602.11389},
+    	doi = {10.48550/arXiv.2602.11389},
+    	abstract = {World models require robust relational understanding to support prediction, reasoning, and control. While object-centric representations provide a useful abstraction, they are not sufficient to capture interaction-dependent dynamics. We therefore propose C-JEPA, a simple and flexible object-centric world model that extends masked joint embedding prediction from image patches to object-centric representations. By applying object-level masking that requires an object's state to be inferred from other objects, C-JEPA induces latent interventions with counterfactual-like effects and prevents shortcut solutions, making interaction reasoning essential. Empirically, C-JEPA leads to consistent gains in visual question answering, with an absolute improvement of about 20{\\textbackslash}\\% in counterfactual reasoning compared to the same architecture without object-level masking. On agent control tasks, C-JEPA enables substantially more efficient planning by using only 1{\\textbackslash}\\% of the total latent input features required by patch-based world models, while achieving comparable performance. Finally, we provide a formal analysis demonstrating that object-level masking induces a causal inductive bias via latent interventions. Our code is available at https://github.com/galilai-group/cjepa.},
+    	urldate = {2026-05-04},
+    	publisher = {arXiv},
+    	author = {Nam, Heejeong and Lidec, Quentin Le and Maes, Lucas and LeCun, Yann and Balestriero, Randall},
+    	month = feb,
+    	year = {2026},
+    	note = {arXiv:2602.11389 [cs]},
+    	keywords = {Computer Science - Artificial Intelligence},
+    	file = {Full Text PDF:/Users/julian/Zotero/storage/YAFY2CD9/Nam et al. - 2026 - Causal-JEPA Learning World Models through Object-Level Latent Interventions.pdf:application/pdf;Snapshot:/Users/julian/Zotero/storage/F9MMYMUE/2602.html:text/html},
+    }
+
+    @article{ha_world_2018,
+    	title = {World {Models}},
+    	url = {http://arxiv.org/abs/1803.10122},
+    	doi = {10.5281/zenodo.1207631},
+    	abstract = {We explore building generative neural network models of popular reinforcement learning environments. Our world model can be trained quickly in an unsupervised manner to learn a compressed spatial and temporal representation of the environment. By using features extracted from the world model as inputs to an agent, we can train a very compact and simple policy that can solve the required task. We can even train our agent entirely inside of its own hallucinated dream generated by its world model, and transfer this policy back into the actual environment. An interactive version of this paper is available at https://worldmodels.github.io/},
+    	urldate = {2026-05-04},
+    	author = {Ha, David and Schmidhuber, Jürgen},
+    	month = mar,
+    	year = {2018},
+    	note = {arXiv:1803.10122 [cs]},
+    	keywords = {Computer Science - Machine Learning, Statistics - Machine Learning},
+    	file = {Full Text PDF:/Users/julian/Zotero/storage/B844DNWA/Ha and Schmidhuber - 2018 - World Models.pdf:application/pdf;Snapshot:/Users/julian/Zotero/storage/ST4PC9YM/1803.html:text/html},
+    }
+
+    @inproceedings{bromley_signature_1993,
+    	title = {Signature {Verification} using a "{Siamese}" {Time} {Delay} {Neural} {Network}},
+    	volume = {6},
+    	url = {https://proceedings.neurips.cc/paper_files/paper/1993/hash/288cc0ff022877bd3df94bc9360b9c5d-Abstract.html},
+    	urldate = {2026-05-05},
+    	booktitle = {Advances in {Neural} {Information} {Processing} {Systems}},
+    	publisher = {Morgan-Kaufmann},
+    	author = {Bromley, Jane and Guyon, Isabelle and LeCun, Yann and Säckinger, Eduard and Shah, Roopak},
+    	year = {1993},
+    	file = {Full Text PDF:/Users/julian/Zotero/storage/PKF36WS9/Bromley et al. - 1993 - Signature Verification using a Siamese Time Delay Neural Network.pdf:application/pdf},
+    }
+
+    @misc{assran_v-jepa_2025,
+    	title = {V-{JEPA} 2: {Self}-{Supervised} {Video} {Models} {Enable} {Understanding}, {Prediction} and {Planning}},
+    	shorttitle = {V-{JEPA} 2},
+    	url = {http://arxiv.org/abs/2506.09985},
+    	doi = {10.48550/arXiv.2506.09985},
+    	abstract = {A major challenge for modern AI is to learn to understand the world and learn to act largely by observation. This paper explores a self-supervised approach that combines internet-scale video data with a small amount of interaction data (robot trajectories), to develop models capable of understanding, predicting, and planning in the physical world. We first pre-train an action-free joint-embedding-predictive architecture, V-JEPA 2, on a video and image dataset comprising over 1 million hours of internet video. V-JEPA 2 achieves strong performance on motion understanding (77.3 top-1 accuracy on Something-Something v2) and state-of-the-art performance on human action anticipation (39.7 recall-at-5 on Epic-Kitchens-100) surpassing previous task-specific models. Additionally, after aligning V-JEPA 2 with a large language model, we demonstrate state-of-the-art performance on multiple video question-answering tasks at the 8 billion parameter scale (e.g., 84.0 on PerceptionTest, 76.9 on TempCompass). Finally, we show how self-supervised learning can be applied to robotic planning tasks by post-training a latent action-conditioned world model, V-JEPA 2-AC, using less than 62 hours of unlabeled robot videos from the Droid dataset. We deploy V-JEPA 2-AC zero-shot on Franka arms in two different labs and enable picking and placing of objects using planning with image goals. Notably, this is achieved without collecting any data from the robots in these environments, and without any task-specific training or reward. This work demonstrates how self-supervised learning from web-scale data and a small amount of robot interaction data can yield a world model capable of planning in the physical world.},
+    	urldate = {2026-05-06},
+    	publisher = {arXiv},
+    	author = {Assran, Mido and Bardes, Adrien and Fan, David and Garrido, Quentin and Howes, Russell and Komeili, Mojtaba and Muckley, Matthew and Rizvi, Ammar and Roberts, Claire and Sinha, Koustuv and Zholus, Artem and Arnaud, Sergio and Gejji, Abha and Martin, Ada and Hogan, Francois Robert and Dugas, Daniel and Bojanowski, Piotr and Khalidov, Vasil and Labatut, Patrick and Massa, Francisco and Szafraniec, Marc and Krishnakumar, Kapil and Li, Yong and Ma, Xiaodong and Chandar, Sarath and Meier, Franziska and LeCun, Yann and Rabbat, Michael and Ballas, Nicolas},
+    	month = jun,
+    	year = {2025},
+    	note = {arXiv:2506.09985 [cs]},
+    	keywords = {Computer Science - Artificial Intelligence, Computer Science - Robotics, Computer Science - Computer Vision and Pattern Recognition, Computer Science - Machine Learning},
+    	file = {Full Text PDF:/Users/julian/Zotero/storage/JI95FUI6/Assran et al. - 2025 - V-JEPA 2 Self-Supervised Video Models Enable Understanding, Prediction and Planning.pdf:application/pdf;Snapshot:/Users/julian/Zotero/storage/GQTKDXV9/2506.html:text/html},
+    }
+
+    @misc{assran_i-jepa_2023,
+    	title = {Self-{Supervised} {Learning} from {Images} with a {Joint}-{Embedding} {Predictive} {Architecture}},
+    	shorttitle = {I-{JEPA}},
+    	url = {http://arxiv.org/abs/2301.08243},
+    	doi = {10.48550/arXiv.2301.08243},
+    	publisher = {arXiv},
+    	author = {Assran, Mahmoud and Duval, Quentin and Misra, Ishan and Bojanowski, Piotr and Vincent, Pascal and Rabbat, Michael and LeCun, Yann and Ballas, Nicolas},
+    	year = {2023},
+    	note = {arXiv:2301.08243 [cs]. CVPR 2023},
+    }
+
+    @misc{bardes_v-jepa_2024,
+    	title = {Revisiting {Feature} {Prediction} for {Learning} {Visual} {Representations} from {Video}},
+    	shorttitle = {V-{JEPA}},
+    	url = {http://arxiv.org/abs/2404.08471},
+    	doi = {10.48550/arXiv.2404.08471},
+    	publisher = {arXiv},
+    	author = {Bardes, Adrien and Garrido, Quentin and Ponce, Jean and Chen, Xinlei and Rabbat, Michael and LeCun, Yann and Assran, Mahmoud and Ballas, Nicolas},
+    	year = {2024},
+    	note = {arXiv:2404.08471 [cs]},
+    }
+
+    @misc{munim_echojepa_2026,
+    	title = {{EchoJEPA}: {A} {Latent} {Predictive} {Foundation} {Model} for {Echocardiography}},
+    	shorttitle = {{EchoJEPA}},
+    	url = {http://arxiv.org/abs/2602.02603},
+    	doi = {10.48550/arXiv.2602.02603},
+    	publisher = {arXiv},
+    	author = {Munim, Alif and Fallahpour, Adibvafa and Szasz, Teodora and Attarpour, Ahmadreza and Jiang, River and Sooriyakanthan, Brana and Sooriyakanthan, Maala and Whitney, Heather and Slivnick, Jeremy and Rubin, Barry and Tsang, Wendy and Wang, Bo},
+    	year = {2026},
+    	note = {arXiv:2602.02603 [cs]},
+    }
+
+    @misc{dong_brain-jepa_2024,
+    	title = {Brain-{JEPA}: {Brain} {Dynamics} {Foundation} {Model} with {Gradient} {Positioning} and {Spatiotemporal} {Masking}},
+    	shorttitle = {Brain-{JEPA}},
+    	url = {http://arxiv.org/abs/2409.19407},
+    	doi = {10.48550/arXiv.2409.19407},
+    	publisher = {arXiv},
+    	author = {Dong, Zijian and Li, Ruilin and Wu, Yilei and Nguyen, Thuan Tinh and Chong, Joanna Su Xian and Ji, Fang and Tong, Nathanael Ren Jie and Chen, Christopher Li Hsian and Zhou, Juan Helen},
+    	year = {2024},
+    	note = {arXiv:2409.19407 [cs]. NeurIPS 2024},
+    }
+
+    @misc{micheli_iris_2023,
+    	title = {Transformers are {Sample}-{Efficient} {World} {Models}},
+    	shorttitle = {{IRIS}},
+    	url = {http://arxiv.org/abs/2209.00588},
+    	doi = {10.48550/arXiv.2209.00588},
+    	publisher = {arXiv},
+    	author = {Micheli, Vincent and Alonso, Eloi and Fleuret, François},
+    	year = {2023},
+    	note = {arXiv:2209.00588 [cs]. ICLR 2023},
+    }
+
+    @misc{alonso_diamond_2024,
+    	title = {Diffusion for {World} {Modeling}: {Visual} {Details} {Matter} in {Atari}},
+    	shorttitle = {{DIAMOND}},
+    	url = {http://arxiv.org/abs/2405.12399},
+    	doi = {10.48550/arXiv.2405.12399},
+    	publisher = {arXiv},
+    	author = {Alonso, Eloi and Jelley, Adam and Micheli, Vincent and Kanervisto, Anssi and Storkey, Amos and Pearce, Tim and Fleuret, François},
+    	year = {2024},
+    	note = {arXiv:2405.12399 [cs]. NeurIPS 2024},
+    }
+
+    @misc{decart_oasis_2024,
+    	title = {Oasis: {A} {Universe} in a {Transformer}},
+    	shorttitle = {Oasis},
+    	url = {https://oasis-model.github.io/},
+    	author = {{Decart} and {Etched}},
+    	year = {2024},
+    	note = {Interactive diffusion-transformer world model},
+    }
+
+    @misc{hafner_dreamer4_2025,
+    	title = {Training {Agents} {Inside} of {Scalable} {World} {Models}},
+    	shorttitle = {Dreamer 4},
+    	url = {http://arxiv.org/abs/2509.24527},
+    	doi = {10.48550/arXiv.2509.24527},
+    	publisher = {arXiv},
+    	author = {Hafner, Danijar and Yan, Wilson and Lillicrap, Timothy},
+    	year = {2025},
+    	note = {arXiv:2509.24527 [cs]},
+    }
+
+    @misc{bruce_genie_2024,
+    	title = {Genie: {Generative} {Interactive} {Environments}},
+    	shorttitle = {Genie},
+    	url = {http://arxiv.org/abs/2402.15391},
+    	doi = {10.48550/arXiv.2402.15391},
+    	publisher = {arXiv},
+    	author = {Bruce, Jake and Dennis, Michael and Edwards, Ashley and Parker-Holder, Jack and Shi, Yuge and others},
+    	year = {2024},
+    	note = {arXiv:2402.15391 [cs]. ICML 2024},
+    }
+
+    @misc{zhou_dino-wm_2024,
+    	title = {{DINO}-{WM}: {World} {Models} on {Pre}-trained {Visual} {Features} enable {Zero}-shot {Planning}},
+    	shorttitle = {{DINO}-{WM}},
+    	url = {http://arxiv.org/abs/2411.04983},
+    	doi = {10.48550/arXiv.2411.04983},
+    	publisher = {arXiv},
+    	author = {Zhou, Gaoyue and Pan, Hengkai and LeCun, Yann and Pinto, Lerrel},
+    	year = {2024},
+    	note = {arXiv:2411.04983 [cs]},
+    }
+
+    @misc{sobal_pldm_2025,
+    	title = {Learning from {Reward}-{Free} {Offline} {Data}: {A} {Case} for {Planning} with {Latent} {Dynamics} {Models}},
+    	shorttitle = {{PLDM}},
+    	url = {http://arxiv.org/abs/2502.14819},
+    	doi = {10.48550/arXiv.2502.14819},
+    	publisher = {arXiv},
+    	author = {Sobal, Vlad and Zhang, Wancong and Cho, Kyunghyun and Balestriero, Randall and Rudner, Tim G. J. and LeCun, Yann},
+    	year = {2025},
+    	note = {arXiv:2502.14819 [cs]},
+    }
+
+    @misc{ba_layer_normalization_2016,
+    	title = {Layer {Normalization}},
+    	url = {http://arxiv.org/abs/1607.06450},
+    	publisher = {arXiv},
+    	author = {Ba, Jimmy Lei and Kiros, Jamie Ryan and Hinton, Geoffrey E.},
+    	year = {2016},
+    	note = {arXiv:1607.06450 [cs]},
+    }
+
+    @misc{peebles_dit_2022,
+    	title = {Scalable {Diffusion} {Models} with {Transformers}},
+    	url = {http://arxiv.org/abs/2212.09748},
+    	publisher = {arXiv},
+    	author = {Peebles, William and Xie, Saining},
+    	year = {2022},
+    	note = {arXiv:2212.09748 [cs]},
+    }
+
+    @inproceedings{dosovitskiy_vit_2021,
+    	title = {An {Image} is {Worth} 16x16 {Words}: {Transformers} for {Image} {Recognition} at {Scale}},
+    	url = {http://arxiv.org/abs/2010.11929},
+    	booktitle = {International {Conference} on {Learning} {Representations} ({ICLR})},
+    	author = {Dosovitskiy, Alexey and Beyer, Lucas and Kolesnikov, Alexander and Weissenborn, Dirk and Zhai, Xiaohua and Unterthiner, Thomas and Dehghani, Mostafa and Minderer, Matthias and Heigold, Georg and Gelly, Sylvain and Uszkoreit, Jakob and Houlsby, Neil},
+    	year = {2021},
+    	note = {arXiv:2010.11929},
+    }
+
+    @misc{bardes_vicreg_2022,
+    	title = {{VICReg}: {Variance}-{Invariance}-{Covariance} {Regularization} for {Self}-{Supervised} {Learning}},
+    	shorttitle = {{VICReg}},
+    	url = {http://arxiv.org/abs/2105.04906},
+    	doi = {10.48550/arXiv.2105.04906},
+    	publisher = {arXiv},
+    	author = {Bardes, Adrien and Ponce, Jean and LeCun, Yann},
+    	year = {2022},
+    	note = {arXiv:2105.04906 [cs]. ICLR 2022},
+    }
+    """
+    return (BIB_TEXT,)
+
+
+@app.cell
+def bibliography_slide_1(BIB_TEXT, mo):
     def _():
         import bibtexparser
 
         ENTRIES_PER_PAGE = 8
 
-        import sys, io
-        if sys.platform == "emscripten":
-            from pyodide.http import open_url
-            _bib_text = open_url("references.bib").read()
-        else:
-            with open("references.bib") as f:
-                _bib_text = f.read()
-        db = bibtexparser.load(io.StringIO(_bib_text))
+        import io
+        parser = bibtexparser.bparser.BibTexParser(common_strings=True)
+        db = bibtexparser.load(io.StringIO(BIB_TEXT), parser=parser)
 
         # Only the works cited in the slides, numbered by their position in CITED.
         by_key = {e.get("ID"): e for e in db.entries}
@@ -954,20 +1243,15 @@ def bibliography_slide_1(mo):
 
 
 @app.cell
-def bibliography_slide_2(mo):
+def bibliography_slide_2(BIB_TEXT, mo):
     def _():
         import bibtexparser
 
         ENTRIES_PER_PAGE = 8
 
-        import sys, io
-        if sys.platform == "emscripten":
-            from pyodide.http import open_url
-            _bib_text = open_url("references.bib").read()
-        else:
-            with open("references.bib") as f:
-                _bib_text = f.read()
-        db = bibtexparser.load(io.StringIO(_bib_text))
+        import io
+        parser = bibtexparser.bparser.BibTexParser(common_strings=True)
+        db = bibtexparser.load(io.StringIO(BIB_TEXT), parser=parser)
 
         # Only the works cited in the slides, numbered by their position in CITED.
         by_key = {e.get("ID"): e for e in db.entries}

@@ -327,9 +327,20 @@ def jepa_principle_animation_slide():
     import sys as _sys
     import marimo as _mo
     if _sys.platform != "emscripten":
-        _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+        import pathlib as _pathlib, subprocess as _sp
+        _sys.path.insert(0, str(_pathlib.Path(__file__).parent))
         from animations.jepa_training import JEPATraining
         _video = render_scene(JEPATraining)
+        # Keep the last frame in sync for the following static slides
+        _mp4  = _pathlib.Path(__file__).parent / "media/videos/jepa_training/1080p60/JEPATraining.mp4"
+        _frame = _pathlib.Path(__file__).parent / "media/images/jepa_final_frame.png"
+        _frame.parent.mkdir(parents=True, exist_ok=True)
+        if _mp4.exists() and (not _frame.exists() or _mp4.stat().st_mtime > _frame.stat().st_mtime):
+            _sp.run(
+                ["ffmpeg", "-sseof", "-0.1", "-i", str(_mp4),
+                 "-frames:v", "1", str(_frame), "-y"],
+                capture_output=True,
+            )
     else:
         _video = _mo.Html(
             f'<video autoplay muted style="{VIDEO_STYLE}">'
@@ -588,11 +599,6 @@ def outline_recap_after_sota():
             gap="0.5rem",
         )
     _()
-    return
-
-
-@app.cell
-def _():
     return
 
 
@@ -1266,11 +1272,6 @@ def bibliography_slide_2(BIB_TEXT, mo):
         ], align="start")
 
     _()
-    return
-
-
-@app.cell
-def _():
     return
 
 

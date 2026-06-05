@@ -1,195 +1,212 @@
 from manim import *
+import numpy as np
 
 
 class JEPATraining(Scene):
     def construct(self):
-        # White background
         self.camera.background_color = WHITE
 
-        # Colors
-        TEXT_COLOR = "#1a1a1a"
-        BOX_COLOR = "#2d2d2d"
-        ARROW_COLOR = "#444444"
-        EMBED_COLOR = "#4A90D9"
-        PRED_COLOR = "#E8704A"
-        LOSS_COLOR = "#5BA85A"
-        NODE_FILL = "#f0f0f0"
-        NODE_STROKE = "#2d2d2d"
+        TEXT_COLOR    = "#1a1a1a"
+        ARROW_COLOR   = "#444444"
+        EMBED_COLOR   = "#4A90D9"
+        PRED_COLOR    = "#E8704A"
+        LATENT_COLOR  = "#7B1FA2"
+        NODE_FILL     = "#f0f0f0"
+        NODE_STROKE   = "#2d2d2d"
+
+        # Layout constants
+        ENC_Y   = -0.50
+        Z_Y     =  0.78
+        PRED_Y  =  1.90
+        FRAME_Y = -2.70
 
         # ── Title ──────────────────────────────────────────────────────────────
         title = Text(
             "Joint Embedding Predictive Architecture (JEPA)",
-            font_size=28,
-            color=TEXT_COLOR,
+            font_size=28, color=TEXT_COLOR,
         ).to_edge(UP, buff=0.4)
         self.play(Write(title), run_time=0.8)
         self.wait(0.3)
 
-        # ── Helper: draw a small neural-net icon ───────────────────────────────
-        def make_nn(layers=(3, 4, 3), node_r=0.13, h_gap=0.55, v_gap=0.32,
-                    fill=NODE_FILL, stroke=NODE_STROKE):
-            """Returns a VGroup of nodes + edges for a small NN diagram."""
+        # ── Helper: neural-net icon ────────────────────────────────────────────
+        def make_nn(layers=(3, 4, 3), node_r=0.13, h_gap=0.55, v_gap=0.32):
             grp = VGroup()
             node_cols = []
             for col_i, n in enumerate(layers):
                 col = VGroup()
                 for row_i in range(n):
-                    c = Circle(radius=node_r, fill_color=fill,
-                               fill_opacity=1, stroke_color=stroke,
+                    c = Circle(radius=node_r, fill_color=NODE_FILL,
+                               fill_opacity=1, stroke_color=NODE_STROKE,
                                stroke_width=1.5)
-                    c.move_to(
-                        RIGHT * col_i * h_gap +
-                        UP * (row_i - (n - 1) / 2) * v_gap
-                    )
+                    c.move_to(RIGHT * col_i * h_gap +
+                              UP * (row_i - (n - 1) / 2) * v_gap)
                     col.add(c)
                 node_cols.append(col)
                 grp.add(col)
-            # edges
             edges = VGroup()
             for i in range(len(node_cols) - 1):
                 for a in node_cols[i]:
                     for b in node_cols[i + 1]:
-                        e = Line(a.get_center(), b.get_center(),
-                                 stroke_color=stroke, stroke_width=0.8,
-                                 stroke_opacity=0.5)
-                        edges.add(e)
+                        edges.add(Line(a.get_center(), b.get_center(),
+                                       stroke_color=NODE_STROKE,
+                                       stroke_width=0.8, stroke_opacity=0.5))
             grp.add(edges)
             return grp
 
-        # ── Encoder left (context) ─────────────────────────────────────────────
-        enc_left = make_nn()
-        enc_left.move_to(LEFT * 3.5 + DOWN * 0.8)
+        # ── Helper: stacked video frames with real images ──────────────────────
+        ASSETS = "/Users/julian/Documents/tum/lewm-seminar/assets"
 
-        obs_left = MathTex(r"x(t)", color=TEXT_COLOR, font_size=36)
-        obs_left.next_to(enc_left, DOWN, buff=0.3)
-        obs_label_left = Tex(r"\textbf{\textsc{Observation}}", color=TEXT_COLOR, font_size=22)
-        obs_label_left.next_to(obs_left, DOWN, buff=0.1)
-        enc_label_left = Tex(r"\textbf{\textsc{Encoder}}", color=TEXT_COLOR, font_size=22)
+        def make_image_frame(path, anchor, fw=1.5):
+            img = ImageMobject(path)
+            img.set_width(fw)
+            img.move_to(anchor)
+            return Group(img)
+
+        def make_frame_stack(anchor, img_paths, n_behind=2, fw=1.5):
+            """Front image at anchor; ghost frames behind-right use earlier imgs."""
+            stack = Group()
+            for i in range(n_behind, 0, -1):
+                offset = RIGHT * 0.11 * i + DOWN * 0.08 * i
+                ghost = make_image_frame(img_paths[-(i + 1)],
+                                         anchor + offset, fw)
+                ghost.set_opacity(0.45 + 0.20 * (n_behind - i))
+                stack.add(ghost)
+            stack.add(make_image_frame(img_paths[-1], anchor, fw))
+            return stack
+
+        # ── Encoders ───────────────────────────────────────────────────────────
+        enc_left = make_nn().move_to(LEFT * 3.5 + UP * ENC_Y)
+        enc_label_left = Tex(r"\textbf{\textsc{Encoder}}",
+                             color=TEXT_COLOR, font_size=22)
         enc_label_left.next_to(enc_left, LEFT, buff=0.2)
 
-        # ── Encoder right (target) ─────────────────────────────────────────────
-        enc_right = make_nn()
-        enc_right.move_to(RIGHT * 3.5 + DOWN * 0.8)
-
-        obs_right = MathTex(r"x(t+1)", color=TEXT_COLOR, font_size=36)
-        obs_right.next_to(enc_right, DOWN, buff=0.3)
-        obs_label_right = Tex(r"\textbf{\textsc{Observation}}", color=TEXT_COLOR, font_size=22)
-        obs_label_right.next_to(obs_right, DOWN, buff=0.1)
-        enc_label_right = Tex(r"\textbf{\textsc{Encoder}}", color=TEXT_COLOR, font_size=22)
+        enc_right = make_nn().move_to(RIGHT * 3.5 + UP * ENC_Y)
+        enc_label_right = Tex(r"\textbf{\textsc{Encoder}}",
+                              color=TEXT_COLOR, font_size=22)
         enc_label_right.next_to(enc_right, RIGHT, buff=0.2)
 
-        # ── Predictor (centre-top) ─────────────────────────────────────────────
-        pred_nn = make_nn(layers=(3, 4, 3))
-        pred_nn.move_to(UP * 1.3)
-        pred_label = Tex(r"\textbf{\textsc{Predictor}}", color=TEXT_COLOR, font_size=22)
+        # ── Video / goal frames ────────────────────────────────────────────────
+        context_imgs = [f"{ASSETS}/ur_frame_0.png",
+                        f"{ASSETS}/ur_frame_1.png"]
+        frame_left  = make_frame_stack(LEFT  * 3.5 + UP * FRAME_Y,
+                                       img_paths=context_imgs, n_behind=1)
+        frame_right = make_frame_stack(RIGHT * 3.5 + UP * FRAME_Y,
+                                       img_paths=[f"{ASSETS}/ur_goal.png"], n_behind=0)
+
+        video_label = Tex(r"\textbf{Video}", color=TEXT_COLOR, font_size=20)
+        video_label.next_to(frame_left, DOWN, buff=0.18)
+
+        goal_label = Tex(r"\textbf{Goal State}", color=TEXT_COLOR, font_size=20)
+        goal_label.next_to(frame_right, DOWN, buff=0.18)
+
+        # ── Predictor ──────────────────────────────────────────────────────────
+        pred_nn = make_nn(layers=(3, 4, 3)).move_to(UP * PRED_Y)
+        pred_label = Tex(r"\textbf{\textsc{Predictor}}",
+                         color=TEXT_COLOR, font_size=22)
         pred_label.next_to(pred_nn, UP, buff=0.2)
 
-        # ── Loss box ──────────────────────────────────────────────────────────
-        loss_box = RoundedRectangle(
-            width=2.6, height=0.9,
-            corner_radius=0.15,
-            fill_color="#f8f8f8",
-            fill_opacity=1,
-            stroke_color=BOX_COLOR,
-            stroke_width=2,
-        ).move_to(RIGHT * 3.5 + UP * 1.3)
-        loss_text = MathTex(
-            r"\min\,d\!\left(z(t{+}1),\, \hat{z}(t{+}1)\right)",
-            color=TEXT_COLOR, font_size=20,
-        )
-        loss_text.move_to(loss_box.get_center())
+        # ── Vector comparison ──────────────────────────────────────────────────
+        vcenter = RIGHT * 3.5 + UP * PRED_Y
 
-        # ── Latent embedding dots ──────────────────────────────────────────────
-        def latent_dot(color):
-            return Dot(radius=0.12, color=color, fill_opacity=1)
+        pred_vec = MathTex(r"\mathtt{[0.05,\ -0.02,\ ...,\ 0.50]}",
+                           color=PRED_COLOR, font_size=22
+                           ).move_to(vcenter + UP * 0.32)
+        pred_vec_label = Tex(r"\textbf{Predicted Embedding}",
+                             color=PRED_COLOR, font_size=18
+                             ).next_to(pred_vec, RIGHT, buff=0.15)
 
-        # z_ctx sits directly above enc_left; z_tgt directly above enc_right
-        z_ctx = latent_dot(EMBED_COLOR).move_to(LEFT * 3.5 + UP * 0.5)
-        z_tgt = latent_dot(EMBED_COLOR).move_to(RIGHT * 3.5 + UP * 0.5)
-        z_pred = latent_dot(PRED_COLOR).move_to(RIGHT * 1.6 + UP * 1.3)
+        goal_vec = MathTex(r"\mathtt{[0.12,\ \ 0.08,\ ...,\ 0.37]}",
+                           color=EMBED_COLOR, font_size=22
+                           ).move_to(vcenter + DOWN * 0.32)
+        goal_vec_label = Tex(r"\textbf{Goal Embedding}",
+                             color=EMBED_COLOR, font_size=18
+                             ).next_to(goal_vec, RIGHT, buff=0.15)
 
-        z_ctx_label = MathTex(r"z(t)", color=EMBED_COLOR, font_size=26)
-        z_ctx_label.next_to(z_ctx, LEFT, buff=0.15)
-        z_tgt_label = MathTex(r"z(t+1)", color=EMBED_COLOR, font_size=26)
-        z_tgt_label.next_to(z_tgt, RIGHT, buff=0.15)
-        z_pred_label = MathTex(r"\hat{z}(t+1)", color=PRED_COLOR, font_size=26)
-        z_pred_label.next_to(z_pred, DOWN, buff=0.12)
-
-        # ── Arrows ────────────────────────────────────────────────────────────
+        # ── Arrows ─────────────────────────────────────────────────────────────
         def make_arrow(start, end, color=ARROW_COLOR):
-            return Arrow(
-                start, end, buff=0.15,
-                stroke_color=color, stroke_width=2.5,
-                tip_length=0.18, max_stroke_width_to_length_ratio=999,
-                color=color,
-            )
+            return Arrow(start, end, buff=0.15,
+                         stroke_color=color, stroke_width=2.5,
+                         tip_length=0.22,
+                         max_tip_length_to_length_ratio=1.0,
+                         color=color)
 
-        arr_obs_left = make_arrow(obs_left.get_top(), enc_left.get_bottom())
-        arr_obs_right = make_arrow(obs_right.get_top(), enc_right.get_bottom())
+        # Force vertical alignment using encoder x-center
+        lx = enc_left.get_center()[0]
+        rx = enc_right.get_center()[0]
+        arr_frame_left  = make_arrow(
+            np.array([lx, frame_left.get_top()[1],  0]),
+            np.array([lx, enc_left.get_bottom()[1], 0]),
+        )
+        arr_frame_right = make_arrow(
+            np.array([rx, frame_right.get_top()[1],  0]),
+            np.array([rx, enc_right.get_bottom()[1], 0]),
+        )
+        arr_enc_left_pred     = make_arrow(enc_left.get_top(),      pred_nn.get_left())
+        arr_pred_to_compare   = make_arrow(pred_nn.get_right(),     pred_vec.get_left())
+        arr_enc_right_compare = make_arrow(enc_right.get_top(),     goal_vec.get_bottom())
 
-        # Encoders → latent dots: straight up
-        arr_enc_left_z = make_arrow(enc_left.get_top(), z_ctx.get_bottom())
-        arr_enc_right_z = make_arrow(enc_right.get_top(), z_tgt.get_bottom())
+        # Latent variable: dot + label below predictor
+        latent_dot = Dot(radius=0.14, color=LATENT_COLOR, fill_opacity=1)
+        latent_dot.move_to(DOWN * 0.10)
+        latent_var = Tex(r"\textbf{Latent Variable}", color=LATENT_COLOR, font_size=20)
+        latent_var.next_to(latent_dot, DOWN, buff=0.15)
+        arr_latent_pred = make_arrow(latent_dot.get_top(), pred_nn.get_bottom())
 
-        arr_z_pred_input = make_arrow(z_ctx.get_right(), pred_nn.get_left())
-        arr_pred_z_out = make_arrow(pred_nn.get_right(), z_pred.get_left())
-
-        # ── Stage 1: Observations & Encoders ─────────────────────────────────
+        # ── Stage 1: frames appear ────────────────────────────────────────────
         self.play(
             LaggedStart(
-                AnimationGroup(FadeIn(obs_left), FadeIn(obs_label_left)),
-                AnimationGroup(FadeIn(obs_right), FadeIn(obs_label_right)),
+                AnimationGroup(FadeIn(frame_left),  FadeIn(video_label)),
+                AnimationGroup(FadeIn(frame_right), FadeIn(goal_label)),
                 lag_ratio=0.3,
             ),
-            run_time=0.8,
+            run_time=1.0,
         )
         self.wait(0.2)
 
+        # ── Stage 2: encoders ────────────────────────────────────────────────
         self.play(
             LaggedStart(
-                AnimationGroup(GrowArrow(arr_obs_left), Create(enc_left),
-                               FadeIn(enc_label_left)),
-                AnimationGroup(GrowArrow(arr_obs_right), Create(enc_right),
-                               FadeIn(enc_label_right)),
+                AnimationGroup(GrowArrow(arr_frame_left),
+                               Create(enc_left), FadeIn(enc_label_left)),
+                AnimationGroup(GrowArrow(arr_frame_right),
+                               Create(enc_right), FadeIn(enc_label_right)),
                 lag_ratio=0.3,
             ),
             run_time=1.2,
         )
         self.wait(0.3)
 
-        # ── Stage 2: Latent embeddings flow out ──────────────────────────────
+        # ── Stage 3: predictor ───────────────────────────────────────────────
         self.play(
-            LaggedStart(
-                AnimationGroup(GrowArrow(arr_enc_left_z),
-                               FadeIn(z_ctx), Write(z_ctx_label)),
-                AnimationGroup(GrowArrow(arr_enc_right_z),
-                               FadeIn(z_tgt), Write(z_tgt_label)),
-                lag_ratio=0.4,
-            ),
-            run_time=1.0,
-        )
-        self.wait(0.3)
-
-        # ── Stage 3: Predictor ───────────────────────────────────────────────
-        self.play(
-            GrowArrow(arr_z_pred_input),
+            GrowArrow(arr_enc_left_pred),
             Create(pred_nn),
             FadeIn(pred_label),
             run_time=1.0,
         )
         self.play(
-            GrowArrow(arr_pred_z_out),
-            FadeIn(z_pred),
-            Write(z_pred_label),
+            FadeIn(latent_dot),
+            FadeIn(latent_var),
+            GrowArrow(arr_latent_pred),
             run_time=0.8,
+        )
+        self.play(
+            LaggedStart(
+                GrowArrow(arr_pred_to_compare),
+                GrowArrow(arr_enc_right_compare),
+                lag_ratio=0.4,
+            ),
+            run_time=0.9,
         )
         self.wait(0.3)
 
-        # ── Stage 4: Loss ────────────────────────────────────────────────────
+        # ── Stage 4: vector comparison ───────────────────────────────────────
         self.play(
-            FadeIn(loss_box), FadeIn(loss_text),
-            run_time=0.8,
+            LaggedStart(
+                AnimationGroup(FadeIn(pred_vec), FadeIn(pred_vec_label)),
+                AnimationGroup(FadeIn(goal_vec), FadeIn(goal_vec_label)),
+                lag_ratio=0.5,
+            ),
+            run_time=0.9,
         )
         self.wait(0.4)
-
         self.wait(1.0)

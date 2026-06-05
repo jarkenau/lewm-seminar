@@ -8,7 +8,7 @@
 
 import marimo
 
-__generated_with = "0.23.8"
+__generated_with = "0.23.9"
 app = marimo.App(
     width="full",
     app_title="World Models Seminar",
@@ -872,7 +872,7 @@ def sigreg_mechanism_slide(mo):
 
 @app.cell
 def outline_recap_after_lewm():
-    # Recap shown at the 02 → 03 boundary. Sections 01 and 02 are grayed out
+    ''# Recap shown at the 02 → 03 boundary. Sections 01 and 02 are grayed out
     # (done); 03 is up next.
     def _():
         import marimo as mo

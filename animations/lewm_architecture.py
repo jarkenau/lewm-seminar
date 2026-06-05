@@ -102,13 +102,13 @@ class LeWMArchitecture(Scene):
 
             return VGroup(green, gray, eef).shift(center)
 
-        def build_encoder(x, progress, x_tex):
+        def build_encoder(x, progress, x_tex, tex_size=28):
             enc = make_vit_box().move_to([x, -0.6, 0])
             center = np.array([x, -2.55, 0])
             border = Square(side_length=IMG_H, color=BOX_COLOR, stroke_width=1.5,
                             fill_color=WHITE, fill_opacity=1).move_to(center)
             state = make_state(progress, center)
-            x_lab = MathTex(x_tex, color=TEXT_COLOR, font_size=28).next_to(border, DOWN, buff=0.18)
+            x_lab = MathTex(x_tex, color=TEXT_COLOR, font_size=tex_size).next_to(border, DOWN, buff=0.18)
             obs_lab = Tex(r"\textbf{\textsc{Observation}}", color=TEXT_COLOR, font_size=16)
             obs_lab.next_to(x_lab, DOWN, buff=0.07)
             a_img = make_arrow(border.get_top(), enc.get_bottom())
@@ -116,8 +116,8 @@ class LeWMArchitecture(Scene):
                         x_lab=x_lab, obs_lab=obs_lab, a_img=a_img)
 
         STEP = 0.1
-        encL = build_encoder(-EX, 0.0, r"x(t)")
-        encR = build_encoder(EX, STEP, r"x(t{+}1)")
+        encL = build_encoder(-EX, 0.0, r"x(t{-}2),\,x(t{-}1),\,x(t)", tex_size=16)
+        encR = build_encoder(EX, STEP, r"x(t{+}1)", tex_size=16)
 
         # x(t) is really a short stack of past frames — show faded ghost copies
         # offset behind the current observation to convey the temporal context.

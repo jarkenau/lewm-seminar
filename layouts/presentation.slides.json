@@ -4,17 +4,36 @@
     "cells": [
       {},
       {
-        "speakerNotes": "  - Pre-print released March 2026\n  - Co-authored by Yann LeCun \u2014 one of the founding figures of modern deep learning\n  - 2018 Turing Award winner (shared with Bengio & Hinton) for contributions to deep learning\n  - Vocal critic of LLMs: argues autoregressive next-token prediction is the wrong path to true intelligence\n  - In 2022: 60-page position paper outlining his vision for autonomous machine intelligence\n  - Central idea: the Joint-Embedding Predictive Architecture (JEPA) \u2014 predict in latent space, not pixel space"
+        "speakerNotes": "- Pre-print released March 2026\n- Co-authored by Yann LeCun, one of the founding figures of modern deep learning\n- 2018 Turing Award winner (shared with Bengio & Hinton) for contributions to deep learning\n- Critic of autoregressive LLMs and model-free RL as paths to true intelligence\n- In 2022: 60-page position paper outlining his vision for autonomous machine intelligence\n- Central idea: the Joint-Embedding Predictive Architecture (JEPA) \u2014 predict in latent space, not pixel space\n- LeWorldModel: First JEPA-based world model to train end-to-end from raw pixels using only a two-terms loss "
       },
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
-      {},
+      {
+        "speakerNotes": "- Agenda for the next 20 minutes\n  - First we'll cover the general JEPA paradigm\n  - We'll identify representation collapse as its central challenge, then see how existing methods address it\n  - We'll then walk through LeWorldModel's general architecture\n  - How it handles collapse with a single hyperparameter\n  - How this latent model is used for planning at inference time\n  - We'll look at one experiment that I think best illustrates what the model can and can't do\n  - We close with a short discussion: main results, limitations, and open questions"
+      },
+      {
+        "speakerNotes": "  - Model takes raw pixels as input -> No preprocessing, no pre-trained features\n  - Left encoder: sequence of video frames -> Temporal context observed so far\n  - Right encoder: goal state image -> The target state the agent should reach\n  - Both encoders map into the same latent space -> The \"joint embedding\" in the name; both trained end-to-end together\n  - Predictor takes the context embedding + a latent variable -> Predicts what the goal embedding should look like\n  - Latent variable captures uncertainty: Which of many plausible future states will actually occur\n  - Loss: minimize distance between predicted and actual goal embedding -> Purely in latent space\n  - No pixel decoder, no reconstruction \u2014 the model never needs to render what the goal looks like\n"
+      },
+      {
+        "speakerNotes": "- In the last slide, we saw that a JEPA trains by minimizing the distance between the predicted and the goal embedding\n- Questions: Can you think of a way to achieve (near)-perfect loss without the model ever learning anything meaningful about the environment?\n- No answer: Think about it from the optimizer's perspective. What's the path of least resistance when both the predicted and goal embeddings come from learned encoders\n- What if both encoders output the exact same vector for every single input? Regardless of what the video or goal state actually looks like? \n"
+      },
+      {
+        "speakerNotes": "- Answer: The encoders can output the same vector for every input -> Two ways this can happen\n- Complete collapse: Every input maps to the exact same point in the embedding space -> Predicted and goal embedding are always identical -> Zero loss, but the model has learned nothing\n- Dimensional collapse: Embeddings don't collapse into a single point but only vary along a few dimensions\n- Example: 512-dimensional embedding space where the model only uses 3 dimensions -> Result: The loss looks healthy, but the representation is almost useless for planning\n- Central questions for JEPA-based methods are: How to prevent the representation collapse? "
+      },
+      {
+        "speakerNotes": "- Name: 'Le' mirrors LeJEPA \u2014 same research group (LeCun, Balestriero). 'Le' = first syllable of LeCun, also French definite article.\n- SIGReg: Sketched Isotropic Gaussian Regularization \u2014 from LeJEPA, enforces N(0,I) target.\n- 48x: vs DINO-WM (ViT-H backbone). LeWM uses ViT-Tiny + compact 192-dim latent + CEM. No pixel decoder needed per planning step.\n- Scaling: specialist model for low-dim action control. Not a foundation model \u2014 extending to language/semantics is open work."
+      },
+      {
+        "type": "slide",
+        "speakerNotes": "- Self-supervised representation learning (I-JEPA, V-JEPA\u00a02): Predict masked latent patches \n  - Purely about learning good representations, no actions, no planning component at all\n  - These are the models closest to the original JEPA vision\n  - They're not world models in the RL sense, the agent can't use them to plan\n- Generative world models (DreamerV4, Genie): action-conditioned simulators that operate in pixel space\n  - The agent imagines future frames and plans through them\n  - These can plan, but they do it by hallucinating pixels -> Computationally expensive and capacity is spent on visual fidelity rather than decision-relevant structure\n- Latent action-conditioned world models (DINO-WM, PLDM): predict dynamics directly in latent space and plan by imagination there \n  - No pixel reconstruction at any point\n  - This is the smallest family, and the one LeWM belongs to"
+      },
+      {
+        "speakerNotes": "- V-JEPA 2: End-to-end, but not built for control\n- DreamerV4: End-to-end and does control, but requires reward and operates in pixel space\n- DINO-WM: reward-free latent control, but the frozen encoder means it's not end-to-end \n  - It can only be as good as DINOv2\n- PLDM: the closest predecessor: End-to-end, reward-free, latent control, \n  - Explicit regularization, but 6 hyperparameters -> Training instabilities\n- LeWM is essentially PLDM with a better regularizer, same target task, same end-to-end training, but SIGReg replaces VICReg's 6 hyperparameters with 1\n"
+      },
+      {
+        "speakerNotes": ""
+      },
+      {
+        "speakerNotes": "- Generative reconstruction (DreamerV4): predict pixels instead of latent vectors \n  - Collapse is impossible because the target is fixed in pixel space\n  - Limitation: for planning and control, capacity spent on pixel-level detail (textures, lighting, background) doesn't contribute to better decisions \n  - A latent model can be more efficient for that specific use case\n- EMA + stop-gradient (V-JEPA\u00a02): two encoders \n  - An online encoder trained by gradient descent, and a target encoder updated only as a slow-moving average of the online encoder's weights\n  - Stop-gradient means no gradients flow through the target encoder\n  - The asymmetry is what prevents collapse\n  - Limitation: there's no loss term that explicitly prevents collapse \u2014> It's the asymmetry that happens to work empirically -> No theoretical guarantee.\n- Frozen pretrained encoder (DINO-WM): fix the encoder entirely so it physically cannot collapse\n  - Limitation: bounded by what the pretrained model learned -> The encoder never adapts to the task, and you lose end-to-end training\n - Explicit regularization (VICReg / PLDM): directly penalizes variance and covariance of embeddings -> Provably prevents collapse\n   - Limitation: up to 6 loss hyperparameters to tune, and known training instabilities in practice"
+      },
       {
         "speakerNotes": "- Explain action conditioning with an actual task\n- T-Task: Goal to "
       },
@@ -23,6 +42,9 @@
       {
         "speakerNotes": "- Activations shifts as weights update -> internal covariate shift\n- Normalization layers stabilize by rescaling activations to a constant range\n- In LayerNorm, only the scale and shift are learned parameters -> Same for every input that passes through\n- Adaptive layer normalization keeps the math, but generates the scale and shift dynamically from a conditioning signal\n- Conditioning vector a is fed through a small MLP that outputs scale and shift\n- Just concatenating -> tiny action vector vs large state embedding. \n- Adding -> We want to have a multiplicative effect -> Not just scale it\n"
       },
+      {},
+      {},
+      {},
       {},
       {},
       {},

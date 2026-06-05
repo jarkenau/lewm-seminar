@@ -461,16 +461,16 @@ def sota_anticollapse_slide():
             sota_table(
                 ["Strategy", "Mechanism", "Limitation"],
                 [
-                    ["Generative reconstruction",
+                    [f"Generative reconstruction (DreamerV4 [{cite('hafner_dreamer4_2025')}])",
                      "Pixel target is fixed — collapse impossible by construction",
                      "Wastes capacity modelling irrelevant pixel detail"],
-                    ["EMA + stop-gradient",
+                    [f"EMA + stop-gradient (V-JEPA 2 [{cite('assran_v-jepa_2025')}])",
                      "Asymmetric self-distillation from a moving-average teacher",
                      "No well-defined objective — purely heuristic"],
-                    ["Frozen pretrained encoder",
+                    [f"Frozen pretrained encoder (DINO-WM [{cite('zhou_dino-wm_2024')}])",
                      "Encoder is fixed, so it cannot collapse",
                      "Bounded by pretraining knowledge; not end-to-end"],
-                    [f"Explicit regularization (VICReg [{cite('bardes_vicreg_2022')}])",
+                    [f"Explicit regularization (VICReg [{cite('bardes_vicreg_2022')}], PLDM [{cite('sobal_pldm_2025')}])",
                      "Variance / covariance penalty terms",
                      "Training instabilities; up to 6 loss hyperparameters"],
                 ],
@@ -495,14 +495,10 @@ def sota_target_task_slide():
                 [
                     ["Self-supervised representation learning",
                      "Predict masked latent patches — no actions, no planning",
-                     f"I-JEPA [{cite('assran_i-jepa_2023')}], V-JEPA [{cite('bardes_v-jepa_2024')}] / "
-                     f"V-JEPA 2 [{cite('assran_v-jepa_2025')}], Echo-JEPA [{cite('munim_echojepa_2026')}] / "
-                     f"Brain-JEPA [{cite('dong_brain-jepa_2024')}]"],
+                     f"I-JEPA [{cite('assran_i-jepa_2023')}], V-JEPA 2 [{cite('assran_v-jepa_2025')}]"],
                     ["Generative world models",
                      "Action-conditioned pixel-space simulators, often reward-based, for RL &amp; games",
-                     f"IRIS [{cite('micheli_iris_2023')}], DIAMOND [{cite('alonso_diamond_2024')}], "
-                     f"OASIS [{cite('decart_oasis_2024')}], DreamerV4 [{cite('hafner_dreamer4_2025')}], "
-                     f"Genie [{cite('bruce_genie_2024')}]"],
+                     f"DreamerV4 [{cite('hafner_dreamer4_2025')}], Genie [{cite('bruce_genie_2024')}]"],
                     ["Latent action-conditioned world models",
                      "Predict dynamics in latent space, plan by imagination",
                      f"DINO-WM [{cite('zhou_dino-wm_2024')}], PLDM [{cite('sobal_pldm_2025')}]"],

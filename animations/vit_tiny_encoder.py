@@ -240,15 +240,16 @@ class ViTTinyEncoder(Scene):
         e_group = VGroup(e_rect, e_lbl)
         e_group.move_to(flat_centers[0])
 
-        # Formula + D=192 stacked on the right
+        # Formula + E dims + D=192 stacked on the right
         formula = MathTex(
             r"z_i", r"=", r"E", r"\cdot", r"\mathrm{vec}(p_i)",
             font_size=22, color=TEXT_COLOR,
         )
         formula[0].set_color(EMBED_COLOR)
         formula[2].set_color(EMBED_COLOR)
+        e_dim = MathTex(r"E \in \mathbb{R}^{P^2 \cdot C \times D}", font_size=15, color=EMBED_COLOR)
         d_label = MathTex(r"D = 192", font_size=20, color=EMBED_COLOR)
-        right_panel = VGroup(formula, d_label).arrange(DOWN, buff=0.22, aligned_edge=LEFT)
+        right_panel = VGroup(formula, e_dim, d_label).arrange(DOWN, buff=0.18, aligned_edge=LEFT)
         right_panel.next_to(embed_boxes, RIGHT, buff=0.45)
 
         # Pre-build arrows so they can grow patch-by-patch during the E sweep
@@ -277,8 +278,8 @@ class ViTTinyEncoder(Scene):
             )
 
         self.play(FadeOut(e_group), run_time=0.35)
-        self.play(Write(d_label), run_time=0.35)
-        self.wait(0.3)
+        self.play(Write(e_dim), Write(d_label), run_time=0.35)
+        self.wait(1.5)
 
         # ── Stage 5: [CLS] token ──────────────────────────────────────────────
         cls_x   = embed_boxes[0].get_center()[0] - (PATCH_SIZE + GAP)
@@ -312,7 +313,7 @@ class ViTTinyEncoder(Scene):
             for c in pe_centers
         ])
         pe_labels = VGroup(*[
-            MathTex(r"e_{" + str(i) + r"}", font_size=13, color=PE_COLOR).move_to(pe_centers[i])
+            MathTex(r"E_{\mathrm{pos}}[" + str(i) + r"]", font_size=10, color=PE_COLOR).move_to(pe_centers[i])
             for i in range(N_tok)
         ])
 
@@ -329,7 +330,7 @@ class ViTTinyEncoder(Scene):
 
         # Reuse the Stage-4 right-panel position for the PE formula
         pe_formula = MathTex(
-            r"\mathbf{z}_i \leftarrow \mathbf{z}_i + e_i^{\mathrm{pos}}",
+            r"z_i \leftarrow z_i + E_{\mathrm{pos}}[i]",
             font_size=18, color=PE_COLOR,
         )
         pe_dim = MathTex(
@@ -376,7 +377,15 @@ class ViTTinyEncoder(Scene):
             FadeOut(pe_right_panel),
             run_time=0.4,
         )
-        self.wait(0.3)
+
+        # ── Eq. 1: full assembled input sequence ──────────────────────────────
+        eq1 = MathTex(
+            r"z_0 = [x_\mathrm{class};\ x_p^1 E;\ \cdots;\ x_p^N E] + E_\mathrm{pos}",
+            font_size=13, color=PE_COLOR,
+        )
+        eq1.move_to(pe_right_panel.get_center())
+        self.play(Write(eq1), run_time=0.7)
+        self.wait(1.5)
 
         # ── Stage 7: Transformer Encoder ──────────────────────────────────────
         # Width: from left edge of CLS to right edge of last patch token
@@ -410,10 +419,23 @@ class ViTTinyEncoder(Scene):
             for tok in all_token_boxes
         ])
 
-        self.play(LaggedStart(*[GrowArrow(a) for a in up_arrows], lag_ratio=0.04), run_time=0.8)
+        self.play(FadeOut(eq1), LaggedStart(*[GrowArrow(a) for a in up_arrows], lag_ratio=0.04), run_time=0.8)
         self.play(FadeIn(transformer_box), Write(transformer_label), run_time=0.9)
         self.play(FadeIn(transformer_sublabel), run_time=0.5)
-        self.wait(0.3)
+
+        transformer_eq2 = MathTex(
+            r"z'_\ell = \mathrm{MSA}(\mathrm{LN}(z_{\ell-1})) + z_{\ell-1}",
+            font_size=14, color=TRANSFORMER_COLOR,
+        )
+        transformer_eq3 = MathTex(
+            r"z_\ell = \mathrm{MLP}(\mathrm{LN}(z'_\ell)) + z'_\ell",
+            font_size=14, color=TRANSFORMER_COLOR,
+        )
+        transformer_eqs = VGroup(transformer_eq2, transformer_eq3).arrange(DOWN, buff=0.18, aligned_edge=LEFT)
+        transformer_eqs.next_to(transformer_box, RIGHT, buff=0.35)
+
+        self.play(Write(transformer_eqs), run_time=0.8)
+        self.wait(1.5)
 
         # ── Stage 8: Extract [CLS] token ──────────────────────────────────────
         top_c = transformer_box.get_top()
@@ -429,13 +451,15 @@ class ViTTinyEncoder(Scene):
             stroke_color=CLS_COLOR, stroke_width=2.5,
         ).move_to(top_c + UP * (0.30 + 0.05 + EMB_H / 2))
         cls_out_text = Text("[CLS]", font_size=13, color=CLS_COLOR, weight=BOLD, font="DejaVu Sans").move_to(cls_out_box)
-        cls_extract_label = Text("extract [CLS] token", font_size=13, color=CLS_COLOR)
+        cls_extract_label = Text("extract [CLS] token", font_size=13, color=CLS_COLOR, font="DejaVu Sans")
         cls_extract_label.next_to(cls_out_box, RIGHT, buff=0.2)
+        eq4 = MathTex(r"y = \mathrm{LN}(z_L^0)", font_size=13, color=CLS_COLOR)
+        eq4.next_to(cls_extract_label, DOWN, buff=0.15, aligned_edge=LEFT)
 
-        self.play(GrowArrow(cls_extract_arrow), run_time=0.4)
+        self.play(FadeOut(transformer_eqs), GrowArrow(cls_extract_arrow), run_time=0.4)
         self.play(FadeIn(cls_out_box), Write(cls_out_text), run_time=0.6)
-        self.play(FadeIn(cls_extract_label), run_time=0.4)
-        self.wait(0.3)
+        self.play(FadeIn(cls_extract_label), Write(eq4), run_time=0.4)
+        self.wait(1.5)
 
         # ── Stage 9: 1-layer MLP + BatchNorm → z_t ────────────────────────────
         MLP_COLOR = "#C0392B"

@@ -69,15 +69,27 @@ the Marimo slides.
 │   └── *.mp4
 └── papers/                    # Key reference PDFs
     ├── 2603.19312v2.pdf        # LeWorldModel (main paper)
-    ├── 2506.09985v1.pdf        # V-JEPA 2: Self-Supervised Video Models Enable Understanding, Prediction and Planning
-    ├── 10356_a_path_towards_autonomous_mach.pdf  # LeCun 2022
-    ├── 1803.10122v4.pdf        # Ha & Schmidhuber World Models
-    ├── 2511.08544v3.pdf        # LeJEPA
-    ├── 2411.04983v2.pdf        # DINO-WM: World Models on Pre-trained Visual Features enable Zero-shot Planning
-    ├── 2508.10104v1.pdf        # DINOv3
-    ├── 2010.11929v2.pdf        # ViT: An Image is Worth 16x16 Words (Dosovitskiy et al.)
-    ├── 2604.03208v1.pdf        # Hierarchical Planning with Latent World Models
-    ├── 2212.09748v2.pdf        # DiT: Scalable Diffusion Models with Transformers (Peebles & Xie) — AdaLN origin
+    ├── 2511.08544v3.pdf        # LeJEPA — SIGReg origin (Balestriero & LeCun, 2025)
+    ├── 10356_a_path_towards_autonomous_mach.pdf  # LeCun 2022 — A Path Towards Autonomous Machine Intelligence
+    ├── 1803.10122v4.pdf        # Ha & Schmidhuber — World Models (2018)
+    ├── 2301.08243.pdf          # I-JEPA — Self-Supervised Learning from Images with a Joint-Embedding Predictive Architecture (Assran et al., CVPR 2023)
+    ├── 2404.08471.pdf          # V-JEPA — Revisiting Feature Prediction for Learning Visual Representations from Video (Bardes et al., 2024)
+    ├── 2506.09985v1.pdf        # V-JEPA 2 — Self-Supervised Video Models Enable Understanding, Prediction and Planning (Assran et al., 2025)
+    ├── 2602.02603.pdf          # Echo-JEPA — A Latent Predictive Foundation Model for Echocardiography (Munim et al., 2026)
+    ├── 2409.19407.pdf          # Brain-JEPA — Brain Dynamics Foundation Model with Gradient Positioning and Spatiotemporal Masking (Dong et al., NeurIPS 2024)
+    ├── 2209.00588.pdf          # IRIS — Transformers are Sample-Efficient World Models (Micheli et al., ICLR 2023)
+    ├── 2405.12399.pdf          # DIAMOND — Diffusion for World Modeling: Visual Details Matter in Atari (Alonso et al., NeurIPS 2024)
+    ├── 2509.24527v1.pdf        # DreamerV4 — Training Agents Inside of Scalable World Models (Hafner et al., 2025)
+    ├── 2402.15391.pdf          # Genie — Generative Interactive Environments (Bruce et al., ICML 2024)
+    ├── 2411.04983v2.pdf        # DINO-WM — World Models on Pre-trained Visual Features enable Zero-shot Planning (Zhou et al., 2024)
+    ├── 2502.14819.pdf          # PLDM — Learning from Reward-Free Offline Data: Planning with Latent Dynamics Models (Sobal et al., 2025)
+    ├── 2105.04906.pdf          # VICReg — Variance-Invariance-Covariance Regularization for SSL (Bardes et al., ICLR 2022)
+    ├── 2010.11929v2.pdf        # ViT — An Image is Worth 16x16 Words (Dosovitskiy et al., 2021)
+    ├── 1607.06450.pdf          # Layer Normalization (Ba et al., 2016)
+    ├── 2212.09748v2.pdf        # DiT — Scalable Diffusion Models with Transformers (Peebles & Xie) — AdaLN origin
+    ├── 2508.10104v1.pdf        # (not cited in slides — extra reference)
+    ├── 2604.03208v1.pdf        # (not cited in slides — extra reference)
+    ├── 2605.26379v1.pdf        # (not cited in slides — extra reference)
     └── SWM_Introduction.pdf    # Example seminar format
 ```
 

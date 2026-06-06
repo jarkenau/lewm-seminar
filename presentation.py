@@ -61,8 +61,10 @@ with app.setup:
         import marimo as mo
         c = SECTION[num]
         return mo.Html(
-            f'<div style="position:fixed;top:1rem;left:50%;transform:translateX(-50%);z-index:100;">'
-            f'<span style="font-size:0.7rem;font-weight:700;color:{c["text"]};letter-spacing:0.1em;text-transform:uppercase;">'
+            f'<div style="position:fixed;top:0.6rem;right:1.75rem;z-index:100;">'
+            f'<span style="font-size:0.6rem;font-weight:700;color:{c["text"]};letter-spacing:0.1em;'
+            f'text-transform:uppercase;background:{c["bg"]};padding:0.2rem 0.5rem;'
+            f'border-radius:0.25rem;">'
             f'{c["label"]}</span></div>'
         )
 
@@ -258,6 +260,13 @@ def title_slide():
     import marimo as mo
     mo.vstack(
         [
+            mo.Html(
+                "<style>"
+                ":root { font-size: 12px; }"
+                "mjx-container { font-size: 85% !important; }"
+                ".marimo-markdown p, .marimo-markdown li { font-size: 0.9rem; }"
+                "</style>"
+            ),
             mo.md("World Models Seminar · Technical University of Munich "),
             mo.md("*Chair of Computer Aided Medical Procedures*"),
             mo.md("&nbsp;"),
@@ -670,29 +679,33 @@ def adaln_formulas_slide(mo):
 
     _adaptive_ln = mo.vstack([
         mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">AdaLN-Zero &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Peebles & Xie [{cite("peebles_dit_2022")}]</span></h3>'),
-        mo.md(r"$$y = \underbrace{(1+\Sigma(c))}_{\text{scale}} \cdot \frac{x-\mu}{\sigma} + \underbrace{\Delta(c)}_{\text{shift}}, \qquad x \leftarrow x + \underbrace{G(c)}_{\text{gate}} \cdot \text{sublayer}(y)$$"),
-        mo.md(r"$$[\Delta,\;\Sigma,\;G]_{\text{attn}},\;[\Delta,\;\Sigma,\;G]_{\text{mlp}} = \text{SiLU}(c)\,W + b, \quad W\!=\!0,\;b\!=\!0$$"),
+        mo.md(r"$$y = \underbrace{(1+\Sigma(c))}_{\text{scale}} \cdot \frac{x-\mu}{\sigma} + \underbrace{\Delta(c)}_{\text{shift}}, \quad x \leftarrow x + \underbrace{G(c)}_{\text{gate}} \cdot \text{sublayer}(y)$$"),
+        mo.md(r"$$[\Delta,\Sigma,G]_{\text{attn}},[\Delta,\Sigma,G]_{\text{mlp}} = \text{SiLU}(c)\,W + b$$"),
         mo.md(
-            "- $\\Delta, \\Sigma, G$ **generated from conditioning signal** $c$ (the action)\n"
-            "- **6 outputs** per block: shift / scale / gate for both attention & MLP\n"
-            "- **Zero-init**: $W=0, b=0$ → block is identity at the start of training"
+            "- $\\Delta, \\Sigma, G$ **from conditioning signal** $c$ (the action)\n"
+            "- **6 outputs**: shift / scale / gate for attn & MLP\n"
+            "- **Zero-init**: $W=0, b=0$ → identity at init"
         ),
     ], align="start")
 
-    if _sys.platform != "emscripten":
-        _img_src = (_pathlib.Path(__file__).parent / "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png").read_bytes()
-    else:
-        _img_src = "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png"
+    _silu_img_url = "https://pytorch.org/docs/2.12/_images/SiLU.png"
+    _silu_panel = mo.Html(
+        f'<div style="margin-left:auto;width:fit-content;text-align:center;transform:scale(0.65);transform-origin:top right;">'
+        f'<img src="{_silu_img_url}" style="max-width:100%;height:auto;display:block;" />'
+        f'<p style="margin:0.3rem 0 0.1rem 0;font-size:1.1rem;font-weight:600;color:#334155;">SiLU(x) = x · σ(x)</p>'
+        f'<a href="https://docs.pytorch.org/docs/2.12/generated/torch.nn.SiLU.html" '
+        f'style="font-size:1rem;color:#3B82F6;">torch.nn.SiLU</a>'
+        f'</div>'
+    )
 
     mo.vstack([
         section_strip(2),
         page_number(9),
         _heading,
         mo.md("*HOW THE ACTION EMBEDDING MODULATES EVERY PREDICTOR LAYER*"),
-        mo.md("&nbsp;"),
         mo.hstack([
             mo.vstack([_standard_ln, mo.md("&nbsp;"), _adaptive_ln], align="start"),
-            mo.image(_img_src),
+            _silu_panel,
         ], widths=[1, 1], gap="2rem", align="start"),
     ])
     return
@@ -700,6 +713,9 @@ def adaln_formulas_slide(mo):
 
 @app.cell
 def adaln_why_lewm_slide(mo):
+    import sys as _sys
+    import pathlib as _pathlib
+
     _ACTION = "#8E6FBF"
 
     _heading = mo.Html(
@@ -711,10 +727,7 @@ def adaln_why_lewm_slide(mo):
         f'</div>'
     )
 
-    mo.vstack([
-        section_strip(2),
-        page_number(10),
-        _heading,
+    _text = mo.vstack([
         mo.md("*THREE DESIGN CHOICES AND THEIR CONSEQUENCES*"),
         mo.md("&nbsp;"),
         mo.md(
@@ -729,6 +742,22 @@ def adaln_why_lewm_slide(mo):
             "- Conditioning grows in progressively as representations mature → "
             "**stable end-to-end training from pixels**"
         ),
+    ], align="start")
+
+    if _sys.platform != "emscripten":
+        _img_src = (_pathlib.Path(__file__).parent / "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png").read_bytes()
+    else:
+        _img_src = "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png"
+
+    mo.vstack([
+        section_strip(2),
+        page_number(10),
+        _heading,
+        mo.md("&nbsp;"),
+        mo.hstack([
+            _text,
+            mo.image(_img_src),
+        ], widths=[1, 1], gap="2rem", align="start"),
     ], align="start")
     return
 

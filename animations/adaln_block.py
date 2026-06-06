@@ -31,13 +31,13 @@ class AdaLNTransformerBlock(Scene):
     BW = 2.7      # block width
     BH = 0.60     # standard block height
 
-    YP  = -3.60   # Embedded Patches (outside block, moved down)
-    YN1 = -2.30   # AdaLN 1
-    YM  = -1.15   # Multi-Head Attention
-    YA1 = -0.15   # add circle 1
-    YN2 =  0.85   # AdaLN 2
-    YL  =  1.90   # MLP
-    YA2 =  3.10   # add circle 2
+    YP  = -4.00   # Embedded Patches (outside block, moved down)
+    YN1 = -2.80   # AdaLN 1
+    YM  = -1.56   # Multi-Head Attention
+    YA1 = -0.34   # add circle 1
+    YN2 =  0.74   # AdaLN 2
+    YL  =  1.84   # MLP
+    YA2 =  2.92   # add circle 2
 
     # ── Conditioning column ────────────────────────────────────────────────
     # Bus line: single vertical at x=BX; horizontal branches for each target.
@@ -51,7 +51,9 @@ class AdaLNTransformerBlock(Scene):
         r = RoundedRectangle(width=w, height=h, corner_radius=0.18,
                              fill_color=fill, fill_opacity=0.95,
                              stroke_color=stroke, stroke_width=2.5)
-        t = Text(label, font_size=fsize, color=self.TEXT_C).move_to(r)
+        lines = label.split("\n")
+        t = VGroup(*[Text(l, font_size=fsize, color=self.TEXT_C) for l in lines]
+                   ).arrange(DOWN, aligned_edge=ORIGIN, buff=0.06).move_to(r)
         return VGroup(r, t)
 
     def _add_circle(self, pos):
@@ -105,7 +107,7 @@ class AdaLNTransformerBlock(Scene):
             stroke_color=self.BG_S, stroke_width=2.5,
         ).move_to([TX, blk_cy, 0])
         lx = Text("L ×", font_size=19, color="#6B7280").move_to(
-            bg.get_corner(UL) + [-0.30, -0.18, 0])
+            bg.get_corner(UL) + [0.35, -0.22, 0])
 
         # ── Transformer elements ───────────────────────────────────────────
         patches = self._box("Embedded\nPatches", self.PAT_F, self.PAT_S,
@@ -135,7 +137,7 @@ class AdaLNTransformerBlock(Scene):
         va_a2n  = self._va(add1,   adaln2)
         va_n2l  = self._va(adaln2, mlp)
         va_l2a  = self._va(mlp,    add2)
-        out_arr = Arrow(add2.get_top(), [TX, blk_top + 0.45, 0],
+        out_arr = Arrow(add2.get_top(), [TX, blk_top + 0.25, 0],
                         buff=0.0, stroke_width=2.5, color=self.TEXT_C,
                         tip_length=self.TIP, max_tip_length_to_length_ratio=self.RATIO)
 
@@ -150,28 +152,16 @@ class AdaLNTransformerBlock(Scene):
         mod_box = self._box("Mod. MLP\n(SiLU + Linear)", self.ACT_F, self.ACT_S,
                             w=2.3, h=0.82, fsize=19).move_to([AX, 0.05, 0])
 
-        # Formula above the Mod. MLP box — single row + zero-init note
-        formula = VGroup(
-            MathTex(
-                r"[\Delta,\Sigma,G]_{\rm attn},\,[\Delta,\Sigma,G]_{\rm mlp}"
-                r"= \mathrm{SiLU}(c)\,W+b",
-                font_size=16, color=self.TEXT_C,
-            ),
-            MathTex(r"W = b = 0 \text{ at init}",
-                    font_size=15, color=GRAY),
-        ).arrange(DOWN, aligned_edge=LEFT, buff=0.12
-                  ).next_to(mod_box, UP, buff=0.25)
-
         # Embedder box
         act_box = self._box("Embedder\n(Conv1d + SiLU)", self.ACT_F, self.ACT_S,
                             w=2.3, h=0.85, fsize=19).move_to([AX, -1.55, 0])
 
         # Arrow Embedder → Mod. MLP, labelled "c"
         arr_a2m = Arrow(act_box.get_top(), mod_box.get_bottom(),
-                        buff=0.09, stroke_width=2.5, color=self.MOD_C,
+                        buff=0.09, stroke_width=2.5, color=self.TEXT_C,
                         tip_length=self.TIP, max_tip_length_to_length_ratio=self.RATIO)
-        c_label = MathTex(r"c", font_size=22, color=self.MOD_C).move_to(
-            arr_a2m.get_center() + np.array([0.32, 0, 0]))
+        c_label = MathTex(r"c", font_size=22, color=self.TEXT_C).move_to(
+            arr_a2m.get_center() + np.array([0.28, 0, 0]))
 
         # a_t label + arrow into Embedder
         at_label = MathTex(r"a_t", font_size=28, color=self.TEXT_C
@@ -227,18 +217,19 @@ class AdaLNTransformerBlock(Scene):
             offset = -0.30 if below else 0.30
             return MathTex(tex, font_size=21, color=color).move_to([x_mid, y + offset, 0])
 
-        mid_ada = (BX + adaln1_lx) / 2
-        mid_add = (BX + add1_lx)   / 2
+        gray_lx = TX - (self.BW + 1.05) / 2   # left edge of gray background box
+        mid_ada = (BX + gray_lx) / 2
+        mid_add = (BX + gray_lx) / 2
 
-        lbl_ds1 = _lbl(r"\Delta_1,\Sigma_1", self.MOD_C,  self.YN1, mid_ada)
-        lbl_g1  = _lbl(r"G_1",               self.GATE_C, self.YA1, mid_add)
-        lbl_ds2 = _lbl(r"\Delta_2,\Sigma_2", self.MOD_C,  self.YN2, mid_ada)
-        lbl_g2  = _lbl(r"G_2",               self.GATE_C, self.YA2, mid_add, below=True)
+        lbl_ds1 = _lbl(r"\Delta_{\rm attn},\Sigma_{\rm attn}", self.MOD_C,  self.YN1, mid_ada)
+        lbl_g1  = _lbl(r"G_{\rm attn}",                       self.GATE_C, self.YA1, mid_add)
+        lbl_ds2 = _lbl(r"\Delta_{\rm mlp},\Sigma_{\rm mlp}",  self.MOD_C,  self.YN2, mid_ada)
+        lbl_g2  = _lbl(r"G_{\rm mlp}",                        self.GATE_C, self.YA2, mid_add, below=True)
 
         # ── Title ──────────────────────────────────────────────────────────
         title = Text("AdaLN-Zero Transformer Block",
                      font_size=26, weight=BOLD, color=self.TEXT_C
-                     ).to_edge(UP, buff=0.3)
+                     ).move_to([TX, blk_top + 0.50, 0])
 
         # ── Legend ─────────────────────────────────────────────────────────
         def _leg(line_col, txt):
@@ -262,7 +253,7 @@ class AdaLNTransformerBlock(Scene):
             va_a2n, adaln2, va_n2l, mlp, va_l2a,
             add2, skip2, out_arr,
             # conditioning
-            formula, mod_box, arr_a2m, c_label, act_box, at_arrow, at_label,
+            mod_box, arr_a2m, c_label, act_box, at_arrow, at_label,
             arr_m2bus, bus_line, junction,
             br_ds1, br_g1, br_ds2, br_g2,
             dots,

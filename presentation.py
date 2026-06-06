@@ -728,19 +728,15 @@ def adaln_why_lewm_slide(mo):
     )
 
     _text = mo.vstack([
-        mo.md("*THREE DESIGN CHOICES AND THEIR CONSEQUENCES*"),
-        mo.md("&nbsp;"),
         mo.md(
             "**01 Why scale + shift — not concatenation or addition?**\n\n"
-            "- *Concatenation*: action token is tiny compared to patch embeddings — signal drowned out\n"
-            "- *Addition*: shifts features uniformly but no multiplicative gating over content\n"
-            "- *AdaLN*: rescales every token via $(1{+}\\Sigma(c))$ then shifts — "
-            "action has **full, per-feature influence** over all patches\n\n"
+            "- *Concat / addition*: action signal is drowned out or shifts features uniformly\n"
+            "- *AdaLN*: action conditions both the **scale and shift of every feature**\n\n"
             "**02 Why zero-init?**\n\n"
-            "- At init: $W{=}0 \\Rightarrow G{=}0$ → predictor is a **pure residual stream (identity)**\n"
-            "- Encoder has learned nothing useful yet — random conditioning would destabilise gradients\n"
-            "- Conditioning grows in progressively as representations mature → "
-            "**stable end-to-end training from pixels**"
+            "- $G{=}0$ gates out the sublayer's contribution — **pure skip connection**:  \n"
+            "  $x \\leftarrow x + 0{\\cdot}\\text{sublayer}(y) = x$\n"
+            "- **Two-phase**: SIGReg first anchors the latent geometry; "
+            "gates then open progressively as representations mature → stable end-to-end training"
         ),
     ], align="start")
 

@@ -771,53 +771,30 @@ def sigreg_optimal_distribution_slide(mo):
         f'</div>'
     )
 
-    _left = mo.vstack([
-        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">Two lemmas against anisotropy</h3>'),
-        mo.md(
-            "**Lemma 1 — Anisotropy amplifies bias**\n\n"
-            "Whenever $\\lambda_K > \\lambda_1$ (covariance eigenvalues differ), there always exists "
-            "a downstream task for which anisotropic embeddings produce **higher estimation bias**.\n\n"
-            "**Lemma 2 — Anisotropy amplifies variance**\n\n"
-            "The OLS estimation variance $\\text{tr}(\\text{Var}(\\hat{\\beta}))$ is minimised if and "
-            "only if $\\text{Cov}(Z) \\propto I$ — all eigenvalues must be equal."
-        ),
-        mo.md("&nbsp;"),
-        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">Consequence for collapse</h3>'),
-        mo.md(
-            "- **Complete collapse** → $\\text{Var}(Z) = 0$ — violates isotropy\n"
-            "- **Dimensional collapse** → $\\text{rank}(\\text{Cov}(Z)) < d$ — violates isotropy\n"
-            "- Both failure modes are ruled out by enforcing $\\mathcal{N}(0, I)$"
-        ),
-    ], align="start")
-
-    _right = mo.vstack([
-        mo.Html(
-            f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Theorem 1'
-            f'&nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">'
-            f'LeJEPA [{cite("balestriero_lejepa_2025")}]</span></h3>'
-        ),
-        mo.md(
-            "Among all distributions with fixed total variance, the **isotropic Gaussian "
-            "$\\mathcal{N}(0, I)$ uniquely minimises the integrated squared bias** across "
-            "downstream probing tasks — for both linear probes (OLS) and nonlinear probes ($k$-NN, kernel)."
-        ),
-        mo.md("&nbsp;"),
-        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The target distribution</h3>'),
-        mo.md(r"$$z_t \;\sim\; \mathcal{N}(0,\; I_d)$$"),
-        mo.md(
-            "This turns anti-collapse from a **heuristic constraint** into a "
-            "**theoretically grounded distributional objective**: enforce $\\mathcal{N}(0, I)$ "
-            "and collapse is provably impossible."
-        ),
-    ], align="start")
-
     mo.vstack([
         section_strip(2),
         page_number(11),
         _heading,
         mo.md("*THE THEORETICALLY OPTIMAL TARGET FOR ANY DOWNSTREAM TASK*"),
         mo.md("&nbsp;"),
-        mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
+        mo.Html('<h3 style="margin:0 0 0.5rem 0;color:#334155;">Two lemmas against anisotropy</h3>'),
+        mo.md(
+            "- **Lemma 1** — anisotropic covariance ($\\lambda_K > \\lambda_1$) "
+            "always hurts bias on some downstream task\n"
+            "- **Lemma 2** — OLS estimation variance is minimised **if and only if** "
+            "$\\text{Cov}(Z) \\propto I$"
+        ),
+        mo.md("&nbsp;"),
+        mo.Html(
+            f'<h3 style="margin:0 0 0.5rem 0;color:#334155;">Theorem 1'
+            f'&nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">'
+            f'LeJEPA [{cite("balestriero_lejepa_2025")}]</span></h3>'
+        ),
+        mo.md(
+            "Among all distributions with fixed total variance, "
+            "$\\mathcal{N}(0, I)$ **uniquely minimises** integrated squared bias "
+            "across all downstream tasks (linear & nonlinear)."
+        ),
     ], align="start")
     return
 
@@ -847,6 +824,28 @@ def sigreg_mechanism_slide(mo):
         f'</div>'
     )
 
+    mo.vstack([
+        section_strip(2),
+        page_number(12),
+        _heading,
+        _video,
+    ], align="start")
+    return
+
+
+@app.cell
+def sigreg_algorithm_slide(mo):
+    _SIG = "#10B981"
+
+    _heading = mo.Html(
+        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
+        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
+        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
+        f'<h2 style="margin:0;line-height:1.2;">SIGReg: The Sketching Algorithm</h2>'
+        f'</div>'
+    )
+
     _left = mo.vstack([
         mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The sketching algorithm</h3>'),
         mo.md(
@@ -862,34 +861,26 @@ def sigreg_mechanism_slide(mo):
     ], align="start")
 
     _right = mo.vstack([
-        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The normality test: Epps–Pulley</h3>'),
+        mo.Html(
+            '<p style="margin:0 0 0.3rem 0;font-size:0.72rem;font-weight:700;'
+            'color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">'
+            'Normality test — Epps–Pulley</p>'
+        ),
         mo.md(r"$$T = N\!\int_{-\infty}^{\infty} \!\left|\hat{\varphi}_X(t) - e^{-t^2/2}\right|^2 e^{-t^2/2}\,\mathrm{d}t$$"),
         mo.md(
-            "Compares the **empirical characteristic function** $\\hat{\\varphi}_X(t)$ against "
-            "the Gaussian CF $e^{-t^2/2}$. Bounded gradients: "
-            "$|\\partial T/\\partial z_i| \\leq 4\\sigma^2/N$ — stable by construction.\n\n"
-            "Unlike moment tests (exploding gradients) or CDF tests (require sorting), "
-            "EP is $\\mathcal{O}(N)$, differentiable, and DDP-friendly."
-        ),
-        mo.md("&nbsp;"),
-        mo.Html(
-            f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Full LeWM objective'
-            f'&nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">'
-            f'[{cite("maes_leworldmodel_2026")}]</span></h3>'
-        ),
-        mo.md(r"$$\mathcal{L}_\text{LeWM} = \underbrace{\|\hat{z}_{t+1} - z_{t+1}\|_2^2}_{\mathcal{L}_\text{pred}} + \lambda\;\text{SIGReg}(Z)$$"),
-        mo.md(
-            "$\\lambda = 0.1$, $M = 1024$ (insensitive) — "
-            "**1 effective hyperparameter** vs 6 in PLDM. "
-            "No stop-gradient, no EMA, no teacher–student."
+            "<span style='font-size:0.78rem;color:#94A3B8;'>"
+            "Compares empirical CF against the Gaussian CF. "
+            "Bounded gradients $|\\partial T/\\partial z_i| \\leq 4\\sigma^2/N$, "
+            "$\\mathcal{O}(N)$, differentiable."
+            "</span>"
         ),
     ], align="start")
 
     mo.vstack([
         section_strip(2),
-        page_number(12),
+        page_number(13),
         _heading,
-        _video,
+        mo.md("&nbsp;"),
         mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
     ], align="start")
     return

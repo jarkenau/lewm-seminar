@@ -435,7 +435,7 @@ def representation_collapse_answer():
     **02 Dimensional Collapse**
 
     - Embeddings span only a low-dimensional subspace.
-    - Loss looks fine — but representations are impoverished.
+    - Loss looks fine, but representations are impoverished.
                             """),
                         ],
                         align="start",
@@ -471,11 +471,11 @@ def sota_anticollapse_slide():
                 ["Strategy", "Mechanism", "Limitation"],
                 [
                     [f"Generative reconstruction (DreamerV4 [{cite('hafner_dreamer4_2025')}])",
-                     "Pixel target is fixed — collapse impossible by construction",
+                     "Pixel target is fixed, collapse impossible by construction",
                      "Wastes capacity modelling irrelevant pixel detail"],
                     [f"EMA + stop-gradient (V-JEPA 2 [{cite('assran_v-jepa_2025')}])",
                      "Asymmetric self-distillation from a moving-average teacher",
-                     "No well-defined objective — purely heuristic"],
+                     "No well-defined objective, purely heuristic"],
                     [f"Frozen pretrained encoder (DINO-WM [{cite('zhou_dino-wm_2024')}])",
                      "Encoder is fixed, so it cannot collapse",
                      "Bounded by pretraining knowledge; not end-to-end"],
@@ -503,7 +503,7 @@ def sota_target_task_slide():
                 ["Family", "What it does", "Representative work"],
                 [
                     ["Self-supervised representation learning",
-                     "Predict masked latent patches — no actions, no planning",
+                     "Predict masked latent patches no actions, no planning",
                      f"I-JEPA [{cite('assran_i-jepa_2023')}], V-JEPA 2 [{cite('assran_v-jepa_2025')}]"],
                     ["Generative world models",
                      "Action-conditioned pixel-space simulators, often reward-based, for RL &amp; games",
@@ -673,7 +673,7 @@ def adaln_formulas_slide(mo):
         mo.md(r"$$y = \gamma \cdot \frac{x - \mu}{\sigma} + \beta$$"),
         mo.md(
             "- $\\gamma, \\beta$ are **fixed** learned parameters\n"
-            "- Same for every input — no external conditioning"
+            "- Same for every input, no external conditioning"
         ),
     ], align="start")
 
@@ -729,11 +729,11 @@ def adaln_why_lewm_slide(mo):
 
     _text = mo.vstack([
         mo.md(
-            "**01 Why scale + shift — not concatenation or addition?**\n\n"
+            "**01 Why scale + shift? Not concatenation or addition?**\n\n"
             "- *Concat / addition*: action signal is drowned out or shifts features uniformly\n"
             "- *AdaLN*: action conditions both the **scale and shift of every feature**\n\n"
             "**02 Why zero-init?**\n\n"
-            "- $G{=}0$ gates out the sublayer's contribution — **pure skip connection**:  \n"
+            "- $G{=}0$ gates out the sublayer's contribution **pure skip connection**:  \n"
             "  $x \\leftarrow x + 0{\\cdot}\\text{sublayer}(y) = x$\n"
             "- **Two-phase**: SIGReg first anchors the latent geometry; "
             "gates then open progressively as representations mature → stable end-to-end training"
@@ -779,9 +779,9 @@ def sigreg_optimal_distribution_slide(mo):
         mo.md("&nbsp;"),
         mo.Html('<h3 style="margin:0 0 0.5rem 0;color:#334155;">Two lemmas against anisotropy</h3>'),
         mo.md(
-            "- **Lemma 1** — anisotropic covariance ($\\lambda_K > \\lambda_1$) "
+            "- **Lemma 1**: anisotropic covariance ($\\lambda_K > \\lambda_1$) "
             "always hurts bias on some downstream task\n"
-            "- **Lemma 2** — OLS estimation variance is minimised **if and only if** "
+            "- **Lemma 2**: OLS estimation variance is minimised **if and only if** "
             "$\\text{Cov}(Z) \\propto I$"
         ),
         mo.md("&nbsp;"),
@@ -795,6 +795,59 @@ def sigreg_optimal_distribution_slide(mo):
             "$\\mathcal{N}(0, I)$ **uniquely minimises** integrated squared bias "
             "across all downstream tasks (linear & nonlinear)."
         ),
+    ], align="start")
+    return
+
+
+@app.cell
+def sigreg_algorithm_slide(mo):
+    _SIG = "#10B981"
+
+    _heading = mo.Html(
+        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
+        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
+        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
+        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
+        f'<h2 style="margin:0;line-height:1.2;">SIGReg: The Sketching Algorithm</h2>'
+        f'</div>'
+    )
+
+    _left = mo.vstack([
+        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The sketching algorithm</h3>'),
+        mo.md(
+            "**Step 1**: Sample $M$ random unit-norm directions:\n\n"
+            "$$\\boldsymbol{u}^{(m)} \\sim \\mathcal{U}(S^{d-1}), \\quad m = 1, \\ldots, M$$\n\n"
+            "**Step 2**: Project embeddings $Z \\in \\mathbb{R}^{N \\times d}$ onto each direction:\n\n"
+            "$$\\boldsymbol{h}^{(m)} = Z\\,\\boldsymbol{u}^{(m)} \\in \\mathbb{R}^N$$\n\n"
+            "**Step 3**: Apply a normality test $T$ to each projection and average:\n\n"
+            "$$\\text{SIGReg}(Z) \\triangleq \\frac{1}{M}\\sum_{m=1}^{M} T\\!\\left(\\boldsymbol{h}^{(m)}\\right)$$\n\n"
+            "By the **Cramér–Wold theorem**: matching all 1-D marginals "
+            "$\\Leftrightarrow$ matching the full $d$-dimensional joint distribution."
+        ),
+    ], align="start")
+
+    _right = mo.vstack([
+        mo.Html(
+            '<p style="margin:0 0 0.3rem 0;font-size:0.72rem;font-weight:700;'
+            'color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">'
+            'Normality test: Epps–Pulley</p>'
+        ),
+        mo.md(r"$$T = N\!\int_{-\infty}^{\infty} \!\left|\hat{\varphi}_X(t) - e^{-t^2/2}\right|^2 e^{-t^2/2}\,\mathrm{d}t$$"),
+        mo.md(
+            "<span style='font-size:0.78rem;color:#94A3B8;'>"
+            "Compares empirical CF against the Gaussian CF. "
+            "Bounded gradients $|\\partial T/\\partial z_i| \\leq 4\\sigma^2/N$, "
+            "$\\mathcal{O}(N)$, differentiable."
+            "</span>"
+        ),
+    ], align="start")
+
+    mo.vstack([
+        section_strip(2),
+        page_number(13),
+        _heading,
+        mo.md("&nbsp;"),
+        mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
     ], align="start")
     return
 
@@ -829,59 +882,6 @@ def sigreg_mechanism_slide(mo):
         page_number(12),
         _heading,
         _video,
-    ], align="start")
-    return
-
-
-@app.cell
-def sigreg_algorithm_slide(mo):
-    _SIG = "#10B981"
-
-    _heading = mo.Html(
-        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
-        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
-        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
-        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
-        f'<h2 style="margin:0;line-height:1.2;">SIGReg: The Sketching Algorithm</h2>'
-        f'</div>'
-    )
-
-    _left = mo.vstack([
-        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The sketching algorithm</h3>'),
-        mo.md(
-            "**Step 1** — Sample $M$ random unit-norm directions:\n\n"
-            "$$\\boldsymbol{u}^{(m)} \\sim \\mathcal{U}(S^{d-1}), \\quad m = 1, \\ldots, M$$\n\n"
-            "**Step 2** — Project embeddings $Z \\in \\mathbb{R}^{N \\times d}$ onto each direction:\n\n"
-            "$$\\boldsymbol{h}^{(m)} = Z\\,\\boldsymbol{u}^{(m)} \\in \\mathbb{R}^N$$\n\n"
-            "**Step 3** — Apply a normality test $T$ to each projection and average:\n\n"
-            "$$\\text{SIGReg}(Z) \\triangleq \\frac{1}{M}\\sum_{m=1}^{M} T\\!\\left(\\boldsymbol{h}^{(m)}\\right)$$\n\n"
-            "By the **Cramér–Wold theorem**: matching all 1-D marginals "
-            "$\\Leftrightarrow$ matching the full $d$-dimensional joint distribution."
-        ),
-    ], align="start")
-
-    _right = mo.vstack([
-        mo.Html(
-            '<p style="margin:0 0 0.3rem 0;font-size:0.72rem;font-weight:700;'
-            'color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">'
-            'Normality test — Epps–Pulley</p>'
-        ),
-        mo.md(r"$$T = N\!\int_{-\infty}^{\infty} \!\left|\hat{\varphi}_X(t) - e^{-t^2/2}\right|^2 e^{-t^2/2}\,\mathrm{d}t$$"),
-        mo.md(
-            "<span style='font-size:0.78rem;color:#94A3B8;'>"
-            "Compares empirical CF against the Gaussian CF. "
-            "Bounded gradients $|\\partial T/\\partial z_i| \\leq 4\\sigma^2/N$, "
-            "$\\mathcal{O}(N)$, differentiable."
-            "</span>"
-        ),
-    ], align="start")
-
-    mo.vstack([
-        section_strip(2),
-        page_number(13),
-        _heading,
-        mo.md("&nbsp;"),
-        mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
     ], align="start")
     return
 
@@ -1260,9 +1260,9 @@ def bibliography_slide_1(BIB_TEXT, mo):
     return
 
 
-@app.cell
-def bibliography_slide_2(BIB_TEXT, mo):
-    def _():
+app._unparsable_cell(
+    r"""
+    fdef _():
         import bibtexparser
 
         ENTRIES_PER_PAGE = 8
@@ -1284,7 +1284,9 @@ def bibliography_slide_2(BIB_TEXT, mo):
         ], align="start")
 
     _()
-    return
+    """,
+    name="bibliography_slide_2"
+)
 
 
 if __name__ == "__main__":

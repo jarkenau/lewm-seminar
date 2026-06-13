@@ -741,9 +741,9 @@ def adaln_why_lewm_slide(mo):
     ], align="start")
 
     if _sys.platform != "emscripten":
-        _img_src = (_pathlib.Path(__file__).parent / "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png").read_bytes()
+        _img_src = (_pathlib.Path(__file__).parent / "media/images/AdaLNTransformerBlock_ManimCE_v0.20.1.png").read_bytes()
     else:
-        _img_src = "media/images/adaln_block/AdaLNTransformerBlock_ManimCE_v0.20.1.png"
+        _img_src = "media/images/AdaLNTransformerBlock_ManimCE_v0.20.1.png"
 
     mo.vstack([
         section_strip(2),
@@ -898,7 +898,7 @@ def latent_planning_concept_slide(mo):
     )
 
     _fig = mo.image(
-        src=_pathlib.Path("assets/lewm_latent_planning_fig4.png"),
+        src=_pathlib.Path(__file__).parent / "media/images/lewm_latent_planning_fig4.png",
         caption=f"Figure 4. LeWorldModel Latent Planning. Source: [{cite('maes_leworldmodel_2026')}]",
         width="100%",
     )

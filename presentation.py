@@ -844,7 +844,7 @@ def sigreg_algorithm_slide(mo):
 
     mo.vstack([
         section_strip(2),
-        page_number(13),
+        page_number(12),
         _heading,
         mo.md("&nbsp;"),
         mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
@@ -879,9 +879,119 @@ def sigreg_mechanism_slide(mo):
 
     mo.vstack([
         section_strip(2),
-        page_number(12),
+        page_number(13),
         _heading,
         _video,
+    ], align="start")
+    return
+
+
+@app.cell
+def latent_planning_concept_slide(mo):
+    import sys as _sys
+    import pathlib as _pathlib
+
+    _PLAN = "#0EA5E9"
+
+    _heading = mo.Html(
+        f'<h2 style="margin:0;line-height:1.2;">Latent Planning — Planning in Imagination</h2>'
+    )
+
+    _fig = mo.image(
+        src=_pathlib.Path("assets/lewm_latent_planning_fig4.png"),
+        caption=f"Figure 4. LeWorldModel Latent Planning. Source: [{cite('maes_leworldmodel_2026')}]",
+        width="100%",
+    )
+
+    def _item(n, title, body):
+        return mo.md(f'<span style="font-weight:700;">{n}. {title}</span> {body}')
+
+    _bullets = mo.hstack([
+        mo.vstack([
+            _item(1, "Encode", r"map $o_1 \to z_1$ and $o_g \to z_g$ via frozen encoder"),
+            _item(2, "Imagine", r"unroll predictor $H$ steps with candidate actions $a_1, \ldots, a_H$"),
+        ], align="start"),
+        mo.vstack([
+            _item(3, "Score", r"compute cost $\|\hat{z}_H - z_g\|$ in latent space"),
+            _item(4, "Iterate", "solver updates actions and repeats until cost is minimised"),
+        ], align="start"),
+    ], gap="2rem", align="start")
+
+    mo.vstack([
+        section_strip(2),
+        page_number(14),
+        _heading,
+        mo.md("*FINDING THE OPTIMAL ACTION SEQUENCE ENTIRELY IN IMAGINATION*"),
+        mo.md("&nbsp;"),
+        _fig,
+        mo.md("&nbsp;"),
+        _bullets,
+    ], align="start")
+    return
+
+
+@app.cell
+def latent_planning_cem_slide(mo):
+    _heading = mo.Html(
+        f'<h2 style="margin:0;line-height:1.2;">CEM + MPC: Search, Execute, Replan</h2>'
+    )
+
+    _callout = mo.Html(
+        '<div style="background:#F0F9FF;border:1.5px solid #0EA5E9;border-radius:0.5rem;'
+        'padding:0.5rem 1rem;margin-bottom:0.8rem;">'
+        '<span style="font-size:0.72rem;font-weight:700;color:#0C4A6E;'
+        'text-transform:uppercase;letter-spacing:0.08em;">Zero-order optimizer&ensp;</span>'
+        '<span style="font-size:0.9rem;color:#374151;">'
+        'Does not require differentiability through the world model rollout.'
+        '</span></div>'
+    )
+
+    _algo = mo.Html(
+        '<div style="background:#F8FAFC;border:1px solid #CBD5E1;border-radius:0.5rem;'
+        'padding:0.6rem 1rem;font-family:monospace;font-size:0.83rem;line-height:1.55;">'
+        '<div style="font-weight:700;font-size:0.75rem;letter-spacing:0.06em;color:#475569;'
+        'text-transform:uppercase;border-bottom:1px solid #CBD5E1;margin-bottom:0.4rem;'
+        'padding-bottom:0.25rem;">Algorithm — Cross-Entropy Method (CEM) for Action Sequence Optimization</div>'
+        '<div><b>Initialize:</b> μ<sub>0</sub> = <b>0</b>, Σ<sub>0</sub> = I</div>'
+        '<div><b>for</b> t = 1 <b>to</b> T <b>do</b></div>'
+        '<div style="padding-left:1.4rem;">Sample N candidates '
+        '{a<sub>1:H</sub><sup>(i)</sup>} ~ 𝒩(μ<sub>t−1</sub>, Σ<sub>t−1</sub>)</div>'
+        '<div style="padding-left:1.4rem;"><b>for</b> i = 1 <b>to</b> N <b>do</b></div>'
+        '<div style="padding-left:2.8rem;">Roll out a<sub>1:H</sub><sup>(i)</sup> in world model f</div>'
+        '<div style="padding-left:2.8rem;">Compute cost '
+        'J<sup>(i)</sup> = ‖ẑ<sub>H</sub><sup>(i)</sup> − z<sub>g</sub>‖²</div>'
+        '<div style="padding-left:1.4rem;"><b>end for</b></div>'
+        '<div style="padding-left:1.4rem;">Select top-K elites ℰ (lowest cost)</div>'
+        '<div style="padding-left:1.4rem;">'
+        'μ<sub>t</sub> ← (1/K) ∑<sub>i∈ℰ</sub> a<sub>1:H</sub><sup>(i)</sup></div>'
+        '<div style="padding-left:1.4rem;">'
+        'Σ<sub>t</sub> ← Var<sub>i∈ℰ</sub>(a<sub>1:H</sub><sup>(i)</sup>)</div>'
+        '<div><b>end for</b></div>'
+        '<div><b>return</b> μ<sub>T</sub></div>'
+        '<div style="border-top:1px solid #CBD5E1;margin-top:0.35rem;padding-top:0.25rem;'
+        'font-size:0.72rem;color:#64748B;font-family:sans-serif;">'
+        'LeWM: N=300 &ensp; K=30 &ensp; T=30 (PushT) / 10 (others) &ensp; H=5'
+        '</div></div>'
+    )
+
+    _mpc = mo.vstack([
+        mo.Html('<h3 style="margin:0.6rem 0 0.3rem 0;color:#334155;">Model Predictive Control (MPC)</h3>'),
+        mo.md(
+            "- **Execute** the entire optimized $H{=}5$ step sequence in the real environment\n"
+            "- **Observe** the resulting new state\n"
+            "- **Replan** by running CEM again from the new real observation\n\n"
+            "*Short horizon keeps prediction error low enough that the full plan can be trusted.*"
+        ),
+    ], align="start")
+
+    mo.vstack([
+        section_strip(2),
+        page_number(15),
+        _heading,
+        mo.md("&nbsp;"),
+        _callout,
+        _algo,
+        _mpc,
     ], align="start")
     return
 
@@ -1252,7 +1362,7 @@ def bibliography_slide_1(BIB_TEXT, mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
         return mo.vstack([
-            page_number(13),
+            page_number(16),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
         ], align="start")
 
@@ -1260,9 +1370,9 @@ def bibliography_slide_1(BIB_TEXT, mo):
     return
 
 
-app._unparsable_cell(
-    r"""
-    fdef _():
+@app.cell
+def bibliography_slide_2(BIB_TEXT, mo):
+    def _():
         import bibtexparser
 
         ENTRIES_PER_PAGE = 8
@@ -1279,14 +1389,12 @@ app._unparsable_cell(
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
         return mo.vstack([
-            page_number(14),
+            page_number(17),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
         ], align="start")
 
     _()
-    """,
-    name="bibliography_slide_2"
-)
+    return
 
 
 if __name__ == "__main__":

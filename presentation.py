@@ -897,8 +897,13 @@ def latent_planning_concept_slide(mo):
         f'<h2 style="margin:0;line-height:1.2;">Latent Planning — Planning in Imagination</h2>'
     )
 
+    if _sys.platform != "emscripten":
+        _fig_src = (_pathlib.Path(__file__).parent / "media/images/lewm_latent_planning_fig4.png").read_bytes()
+    else:
+        _fig_src = "media/images/lewm_latent_planning_fig4.png"
+
     _fig = mo.image(
-        src=_pathlib.Path(__file__).parent / "media/images/lewm_latent_planning_fig4.png",
+        src=_fig_src,
         caption=f"Figure 4. LeWorldModel Latent Planning. Source: [{cite('maes_leworldmodel_2026')}]",
         width="100%",
     )

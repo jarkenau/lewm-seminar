@@ -82,11 +82,11 @@ with app.setup:
     # Single source of truth for citations: the works cited in the slides, in
     # reference order. Each entry is a BibTeX key from references.bib. The
     # bibliography renders *exactly* these (and only these), numbered by their
-    # position here, and inline markers use the same numbers via cite() — so
+    # position here, and inline markers use the same numbers via cite() —so
     # the two never drift. To cite a new work: add its key here (and to
     # references.bib) and drop a cite("key") in the slide.
     CITED = [
-        "maes_leworldmodel_2026",   # LeWM — the paper
+        "maes_leworldmodel_2026",   # LeWM —the paper
         "assran_i-jepa_2023",       # I-JEPA
         "bardes_v-jepa_2024",       # V-JEPA
         "assran_v-jepa_2025",       # V-JEPA 2
@@ -102,8 +102,8 @@ with app.setup:
         "bardes_vicreg_2022",       # VICReg
         "dosovitskiy_vit_2021",     # ViT
         "ba_layer_normalization_2016",  # Layer Normalization
-        "peebles_dit_2022",             # DiT — AdaLN origin
-        "balestriero_lejepa_2025",      # LeJEPA — SIGReg origin
+        "peebles_dit_2022",             # DiT —AdaLN origin
+        "balestriero_lejepa_2025",      # LeJEPA —SIGReg origin
     ]
 
     def cite(key):
@@ -129,7 +129,7 @@ with app.setup:
         return (", ".join(out[:-1]) + ", and " + out[-1]) if len(out) > 1 else (out[0] if out else "")
 
     def format_ref_ieee(i, entry):
-        # Returns an HTML string — one bibliography entry in IEEE style.
+        # Returns an HTML string —one bibliography entry in IEEE style.
         def clean(s): return s.replace("{","").replace("}","").replace("\n"," ").strip()
         import re
         authors  = _abbrev_authors(clean(entry.get("author", "")))
@@ -217,7 +217,7 @@ with app.setup:
         _out = _root / "media" / "videos" / _source_stem / _res_dir / f"{_scene_name}.mp4"
 
         if sys.platform != "emscripten":
-            # Re-render via CLI subprocess if missing or stale — the CLI is the
+            # Re-render via CLI subprocess if missing or stale —the CLI is the
             # only reliable way to get output at the expected path.
             _stale = _out.exists() and _source.stat().st_mtime > _out.stat().st_mtime
             if not _out.exists() or _stale:
@@ -232,7 +232,7 @@ with app.setup:
             if not _out.exists():
                 import marimo as mo
                 return mo.callout(
-                    mo.md(f"Video not found: `{_out.name}` — "
+                    mo.md(f"Video not found: `{_out.name}` —"
                           f"run `manim -qh {_source.name} {_scene_name}` to render it."),
                     kind="warn",
                 )
@@ -308,7 +308,7 @@ def outline_slide():
                 mo.md("# Outline"),
                 _entry(1, "01 · Background & State of the Art", [
                     "JEPA: predict in latent space, not pixel space",
-                    "Representation collapse — the central challenge",
+                    "Representation collapse —the central challenge",
                     "How existing methods solve it and where they fall short",
                 ]),
                 _entry(2, "02 · LeWorldModel", [
@@ -464,7 +464,7 @@ def sota_anticollapse_slide():
         return mo.vstack([
             section_strip(1),
             page_number(4),
-            mo.md("## State of the Art — by *Anti-Collapse Strategy*"),
+            mo.md("## State of the Art —by *Anti-Collapse Strategy*"),
             mo.md("*HOW DOES EACH METHOD AVOID REPRESENTATION COLLAPSE?*"),
             mo.md("&nbsp;"),
             sota_table(
@@ -496,7 +496,7 @@ def sota_target_task_slide():
         return mo.vstack([
             section_strip(1),
             page_number(5),
-            mo.md("## State of the Art — by *Target Task*"),
+            mo.md("## State of the Art —by *Target Task*"),
             mo.md("*WHAT PROBLEM IS THE WORLD MODEL ASKED TO SOLVE?*"),
             mo.md("&nbsp;"),
             sota_table(
@@ -525,7 +525,7 @@ def sota_summary_slide():
         return mo.vstack([
             section_strip(1),
             page_number(6),
-            mo.md("## State of the Art — Where LeWM Fits"),
+            mo.md("## State of the Art —Where LeWM Fits"),
             mo.md("*TWO AXES, ONE GAP*"),
             mo.md("&nbsp;"),
             sota_table(
@@ -553,7 +553,7 @@ def sota_summary_slide():
 
 @app.cell
 def outline_recap_after_sota():
-    # Recap of the outline shown at the 01 → 02 boundary. Section 01 is grayed
+    # Recap of the outline shown at the 01 — 02 boundary. Section 01 is grayed
     # out (done) and 02 is flagged "up next", giving anyone who has drifted a
     # beat to re-orient before the main contributions begin.
     def _():
@@ -584,7 +584,7 @@ def outline_recap_after_sota():
                 mo.md("# Outline"),
                 _entry(1, "01 · Background & State of the Art", [
                     "JEPA: predict in latent space, not pixel space",
-                    "Representation collapse — the central challenge",
+                    "Representation collapse —the central challenge",
                     "How existing methods solve it and where they fall short",
                 ], done=True),
                 _entry(2, "02 · LeWorldModel", [
@@ -684,7 +684,7 @@ def adaln_formulas_slide(mo):
         mo.md(
             "- $\\Delta, \\Sigma, G$ **from conditioning signal** $c$ (the action)\n"
             "- **6 outputs**: shift / scale / gate for attn & MLP\n"
-            "- **Zero-init**: $W=0, b=0$ → identity at init"
+            "- **Zero-init**: $W=0, b=0$ — identity at init"
         ),
     ], align="start")
 
@@ -736,7 +736,7 @@ def adaln_why_lewm_slide(mo):
             "- $G{=}0$ gates out the sublayer's contribution **pure skip connection**:  \n"
             "  $x \\leftarrow x + 0{\\cdot}\\text{sublayer}(y) = x$\n"
             "- **Two-phase**: SIGReg first anchors the latent geometry; "
-            "gates then open progressively as representations mature → stable end-to-end training"
+            "gates then open progressively as representations mature — stable end-to-end training"
         ),
     ], align="start")
 
@@ -894,7 +894,7 @@ def latent_planning_concept_slide(mo):
     _PLAN = "#0EA5E9"
 
     _heading = mo.Html(
-        f'<h2 style="margin:0;line-height:1.2;">Latent Planning — Planning in Imagination</h2>'
+        f'<h2 style="margin:0;line-height:1.2;">Latent Planning —Planning in Imagination</h2>'
     )
 
     if _sys.platform != "emscripten":
@@ -956,7 +956,7 @@ def latent_planning_cem_slide(mo):
         'padding:0.6rem 1rem;font-family:monospace;font-size:0.83rem;line-height:1.55;">'
         '<div style="font-weight:700;font-size:0.75rem;letter-spacing:0.06em;color:#475569;'
         'text-transform:uppercase;border-bottom:1px solid #CBD5E1;margin-bottom:0.4rem;'
-        'padding-bottom:0.25rem;">Algorithm — Cross-Entropy Method (CEM) for Action Sequence Optimization</div>'
+        'padding-bottom:0.25rem;">Algorithm —Cross-Entropy Method (CEM) for Action Sequence Optimization</div>'
         '<div><b>Initialize:</b> μ<sub>0</sub> = <b>0</b>, Σ<sub>0</sub> = I</div>'
         '<div><b>for</b> t = 1 <b>to</b> T <b>do</b></div>'
         '<div style="padding-left:1.4rem;">Sample N candidates '
@@ -1003,7 +1003,7 @@ def latent_planning_cem_slide(mo):
 
 @app.cell
 def outline_recap_after_lewm():
-    ''# Recap shown at the 02 → 03 boundary. Sections 01 and 02 are grayed out
+    ''# Recap shown at the 02 — 03 boundary. Sections 01 and 02 are grayed out
     # (done); 03 is up next.
     def _():
         import marimo as mo
@@ -1033,7 +1033,7 @@ def outline_recap_after_lewm():
                 mo.md("# Outline"),
                 _entry(1, "01 · Background & State of the Art", [
                     "JEPA: predict in latent space, not pixel space",
-                    "Representation collapse — the central challenge",
+                    "Representation collapse —the central challenge",
                     "How existing methods solve it and where they fall short",
                 ], done=True),
                 _entry(2, "02 · LeWorldModel", [
@@ -1057,8 +1057,108 @@ def outline_recap_after_lewm():
 
 
 @app.cell
+def experiments_environments_slide(mo):
+    import sys as _esys
+    import pathlib as _epathlib
+
+    _EXP_BG  = "#FEF3C7"
+    _EXP_BDR = "#F59E0B"
+
+    _heading = mo.Html(
+        '<h2 style="margin:0;">Evaluation Environments</h2>'
+    )
+    _subtitle = mo.Html(
+        '<p style="margin:0;color:#64748B;font-size:1.1rem;">'
+        'Four tasks spanning 2D/3D manipulation, navigation, and motion planning'
+        '</p>'
+    )
+
+    _env_imgs = {}
+    for _name, _label in [
+        ("env_pusht",   "Push-T (2D)"),
+        ("env_ogbench", "OGBench-Cube (3D)"),
+        ("env_tworoom", "Two-Room (nav.)"),
+        ("env_reacher", "Reacher (2D)"),
+    ]:
+        if _esys.platform != "emscripten":
+            _src = (_epathlib.Path(__file__).parent / f"assets/{_name}.png").read_bytes()
+        else:
+            _src = f"assets/{_name}.png"
+        _env_imgs[_label] = _src
+
+    _env_panels = mo.hstack(
+        [
+            mo.vstack(
+                [
+                    mo.image(src, width=201),
+                    mo.Html(f'<p style="margin:4px 0 0;font-size:0.85rem;color:#64748B;text-align:center;">{lbl}</p>'),
+                ],
+                align="center",
+            )
+            for lbl, src in _env_imgs.items()
+        ],
+        gap=1,
+    )
+
+    _results = mo.md(
+        "- **Push-T** (2D manipulation): LeWM **96%** vs PLDM 78% vs DINO-WM 92% → best overall \n"
+        "- **OGBench-Cube** (3D manipulation): LeWM 74% vs DINO-WM 86% → DINO-WM leads; 3D visual complexity challenges encoder\n"
+        "- **Two-Room** (navigation): LeWM 87% vs PLDM/DINO-WM ~100% → worst case; Gaussian prior ill-suited to low-dimensional task\n"
+        "- **Reacher** (continuous control): LeWM **86%** vs PLDM 78% vs DINO-WM 79% → best overall\n"
+        "- **Speed**: LeWM plans in **<1 s** → **48× faster** than DINO-WM at equal compute budget"
+    )
+
+    mo.vstack([
+        section_strip(3),
+        page_number(16),
+        _heading,
+        _subtitle,
+        mo.md("&nbsp;"),
+        _env_panels,
+        mo.md("&nbsp;"),
+        _results,
+    ], align="start")
+    return
+
+
+@app.cell
+def experiments_physics_slide(mo):
+    _heading = mo.Html(
+        '<h2 style="margin:0;">Physics Without Supervision</h2>'
+    )
+
+    _content = mo.Html(
+        '<div style="font-size:1.05rem;line-height:1.9;">'
+
+        '<p style="font-weight:700;margin:1rem 0 0.3rem 0;">Linear Probing (PushT)</p>'
+        '<ul style="list-style:none;padding:0;margin:0;">'
+        '<li>Freeze encoder, fit a linear regressor to predict ground-truth agent position, block position, and block angle</li>'
+        '<li>Linear r: agent location 0.974, block location 0.986, block angle 0.902 —all above PLDM baseline</li>'
+        '<li>Physical quantities are linearly decodable from the latent space with no physics supervision</li>'
+        '</ul>'
+
+        '<p style="font-weight:700;margin:1rem 0 0.3rem 0;">Violation-of-Expectation</p>'
+        '<ul style="list-style:none;padding:0;margin:0;">'
+        '<li>Present the model with sequences containing physical violations (e.g. object teleportation, reversed causality)</li>'
+        '<li>Measure latent prediction error —a physics-aware model should be more surprised by impossible events</li>'
+        '<li>LeWM assigns higher prediction error to violating sequences, confirming emergent physical intuition</li>'
+        '</ul>'
+
+        '</div>'
+    )
+
+    mo.vstack([
+        section_strip(3),
+        page_number(17),
+        _heading,
+        _content,
+    ], align="start")
+    return
+
+
+@app.cell
 def outline_recap_after_experiments():
-    # Recap shown at the 03 → 04 boundary. Sections 01, 02, and 03 are grayed
+    # Recap shown at the 03 — 04 boundary. Sections 01, 02, and 03 are grayed
     # out (done); 04 is up next.
     def _():
         import marimo as mo
@@ -1088,7 +1188,7 @@ def outline_recap_after_experiments():
                 mo.md("# Outline"),
                 _entry(1, "01 · Background & State of the Art", [
                     "JEPA: predict in latent space, not pixel space",
-                    "Representation collapse — the central challenge",
+                    "Representation collapse —the central challenge",
                     "How existing methods solve it and where they fall short",
                 ], done=True),
                 _entry(2, "02 · LeWorldModel", [
@@ -1135,8 +1235,8 @@ def discussion_slide(mo):
 
     _findings_html = (
         _col_header("Key Findings", "◆")
-        + _bullet("2 loss terms — no EMA, no frozen encoder",
-                  "Stable end-to-end JEPA from pixels; 6 hyperparameters → 1 vs the only existing alternative")
+        + _bullet("2 loss terms —no EMA, no frozen encoder",
+                  "Stable end-to-end JEPA from pixels; 6 hyperparameters — 1 vs the only existing alternative")
         + _bullet("Zero-shot planning across all task types",
                   "Same model, same hyperparameters: manipulation, navigation, motion planning. All reward-free.")
         + _bullet("Fixed-compute dominance",
@@ -1166,7 +1266,7 @@ def discussion_slide(mo):
 
     mo.vstack([
         section_strip(4),
-        page_number(16),
+        page_number(18),
         mo.md("## Discussion"),
         mo.md("&nbsp;"),
         _grid,
@@ -1485,7 +1585,7 @@ def bibliography_slide_1(BIB_TEXT, mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
         return mo.vstack([
-            page_number(17),
+            page_number(19),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
         ], align="start")
 
@@ -1512,7 +1612,7 @@ def bibliography_slide_2(BIB_TEXT, mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
         return mo.vstack([
-            page_number(18),
+            page_number(20),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
         ], align="start")
 

@@ -1130,18 +1130,29 @@ def experiments_physics_slide(mo):
     _content = mo.Html(
         '<div style="font-size:1.05rem;line-height:1.9;">'
 
-        '<p style="font-weight:700;margin:1rem 0 0.3rem 0;">Linear Probing (PushT)</p>'
-        '<ul style="list-style:none;padding:0;margin:0;">'
-        '<li>Freeze encoder, fit a linear regressor to predict ground-truth agent position, block position, and block angle</li>'
-        '<li>Linear r: agent location 0.974, block location 0.986, block angle 0.902 —all above PLDM baseline</li>'
-        '<li>Physical quantities are linearly decodable from the latent space with no physics supervision</li>'
+        '<p style="font-weight:700;margin:0 0 0.3rem 0;">Linear Probing (PushT)</p>'
+        '<ul style="list-style:disc;padding-left:1.4rem;margin:0 0 1.2rem 0;">'
+        '<li>Can physical quantities be read out from the latent space without any physics supervision?</li>'
+        '<li>Frozen encoder + linear layer achieves R² &gt; 0.90 for position and angle, outperforming PLDM</li>'
+        '<li>Linear (not non-linear) decoder recovering a quantity means it is stored as an explicit direction in latent space</li>'
+        '<li style="list-style:none;padding-left:1rem;font-size:0.88em;color:#444;line-height:2.2;">'
+        'R<sup>2</sup> = 1 &minus; '
+        '<span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;">'
+        '<span style="border-bottom:1px solid currentColor;padding:0 4px;">&sum;<sub>i</sub>(y<sub>i</sub> &minus; &#375;<sub>i</sub>)<sup>2</sup></span>'
+        '<span style="padding:0 4px;">&sum;<sub>i</sub>(y<sub>i</sub> &minus; &#563;)<sup>2</sup></span>'
+        '</span>'
+        '</li>'
+        '<li style="list-style:none;padding-left:1rem;font-size:0.88em;color:#444;">'
+        '&#375;<sub>i</sub> = predicted value &nbsp;&nbsp; &#563; = mean of y &nbsp;&nbsp; R<sup>2</sup> = 1 means perfect prediction'
+        '</li>'
+        '<li>Physical structure emerges implicitly from the JEPA training objective alone</li>'
         '</ul>'
 
-        '<p style="font-weight:700;margin:1rem 0 0.3rem 0;">Violation-of-Expectation</p>'
-        '<ul style="list-style:none;padding:0;margin:0;">'
-        '<li>Present the model with sequences containing physical violations (e.g. object teleportation, reversed causality)</li>'
-        '<li>Measure latent prediction error —a physics-aware model should be more surprised by impossible events</li>'
-        '<li>LeWM assigns higher prediction error to violating sequences, confirming emergent physical intuition</li>'
+        '<p style="font-weight:700;margin:0 0 0.3rem 0;">Violation-of-Expectation</p>'
+        '<ul style="list-style:disc;padding-left:1.4rem;margin:0;">'
+        '<li>Does the model assign higher surprise to physically impossible events than to mere visual changes?</li>'
+        '<li>Teleportation (physical violation) causes sharp MSE spikes; color changes (visual-only) do not</li>'
+        '<li>LeWM has learned an implicit notion of physical plausibility, not just visual pattern matching</li>'
         '</ul>'
 
         '</div>'
@@ -1151,8 +1162,9 @@ def experiments_physics_slide(mo):
         section_strip(3),
         page_number(17),
         _heading,
+        mo.Html('<div style="height:0.8rem;"></div>'),
         _content,
-    ], align="start")
+    ], align="start", gap="1rem")
     return
 
 

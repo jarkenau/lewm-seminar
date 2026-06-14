@@ -41,3 +41,6 @@ media/videos/*/*/partial_movie_files/
 
 # assets no longer used
 assets/
+
+# ignore my internal notes
+notes/

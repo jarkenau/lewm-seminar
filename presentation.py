@@ -1112,6 +1112,69 @@ def outline_recap_after_experiments():
 
 
 @app.cell
+def discussion_slide(mo):
+    _DISC = "#8B5CF6"
+    _DISC_TEXT = "#4C1D95"
+
+    def _col_header(label, icon):
+        return (
+            f'<div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem;">'
+            f'<span style="font-size:2rem;">{icon}</span>'
+            f'<span style="font-weight:700;font-size:2rem;color:{_DISC_TEXT};">{label}</span>'
+            f'</div>'
+        )
+
+    def _bullet(head, body):
+        return (
+            f'<div style="display:flex;gap:0.7rem;margin:1.2rem 0;line-height:1.5;">'
+            f'<span style="color:{_DISC};font-weight:700;flex-shrink:0;margin-top:0.1rem;font-size:1.5rem;">▸</span>'
+            f'<span style="font-size:1.5rem;"><strong>{head}</strong>'
+            f'<br><span style="font-size:1.3rem;color:#374151;">{body}</span></span>'
+            f'</div>'
+        )
+
+    _findings_html = (
+        _col_header("Key Findings", "◆")
+        + _bullet("2 loss terms — no EMA, no frozen encoder",
+                  "Stable end-to-end JEPA from pixels; 6 hyperparameters → 1 vs the only existing alternative")
+        + _bullet("Zero-shot planning across all task types",
+                  "Same model, same hyperparameters: manipulation, navigation, motion planning. All reward-free.")
+        + _bullet("Fixed-compute dominance",
+                  "Equal FLOP budget: LeWM 90% vs DINO-WM 13% on PushT. Token efficiency becomes planning quality.")
+        + _bullet("Regularizer shapes planning geometry",
+                  "Gaussian prior produces straight latent trajectories, making CEM search more effective as a side effect")
+    )
+
+    _limitations_html = (
+        _col_header("Limitations & Future Work", "?")
+        + _bullet("CEM doesn't scale to high-DoF",
+                  "Zero-order optimizer breaks for robot arms or locomotion")
+        + _bullet("Not a foundation model",
+                  "Must retrain per environment; no cross-environment or cross-action-space transfer")
+        + _bullet("Future: hierarchical world models",
+                  "Multi-scale temporal abstraction to move beyond H=5")
+        + _bullet("Future: online / interactive learning",
+                  "Closing the loop between world model and environment")
+    )
+
+    _grid = mo.Html(
+        f'<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:10rem;width:100%;align-items:start;">'
+        f'<div>{_findings_html}</div>'
+        f'<div>{_limitations_html}</div>'
+        f'</div>'
+    )
+
+    mo.vstack([
+        section_strip(4),
+        page_number(16),
+        mo.md("## Discussion"),
+        mo.md("&nbsp;"),
+        _grid,
+    ], align="start")
+    return
+
+
+@app.cell
 def _bib_text_cell():
     BIB_TEXT = """
     @misc{maes_leworldmodel_2026,
@@ -1422,7 +1485,7 @@ def bibliography_slide_1(BIB_TEXT, mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
         return mo.vstack([
-            page_number(16),
+            page_number(17),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
         ], align="start")
 
@@ -1449,7 +1512,7 @@ def bibliography_slide_2(BIB_TEXT, mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
         return mo.vstack([
-            page_number(17),
+            page_number(18),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
         ], align="start")
 

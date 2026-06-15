@@ -240,7 +240,7 @@ with app.setup:
             _b64 = base64.b64encode(_out.read_bytes()).decode()
             import marimo as mo
             return mo.Html(
-                f'<video autoplay muted style="{VIDEO_STYLE}">'
+                f'<video autoplay muted controls style="{VIDEO_STYLE}">'
                 f'<source src="data:video/mp4;base64,{_b64}" type="video/mp4">'
                 f'</video>'
             )
@@ -249,7 +249,7 @@ with app.setup:
             _rel = f"media/videos/{_source_stem}/{_res_dir}/{_scene_name}.mp4"
             import marimo as mo
             return mo.Html(
-                f'<video autoplay muted style="{VIDEO_STYLE}">'
+                f'<video autoplay muted controls style="{VIDEO_STYLE}">'
                 f'<source src="{_rel}" type="video/mp4">'
                 f'</video>'
             )
@@ -265,6 +265,7 @@ def title_slide():
                 ":root { font-size: 12px; }"
                 "mjx-container { font-size: 85% !important; }"
                 ".marimo-markdown p, .marimo-markdown li { font-size: 0.9rem; }"
+                "video::-webkit-media-controls-panel { background: transparent !important; -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }"
                 "</style>"
             ),
             mo.md("World Models Seminar · Technical University of Munich "),
@@ -352,7 +353,7 @@ def jepa_principle_animation_slide():
             )
     else:
         _video = _mo.Html(
-            f'<video autoplay muted style="{VIDEO_STYLE}">'
+            f'<video autoplay muted controls style="{VIDEO_STYLE}">'
             '<source src="media/videos/jepa_training/1080p60/JEPATraining.mp4" type="video/mp4">'
             '</video>'
         )
@@ -617,7 +618,7 @@ def lewm_architecture_animation_slide():
         _video = render_scene(LeWMArchitecture)
     else:
         _video = _mo.Html(
-            f'<video autoplay muted style="{VIDEO_STYLE}">'
+            f'<video autoplay muted controls style="{VIDEO_STYLE}">'
             '<source src="media/videos/lewm_architecture/1080p60/LeWMArchitecture.mp4" type="video/mp4">'
             '</video>'
         )
@@ -634,7 +635,7 @@ def vit_encoder_slide(mo):
         _video = render_scene(ViTTinyEncoder)
     else:
         _video = mo.Html(
-            f'<video autoplay muted loop style="{VIDEO_STYLE}">'
+            f'<video autoplay muted loop controls style="{VIDEO_STYLE}">'
             '<source src="media/videos/vit_tiny_encoder/1080p60/ViTTinyEncoder.mp4" type="video/mp4">'
             '</video>'
         )
@@ -861,7 +862,7 @@ def sigreg_mechanism_slide(mo):
         _video = render_scene(SIGRegVisualization)
     else:
         _video = mo.Html(
-            f'<video autoplay muted loop style="{VIDEO_STYLE}">'
+            f'<video autoplay muted loop controls style="{VIDEO_STYLE}">'
             '<source src="media/videos/sigreg_collapse/1080p60/SIGRegVisualization.mp4"'
             ' type="video/mp4"></video>'
         )

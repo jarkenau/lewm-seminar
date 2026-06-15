@@ -1248,26 +1248,26 @@ def discussion_slide(mo):
 
     _findings_html = (
         _col_header("Key Findings", "◆")
-        + _bullet("2 loss terms —no EMA, no frozen encoder",
-                  "Stable end-to-end JEPA from pixels; 6 hyperparameters — 1 vs the only existing alternative")
-        + _bullet("Zero-shot planning across all task types",
-                  "Same model, same hyperparameters: manipulation, navigation, motion planning. All reward-free.")
-        + _bullet("Fixed-compute dominance",
-                  "Equal FLOP budget: LeWM 90% vs DINO-WM 13% on PushT. Token efficiency becomes planning quality.")
-        + _bullet("Regularizer shapes planning geometry",
-                  "Gaussian prior produces straight latent trajectories, making CEM search more effective as a side effect")
+        + _bullet("Competitive across all tasks, with simplicity",
+                  "End-to-end training from pixels, no pretrained encoder, no EMA or stop-gradient, fewer loss hyperparameters than pixel-based rivals")
+        + _bullet("SIGReg (from LeJEPA) is the key enabler",
+                  "Imported from Balestriero & LeCun 2025, integrated here into end-to-end raining.")
+        + _bullet("No pixel reconstruction",
+                  "Unlike DreamerV3, IRIS and DIAMOND, it predicts only in latent space. No decoder, no generation overhead.")
+        + _bullet("No pretrained visual backbone",
+                  "Unlike DINO-WM, the encoder trains end-to-end. No frozen ViT dependency to prevent collapse.")
     )
 
     _limitations_html = (
         _col_header("Limitations & Future Work", "?")
-        + _bullet("CEM doesn't scale to high-DoF",
-                  "Zero-order optimizer breaks for robot arms or locomotion")
+        + _bullet("Narrow evaluation scope",
+                  "Only 2D and 3D simulated tasks; no real world or high DoF robot validation")
+        + _bullet("Dependence on action labeled data",
+                  "Requires fully labeled action sequences; cannot learn from passive observations")
+        + _bullet("Future: longer horizons",
+                  "Hierarchical world models for long range planning beyond H=5 CEM")
         + _bullet("Not a foundation model",
                   "Must retrain per environment; no cross-environment or cross-action-space transfer")
-        + _bullet("Future: hierarchical world models",
-                  "Multi-scale temporal abstraction to move beyond H=5")
-        + _bullet("Future: online / interactive learning",
-                  "Closing the loop between world model and environment")
     )
 
     _grid = mo.Html(

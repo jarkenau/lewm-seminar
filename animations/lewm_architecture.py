@@ -145,11 +145,10 @@ class LeWMArchitecture(Scene):
                                  fill_color="#f0ebf7", fill_opacity=1,
                                  stroke_color=ACTION_COLOR, stroke_width=2).move_to([-0.7, 0.5, 0])
         a_text = VGroup(
-            MathTex(r"a(t)\in\mathbb{R}^2", color=ACTION_COLOR, font_size=18),
-            Tex(r"goal $(x,\,y)$", color=ACTION_COLOR, font_size=14),
+            MathTex(r"a(t)", color=ACTION_COLOR, font_size=18),
+            MathTex(r"(\Delta x,\,\Delta y)\in[-1,1]^2", color=ACTION_COLOR, font_size=14),
         ).arrange(DOWN, buff=0.08).move_to(a_box.get_center())
         a_to_pred = make_arrow(a_box.get_top(), pred.get_bottom(), sw=2.5)
-        gb_lab = MathTex(r"\gamma,\ \beta", color=ACTION_COLOR, font_size=20).next_to(a_to_pred, RIGHT, buff=0.1)
 
 
         # ── Loss box ────────────────────────────────────────────────────────
@@ -201,7 +200,7 @@ class LeWMArchitecture(Scene):
             encL["enc"], *ghostsL, encL["border"], state_L, encL["x_lab"], encL["obs_lab"], encL["a_img"],
             encR["enc"], encR["border"], state_R, encR["x_lab"], encR["obs_lab"], encR["a_img"],
             z_to_pred, pred,
-            a_box, a_text, a_to_pred, gb_lab,
+            a_box, a_text, a_to_pred,
             loss_rect, eq, zpred_to_loss, ztgt_to_loss,
             badge1, badge2, badge3,
         )

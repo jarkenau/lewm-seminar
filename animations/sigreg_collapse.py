@@ -93,43 +93,6 @@ class SIGRegVisualization(Scene):
         dir_angle = np.radians(40)
         u = np.array([np.cos(dir_angle), np.sin(dir_angle)])
 
-        # ── Pre-build all formula panels ───────────────────────────────────────
-        fp1 = self._formula_panel([
-            ("embedding matrix",
-             r"Z \in \mathbb{R}^{N \times d}", 24, C_LABEL),
-            ("problem",
-             r"\mathrm{Cov}(Z) \not\propto I_d", 22, "#D97706"),
-        ])
-
-        fp2 = self._formula_panel([
-            ("step 1 — sample direction",
-             r"\boldsymbol{u}^{(m)} \sim \mathcal{U}(S^{d-1})", 24, C_DIR),
-        ])
-
-        fp3 = self._formula_panel([
-            ("step 2 — project onto direction",
-             r"\boldsymbol{h}^{(m)} = Z\,\boldsymbol{u}^{(m)} \in \mathbb{R}^N", 22, C_PROJ),
-        ])
-
-        fp4 = self._formula_panel([
-            ("step 3 — Epps–Pulley normality test",
-             r"T = N\!\int_{-\infty}^{\infty}\!\left|\hat{\varphi}_X(t)"
-             r"- e^{-t^2/2}\right|^2 e^{-t^2/2}\,\mathrm{d}t",
-             16, C_HIST),
-            ("",
-             r"\hat{\varphi}_X(t) = \tfrac{1}{N}\textstyle\sum_j e^{it z_j}"
-             r"\quad\text{(empirical CF)}",
-             15, C_MUTED),
-        ])
-
-        fp5 = self._formula_panel([
-            ("aggregate over M directions",
-             r"\mathrm{SIGReg}(Z) \triangleq"
-             r"\frac{1}{M}\sum_{m=1}^{M} T\!\left(Z\,\boldsymbol{u}^{(m)}\right)",
-             20, C_LABEL),
-            ("",
-             r"M = 1024 \;\text{(insensitive to choice of }M\text{)}", 15, C_MUTED),
-        ])
 
         # ══════════════════════════════════════════════════════════════════════
         # PHASE 1 — Anisotropic cloud
@@ -140,17 +103,13 @@ class SIGRegVisualization(Scene):
                       .rotate(angle) \
                       .move_to([CLOUD_ORIGIN[0], CLOUD_ORIGIN[1], 0])
         dots = self._make_dots(pts)
-        bad_label = MathTex(r"\neq \mathcal{N}(0,I)", color="#D97706", font_size=28) \
-                        .next_to(ellipse, DOWN, buff=0.25)
-
-        self.play(FadeIn(title1), FadeIn(fp1))
+        self.play(FadeIn(title1))
         self.play(
             Create(ellipse),
             LaggedStart(*[FadeIn(d) for d in dots], lag_ratio=0.06),
         )
-        self.play(FadeIn(bad_label))
         self.wait(0.6)
-        self.play(FadeOut(bad_label), FadeOut(title1))
+        self.play(FadeOut(title1))
 
         # ══════════════════════════════════════════════════════════════════════
         # PHASE 2 — Sample one direction u^(1)
@@ -164,12 +123,8 @@ class SIGRegVisualization(Scene):
             color=C_DIR, buff=0, stroke_width=3,
             max_tip_length_to_length_ratio=0.12,
         )
-        dir_label = MathTex(r"\boldsymbol{u}^{(1)}", color=C_DIR, font_size=30) \
-                        .next_to(dir_arrow.get_end(), UP + RIGHT, buff=0.1)
-
-        self.play(FadeIn(title2), self._swap_formula(fp1, fp2))
+        self.play(FadeIn(title2))
         self.play(GrowArrow(dir_arrow), run_time=0.8)
-        self.play(FadeIn(dir_label))
         self.wait(0.7)
         self.play(FadeOut(title2))
 
@@ -191,7 +146,7 @@ class SIGRegVisualization(Scene):
             for i in range(N)
         ])
 
-        self.play(FadeIn(title3), self._swap_formula(fp2, fp3))
+        self.play(FadeIn(title3))
         self.play(Create(perp_lines), run_time=1.0)
         self.play(LaggedStart(*[FadeIn(d) for d in proj_dots], lag_ratio=0.04))
         self.wait(0.8)
@@ -234,23 +189,16 @@ class SIGRegVisualization(Scene):
             x_range=[-4.5, 4.5],
             color=C_GAUSS, stroke_width=3,
         )
-        gauss_lbl = MathTex(r"\mathcal{N}(0,1)\;\text{target}", color=C_GAUSS, font_size=20) \
-                        .next_to(hist_ax, UP, buff=0.12).shift(RIGHT * 0.6)
-        gap_lbl = MathTex(r"T\!\left(\boldsymbol{h}^{(1)}\right)", color="#D97706", font_size=22) \
-                      .next_to(hist_ax, LEFT, buff=0.2)
-
-        self.play(FadeIn(title4), self._swap_formula(fp3, fp4))
+        self.play(FadeIn(title4))
         self.play(Create(hist_ax))
         self.play(LaggedStart(*[GrowFromEdge(b, DOWN) for b in bars], lag_ratio=0.04))
-        self.play(Create(gauss_curve), FadeIn(gauss_lbl))
-        self.play(FadeIn(gap_lbl))
+        self.play(Create(gauss_curve))
         self.wait(1.2)
         self.play(
             FadeOut(title4),
             FadeOut(perp_lines), FadeOut(proj_dots),
             FadeOut(hist_ax), FadeOut(bars), FadeOut(gauss_curve),
-            FadeOut(gauss_lbl), FadeOut(gap_lbl),
-            FadeOut(dir_arrow), FadeOut(dir_label),
+            FadeOut(dir_arrow),
         )
 
         # ══════════════════════════════════════════════════════════════════════
@@ -272,8 +220,8 @@ class SIGRegVisualization(Scene):
                     max_tip_length_to_length_ratio=0.10,
                 ))
 
-        self.play(FadeIn(title5), self._swap_formula(fp4, fp5))
+        self.play(FadeIn(title5))
         self.play(LaggedStart(*[GrowArrow(s) for s in spokes], lag_ratio=0.08))
         self.wait(2.0)
-        self.play(FadeOut(title5), FadeOut(fp5), FadeOut(spokes),
+        self.play(FadeOut(title5), FadeOut(spokes),
                   FadeOut(ellipse), *[FadeOut(d) for d in dots])

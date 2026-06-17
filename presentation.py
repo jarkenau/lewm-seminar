@@ -708,33 +708,28 @@ def sigreg_optimal_distribution_slide(mo):
         f'<span style="display:inline-flex;align-items:center;justify-content:center;'
         f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
         f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
-        f'<h2 style="margin:0;line-height:1.2;">Why Isotropic Gaussian?</h2>'
+        f'<h2 style="margin:0;line-height:1.2;">Which distribution should the latent space follow?</h2>'
         f'</div>'
     )
 
     mo.vstack([
-
         page_number(11),
         _heading,
-        mo.md("*The theoretically optimal target distribution for any downstream task*"),
-        mo.md("&nbsp;"),
-        mo.Html('<h3 style="margin:0 0 0.5rem 0;color:#334155;">Two lemmas against anisotropy</h3>'),
-        mo.md(
-            "- **Lemma 1**: anisotropic covariance ($\\lambda_K > \\lambda_1$) "
-            "always hurts bias on some downstream task\n"
-            "- **Lemma 2**: OLS estimation variance is minimised **if and only if** "
-            "$\\text{Cov}(Z) \\propto I$"
+        mo.Html(
+            f'<p style="margin:0;font-size:1rem;color:#64748B;">'
+            f'Balestriero &amp; LeCun — <em>LeJEPA: Provable and Scalable Self-Supervised Learning Without the Heuristics</em>'
+            f'&nbsp;[{cite("balestriero_lejepa_2025")}]</p>'
         ),
+        mo.md("&nbsp;"),
         mo.md("&nbsp;"),
         mo.Html(
-            f'<h3 style="margin:0 0 0.5rem 0;color:#334155;">Theorem 1'
-            f'&nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">'
-            f'LeJEPA [{cite("balestriero_lejepa_2025")}]</span></h3>'
-        ),
-        mo.md(
-            "Among all distributions with fixed total variance, "
-            "$\\mathcal{N}(0, I)$ **uniquely minimises** integrated squared bias "
-            "across all downstream tasks (linear & nonlinear)."
+            '<div style="font-size:2.5rem;">'
+            '<p style="margin:0 0 1.2rem 0;">&#8226; Downstream tasks are solved by probes on frozen embeddings</p>'
+            '<p style="margin:0 0 1.2rem 0;">&#8226; Low-spread dimensions are invisible to any probe &#8594; bias or noise</p>'
+            '<p style="margin:0 0 1.2rem 0;">&nbsp;</p>'
+            '<p style="margin:0 0 1.2rem 0;">&#8594; <strong>Isotropy</strong> makes every dimension equally usable</p>'
+            '<p style="margin:0;">&#8594; <strong>Conclusion:</strong> Isotropic Gaussian is uniquely optimal</p>'
+            '</div>'
         ),
     ], align="start")
     return
@@ -749,36 +744,22 @@ def sigreg_algorithm_slide(mo):
         f'<span style="display:inline-flex;align-items:center;justify-content:center;'
         f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
         f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
-        f'<h2 style="margin:0;line-height:1.2;">SIGReg: The Sketching Algorithm</h2>'
+        f'<h2 style="margin:0;line-height:1.2;">SIGReg Algorithm</h2>'
         f'</div>'
     )
 
-    _left = mo.vstack([
-        mo.md(
-            "**Step 1**: Sample $M$ random unit-norm directions:\n\n"
-            "$$\\boldsymbol{u}^{(m)} \\sim \\mathcal{U}(S^{d-1}), \\quad m = 1, \\ldots, M$$\n\n"
-            "**Step 2**: Project embeddings $Z \\in \\mathbb{R}^{N \\times d}$ onto each direction:\n\n"
-            "$$\\boldsymbol{h}^{(m)} = Z\\,\\boldsymbol{u}^{(m)} \\in \\mathbb{R}^N$$\n\n"
-            "**Step 3**: Apply a normality test $T$ to each projection and average:\n\n"
-            "$$\\text{SIGReg}(Z) \\triangleq \\frac{1}{M}\\sum_{m=1}^{M} T\\!\\left(\\boldsymbol{h}^{(m)}\\right)$$\n\n"
-            "By the **Cramér–Wold theorem**: matching all 1-D marginals "
-            "$\\Leftrightarrow$ matching the full $d$-dimensional joint distribution."
-        ),
-    ], align="start")
+    _spacer = mo.Html('<div style="min-width:2rem;flex-shrink:0;"></div>')
 
-    _right = mo.vstack([
-        mo.Html(
-            '<p style="margin:0 0 0.3rem 0;font-size:0.72rem;font-weight:700;'
-            'color:#94A3B8;text-transform:uppercase;letter-spacing:0.08em;">'
-            'Normality test: Epps–Pulley</p>'
-        ),
-        mo.md(r"$$T = N\!\int_{-\infty}^{\infty} \!\left|\hat{\varphi}_X(t) - e^{-t^2/2}\right|^2 e^{-t^2/2}\,\mathrm{d}t$$"),
+    _left = mo.vstack([
+        mo.md("**Step 1**: Sample $M$ random unit-norm directions:"),
+        mo.hstack([_spacer, mo.md(r"$$\boldsymbol{u}^{(m)} \sim \mathcal{U}(S^{d-1}), \quad m = 1, \ldots, M$$")], gap="0"),
+        mo.md("**Step 2**: Project embeddings $Z \\in \\mathbb{R}^{N \\times d}$ onto each direction:"),
+        mo.hstack([_spacer, mo.md(r"$$\boldsymbol{h}^{(m)} = Z\,\boldsymbol{u}^{(m)} \in \mathbb{R}^N$$")], gap="0"),
+        mo.md("**Step 3**: Apply a normality test $T$ to each projection and average:"),
+        mo.hstack([_spacer, mo.md(r"$$\text{SIGReg}(Z) \triangleq \frac{1}{M}\sum_{m=1}^{M} T\!\left(\boldsymbol{h}^{(m)}\right)$$")], gap="0"),
         mo.md(
-            "<span style='font-size:0.78rem;color:#94A3B8;'>"
-            "Compares empirical CF against the Gaussian CF. "
-            "Bounded gradients $|\\partial T/\\partial z_i| \\leq 4\\sigma^2/N$, "
-            "$\\mathcal{O}(N)$, differentiable."
-            "</span>"
+            "By the **Cramér–Wold theorem**: matching all 1-D marginals "
+            "$\\Leftrightarrow$ Matching the full $d$-dimensional joint distribution."
         ),
     ], align="start")
 
@@ -787,7 +768,7 @@ def sigreg_algorithm_slide(mo):
         page_number(12),
         _heading,
         mo.md("&nbsp;"),
-        mo.hstack([_left, _right], widths=[1, 1], gap="2.5rem", align="start"),
+        _left,
     ], align="start")
     return
 
@@ -1558,6 +1539,11 @@ def bibliography_slide_2(BIB_TEXT, mo):
         ], align="start")
 
     _()
+    return
+
+
+@app.cell
+def _():
     return
 
 

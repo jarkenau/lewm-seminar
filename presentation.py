@@ -518,40 +518,6 @@ def sota_target_task_slide():
     _()
     return
 
-
-@app.cell
-def sota_summary_slide():
-    def _():
-        import marimo as mo
-        return mo.vstack([
-            section_strip(1),
-            page_number(6),
-            mo.md("## State of the Art —Where LeWM Fits"),
-            mo.md("*TWO AXES, ONE GAP*"),
-            mo.md("&nbsp;"),
-            sota_table(
-                ["Method", "Target task", "Anti-collapse",
-                 "End-to-end", "Reward-free", "Loss hyperparams"],
-                [
-                    [f"V-JEPA 2 [{cite('assran_v-jepa_2025')}]", "Representation learning", "EMA + stop-grad", "✓", "—", "—"],
-                    [f"DreamerV4 [{cite('hafner_dreamer4_2025')}]", "Generative control", "Reconstruction", "✓", "✗", "—"],
-                    [f"DINO-WM [{cite('zhou_dino-wm_2024')}]", "Latent control", "Frozen encoder", "✗", "✓", "—"],
-                    [f"PLDM [{cite('sobal_pldm_2025')}]", "Latent control", f"VICReg [{cite('bardes_vicreg_2022')}]", "✓", "✓", "6"],
-                    [f"LeWM [{cite('maes_leworldmodel_2026')}]", "Latent control", "SIGReg", "✓", "✓", "1"],
-                ],
-                aligns=["left", "left", "left", "center", "center", "center"],
-            ),
-            mo.md("&nbsp;"),
-            mo.md(
-                "**LeWM** is the only method that is *task-agnostic, reward-free, "
-                "end-to-end from pixels,* **and** trained with a single, provably "
-                "collapse-free regularizer."
-            ),
-        ], align="start")
-    _()
-    return
-
-
 @app.cell
 def outline_recap_after_sota():
     # Recap of the outline shown at the 01 — 02 boundary. Section 01 is grayed

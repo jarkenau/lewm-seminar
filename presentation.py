@@ -459,9 +459,6 @@ def sota_anticollapse_slide():
             sota_table(
                 ["Strategy", "Mechanism", "Limitation"],
                 [
-                    [f"Generative reconstruction (DreamerV4 [{cite('hafner_dreamer4_2025')}])",
-                     "Pixel target is fixed, collapse impossible by construction",
-                     "Wastes capacity modelling irrelevant pixel detail"],
                     [f"EMA + stop-gradient (V-JEPA 2 [{cite('assran_v-jepa_2025')}])",
                      "Asymmetric self-distillation from a moving-average teacher",
                      "No well-defined objective, purely heuristic"],

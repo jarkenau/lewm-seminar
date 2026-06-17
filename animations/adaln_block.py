@@ -42,7 +42,7 @@ class AdaLNTransformerBlock(Scene):
     # ── Conditioning column ────────────────────────────────────────────────
     # Bus line: single vertical at x=BX; horizontal branches for each target.
     AX  = -3.2    # Mod.MLP + action box center x
-    BX  =  0.4    # bus line x (gap between action side and block)
+    BX  = -0.8    # bus line x (gap between action side and block)
 
     # ── Helpers ────────────────────────────────────────────────────────────
     def _box(self, label, fill, stroke, w=None, h=None, fsize=22):
@@ -160,11 +160,11 @@ class AdaLNTransformerBlock(Scene):
         arr_a2m = Arrow(act_box.get_top(), mod_box.get_bottom(),
                         buff=0.09, stroke_width=2.5, color=self.TEXT_C,
                         tip_length=self.TIP, max_tip_length_to_length_ratio=self.RATIO)
-        c_label = MathTex(r"c", font_size=22, color=self.TEXT_C).move_to(
+        c_label = MathTex(r"c", font_size=30, color=self.TEXT_C).move_to(
             arr_a2m.get_center() + np.array([0.28, 0, 0]))
 
         # a_t label + arrow into Embedder
-        at_label = MathTex(r"a_t", font_size=28, color=self.TEXT_C
+        at_label = MathTex(r"a_t", font_size=36, color=self.TEXT_C
                            ).next_to(act_box, DOWN, buff=0.55)
         at_arrow = Arrow(at_label.get_top() + UP * 0.05, act_box.get_bottom(),
                          buff=0.08, stroke_width=2.5, color=self.TEXT_C,
@@ -212,19 +212,21 @@ class AdaLNTransformerBlock(Scene):
             ]
         ])
 
-        # Branch labels (above each horizontal arrow, between bus and target)
-        def _lbl(tex, color, y, x_mid, below=False):
+        # Branch labels — left-aligned at a fixed x so all four labels form a column
+        x_lbl_left = BX + 0.25  # left edge of every label, just clear of the bus
+
+        def _lbl(tex, color, y, below=False):
             offset = -0.30 if below else 0.30
-            return MathTex(tex, font_size=21, color=color).move_to([x_mid, y + offset, 0])
+            m = MathTex(tex, font_size=28, color=color)
+            m.next_to([x_lbl_left, y + offset, 0], RIGHT, buff=0)
+            return m
 
         gray_lx = TX - (self.BW + 1.05) / 2   # left edge of gray background box
-        mid_ada = (BX + gray_lx) / 2
-        mid_add = (BX + gray_lx) / 2
 
-        lbl_ds1 = _lbl(r"\Delta_{\rm attn},\Sigma_{\rm attn}", self.MOD_C,  self.YN1, mid_ada)
-        lbl_g1  = _lbl(r"G_{\rm attn}",                       self.GATE_C, self.YA1, mid_add)
-        lbl_ds2 = _lbl(r"\Delta_{\rm mlp},\Sigma_{\rm mlp}",  self.MOD_C,  self.YN2, mid_ada)
-        lbl_g2  = _lbl(r"G_{\rm mlp}",                        self.GATE_C, self.YA2, mid_add, below=True)
+        lbl_ds1 = _lbl(r"\Delta_{\rm attn},\Sigma_{\rm attn}", self.MOD_C,  self.YN1)
+        lbl_g1  = _lbl(r"G_{\rm attn}",                       self.GATE_C, self.YA1)
+        lbl_ds2 = _lbl(r"\Delta_{\rm mlp},\Sigma_{\rm mlp}",  self.MOD_C,  self.YN2)
+        lbl_g2  = _lbl(r"G_{\rm mlp}",                        self.GATE_C, self.YA2, below=True)
 
         # ── Title ──────────────────────────────────────────────────────────
         title = Text("AdaLN-Zero Transformer Block",
@@ -235,7 +237,7 @@ class AdaLNTransformerBlock(Scene):
         def _leg(line_col, txt):
             return VGroup(
                 Line(ORIGIN, RIGHT*0.45, stroke_width=3, color=line_col),
-                Text(txt, font_size=16, color=line_col),
+                Text(txt, font_size=22, color=line_col),
             ).arrange(RIGHT, buff=0.12)
 
         legend = VGroup(

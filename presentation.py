@@ -655,14 +655,12 @@ def adaln_why_lewm_slide(mo):
 
     _text = mo.vstack([
         mo.md(
-            "**01 Why scale + shift? Not concatenation or addition?**\n\n"
-            "- *Concat / addition*: action signal is drowned out or shifts features uniformly\n"
-            "- *AdaLN*: action conditions both the **scale and shift of every feature**\n\n"
-            "**02 Why zero-init?**\n\n"
-            "- $G{=}0$ gates out the sublayer's contribution **pure skip connection**:  \n"
-            "  $x \\leftarrow x + 0{\\cdot}\\text{sublayer}(y) = x$\n"
-            "- **Two-phase**: SIGReg first anchors the latent geometry; "
-            "gates then open progressively as representations mature — stable end-to-end training"
+            "**01 Why inject the action at every layer?**\n\n"
+            "- *Concat / add at input*: signal fades as it passes through 6 transformer layers\n"
+            "- *AdaLN per layer*: action re-conditions every intermediate representation\n\n"
+            "**02 Zero initialization**\n\n"
+            "- **Phase 1:** $G{=}0$, predictor is a pure skip, SIGReg anchors latent geometry\n"
+            "- **Phase 2:** gates open, $G$ admits action-conditioned residuals"
         ),
     ], align="start")
 
@@ -1524,6 +1522,11 @@ def bibliography_slide_2(BIB_TEXT, mo):
         ], align="start")
 
     _()
+    return
+
+
+@app.cell
+def _():
     return
 
 

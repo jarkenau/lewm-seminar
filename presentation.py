@@ -1063,47 +1063,43 @@ def experiments_environments_slide(mo):
 
 @app.cell
 def experiments_physics_slide(mo):
+    import pathlib as _pathlib
+    import sys as _sys
+
     _heading = mo.Html(
-        '<h2 style="margin:0;">Physics Without Supervision</h2>'
+        '<h2 style="margin:0;">Violation of Expectation</h2>'
+    )
+
+    if _sys.platform != "emscripten":
+        _voe_src = (_pathlib.Path(__file__).parent / "media/images/fig10_voe_clean.png").read_bytes()
+    else:
+        _voe_src = "media/images/fig10_voe_clean.png"
+
+    _fig = mo.image(
+        src=_voe_src,
+        width="80%",
     )
 
     _content = mo.Html(
         '<div style="font-size:1.05rem;line-height:1.9;">'
 
-        '<p style="font-weight:700;margin:0 0 0.3rem 0;">Linear Probing (PushT)</p>'
-        '<ul style="list-style:disc;padding-left:1.4rem;margin:0 0 1.2rem 0;">'
-        '<li>Can physical quantities be read out from the latent space without any physics supervision?</li>'
-        '<li>Frozen encoder + linear layer achieves R² &gt; 0.90 for position and angle, outperforming PLDM</li>'
-        '<li>Linear (not non-linear) decoder recovering a quantity means it is stored as an explicit direction in latent space</li>'
-        '<li style="list-style:none;padding-left:1rem;font-size:0.88em;color:#444;line-height:2.2;">'
-        'R<sup>2</sup> = 1 &minus; '
-        '<span style="display:inline-flex;flex-direction:column;align-items:center;vertical-align:middle;margin:0 3px;">'
-        '<span style="border-bottom:1px solid currentColor;padding:0 4px;">&sum;<sub>i</sub>(y<sub>i</sub> &minus; &#375;<sub>i</sub>)<sup>2</sup></span>'
-        '<span style="padding:0 4px;">&sum;<sub>i</sub>(y<sub>i</sub> &minus; &#563;)<sup>2</sup></span>'
-        '</span>'
-        '</li>'
-        '<li style="list-style:none;padding-left:1rem;font-size:0.88em;color:#444;">'
-        '&#375;<sub>i</sub> = predicted value &nbsp;&nbsp; &#563; = mean of y &nbsp;&nbsp; R<sup>2</sup> = 1 means perfect prediction'
-        '</li>'
-        '<li>Physical structure emerges implicitly from the JEPA training objective alone</li>'
-        '</ul>'
-
-        '<p style="font-weight:700;margin:0 0 0.3rem 0;">Violation-of-Expectation</p>'
         '<ul style="list-style:disc;padding-left:1.4rem;margin:0;">'
-        '<li>Does the model assign higher surprise to physically impossible events than to mere visual changes?</li>'
-        '<li>Teleportation (physical violation) causes sharp MSE spikes; color changes (visual-only) do not</li>'
-        '<li>LeWM has learned an implicit notion of physical plausibility, not just visual pattern matching</li>'
+        '<li>Surprise = discrepancy between predicted and actual future observations</li>'
         '</ul>'
-
-        '</div>'
+        '<p style="font-weight:700;margin:0.8rem 0 0.3rem 0;">Two perturbation types</p>'
+        '<ul style="list-style:disc;padding-left:1.4rem;margin:0;">'
+        '<li>Visual: object color changes abruptly mid-trajectory</li>'
+        '<li>Physical: object teleports to a random location</li>'
+         '</div>'
     )
 
     mo.vstack([
-
         page_number(17),
         _heading,
         mo.Html('<div style="height:0.8rem;"></div>'),
         _content,
+        mo.Html('<div style="height:2.5rem;"></div>'),
+        _fig,
     ], align="start", gap="1rem")
     return
 

@@ -477,29 +477,19 @@ def sota_anticollapse_slide():
 
 @app.cell
 def sota_target_task_slide():
-    def _():
-        import marimo as mo
-        return mo.vstack([
-
-            page_number(5),
-            mo.md("## State of the Art by *Target Task*"),
-            mo.md("&nbsp;"),
-            sota_table(
-                ["Family", "What it does", "Representative work"],
-                [
-                    ["Self-supervised representation learning",
-                     "Predict masked latent patches no actions, no planning",
-                     f"I-JEPA [{cite('assran_i-jepa_2023')}], V-JEPA 2 [{cite('assran_v-jepa_2025')}]"],
-                    ["Generative world models",
-                     "Action-conditioned pixel-space simulators, often reward-based, for RL &amp; games",
-                     f"DreamerV4 [{cite('hafner_dreamer4_2025')}], Genie [{cite('bruce_genie_2024')}]"],
-                    ["Latent action-conditioned world models",
-                     "Predict dynamics in latent space, plan by imagination",
-                     f"DINO-WM [{cite('zhou_dino-wm_2024')}], PLDM [{cite('sobal_pldm_2025')}]"],
-                ],
-            ),
-        ], align="start")
-    _()
+    import sys as _sys
+    import marimo as _mo
+    if _sys.platform != "emscripten":
+        _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
+        from animations.world_model_taxonomy import WorldModelTaxonomy
+        _video = render_scene(WorldModelTaxonomy)
+    else:
+        _video = _mo.Html(
+            f'<video autoplay muted controls style="{VIDEO_STYLE}">'
+            '<source src="media/videos/world_model_taxonomy/1080p60/WorldModelTaxonomy.mp4" type="video/mp4">'
+            '</video>'
+        )
+    _mo.vstack([page_number(5), _video])
     return
 
 

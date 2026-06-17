@@ -23,7 +23,7 @@
       },
       {
         "type": "slide",
-        "speakerNotes": "- Self-supervised representation learning (I-JEPA, V-JEPA\u00a02): Predict masked latent patches \n  - Purely about learning good representations, no actions, no planning component at all\n  - These are the models closest to the original JEPA vision\n  - They're not world models in the RL sense, the agent can't use them to plan\n- Generative world models (DreamerV4, Genie): action-conditioned simulators that operate in pixel space\n  - The agent imagines future frames and plans through them\n  - These can plan, but they do it by hallucinating pixels -> Computationally expensive and capacity is spent on visual fidelity rather than decision-relevant structure\n- Latent action-conditioned world models (DINO-WM, PLDM): predict dynamics directly in latent space and plan by imagination there \n  - No pixel reconstruction at any point\n  - This is the smallest family, and the one LeWM belongs to"
+        "speakerNotes": ""
       },
       {
         "speakerNotes": "- V-JEPA 2: End-to-end, but not built for control\n- DreamerV4: End-to-end and does control, but requires reward and operates in pixel space\n- DINO-WM: reward-free latent control, but the frozen encoder means it's not end-to-end \n  - It can only be as good as DINOv2\n- PLDM: the closest predecessor: End-to-end, reward-free, latent control, \n  - Explicit regularization, but 6 hyperparameters -> Training instabilities\n- LeWM is essentially PLDM with a better regularizer, same target task, same end-to-end training, but SIGReg replaces VICReg's 6 hyperparameters with 1\n"

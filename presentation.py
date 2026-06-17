@@ -1177,64 +1177,57 @@ def outline_recap_after_experiments():
 
 
 @app.cell
-def discussion_slide(mo):
+def findings_limitations_slide(mo):
     _DISC = "#8B5CF6"
-    _DISC_TEXT = "#4C1D95"
 
-    def _col_header(label, icon):
-        return (
-            f'<div style="display:flex;align-items:center;gap:0.6rem;margin-bottom:1rem;">'
-            f'<span style="font-size:2rem;">{icon}</span>'
-            f'<span style="font-weight:700;font-size:2rem;color:{_DISC_TEXT};">{label}</span>'
-            f'</div>'
-        )
-
-    def _bullet(head, body):
+    def _bullet(head):
         return (
             f'<div style="display:flex;gap:0.7rem;margin:1.2rem 0;line-height:1.5;">'
             f'<span style="color:{_DISC};font-weight:700;flex-shrink:0;margin-top:0.1rem;font-size:1.5rem;">▸</span>'
-            f'<span style="font-size:1.5rem;"><strong>{head}</strong>'
-            f'<br><span style="font-size:1.3rem;color:#374151;">{body}</span></span>'
+            f'<span style="font-size:1.5rem;"><strong>{head}</strong></span>'
             f'</div>'
         )
 
-    _findings_html = (
-        _col_header("Key Findings", "◆")
-        + _bullet("Competitive across all tasks, with simplicity",
-                  "End-to-end training from pixels, no pretrained encoder, no EMA or stop-gradient, fewer loss hyperparameters than pixel-based rivals")
-        + _bullet("SIGReg (from LeJEPA) is the key enabler",
-                  "Imported from Balestriero & LeCun 2025, integrated here into end-to-end MBRL training. Aligns embeddings with an isotropic Gaussian via Epps–Pulley projections — no contrastive pairs needed.")
-        + _bullet("No pixel reconstruction",
-                  "Unlike DreamerV3, IRIS and DIAMOND, it predicts only in latent space. No decoder, no generation overhead.")
-        + _bullet("No pretrained visual backbone",
-                  "Unlike DINO-WM, the encoder trains end-to-end. No frozen ViT dependency to prevent collapse.")
-    )
-
-    _limitations_html = (
-        _col_header("Limitations & Future Work", "?")
-        + _bullet("Narrow evaluation scope",
-                  "Only 2D and 3D simulated tasks; no real world or high DoF robot validation")
-        + _bullet("Dependence on action labeled data",
-                  "Requires fully labeled action sequences; cannot learn from passive observations")
-        + _bullet("Future: longer horizons",
-                  "Hierarchical world models for long range planning beyond H=5 CEM")
-        + _bullet("Not a foundation model",
-                  "Must retrain per environment; no cross-environment or cross-action-space transfer")
-    )
-
-    _grid = mo.Html(
-        f'<div style="display:grid;grid-template-columns:1fr 1fr;column-gap:10rem;width:100%;align-items:start;">'
-        f'<div>{_findings_html}</div>'
-        f'<div>{_limitations_html}</div>'
-        f'</div>'
-    )
+    _findings_html = "".join([
+        _bullet("Stable end-to-end training from raw pixels, competitive across diverse tasks"),
+        _bullet("SIGReg (LeJEPA) is sufficient to stabilize end-to-end world model training"),
+        _bullet("48× faster planning than DINO-WM"),
+        _bullet("Latent space captures physical structure"),
+    ])
 
     mo.vstack([
-
         page_number(18),
-        mo.md("## Discussion"),
+        mo.md("## Key Findings"),
         mo.md("&nbsp;"),
-        _grid,
+        mo.Html(_findings_html),
+    ], align="start")
+    return
+
+
+@app.cell
+def discussion_slide(mo):
+    _DISC = "#8B5CF6"
+
+    def _bullet(head):
+        return (
+            '<div style="display:flex;gap:0.7rem;margin:1.2rem 0;line-height:1.5;">'
+            f'<span style="color:{_DISC};font-weight:700;flex-shrink:0;margin-top:0.1rem;font-size:1.5rem;">&#9658;</span>'
+            f'<span style="font-size:1.5rem;"><strong>{head}</strong></span>'
+            '</div>'
+        )
+
+    _limitations_html = "".join([
+        _bullet("Short horizon + offline ceiling &#8594 Hierarchichal JEPAs" ),
+        _bullet("Deterministic predictor: Multimodal dynamics (contacts, collisions) unrepresentable"),
+        _bullet("Not a foundation model: Action conditioning &#8594 Must retrain per environment"),
+        _bullet("Latent planning with CEM does not scale to high-DoF"),
+    ])
+
+    mo.vstack([
+        page_number(19),
+        mo.md("## Limitations & Future Work"),
+        mo.md("&nbsp;"),
+        mo.Html(_limitations_html),
     ], align="start")
     return
 
@@ -1304,7 +1297,7 @@ def _bib_text_cell():
     	issn = {08936080},
     	url = {https://linkinghub.elsevier.com/retrieve/pii/S0893608022001150},
     	doi = {10.1016/j.neunet.2022.03.037},
-    	abstract = {Deep learning (DL) and reinforcement learning (RL) methods seem to be a part of indispensable factors to achieve human-level or super-human AI systems. On the other hand, both DL and RL have strong connections with our brain functions and with neuroscientific findings. In this review, we summarize talks and discussions in the ‘‘Deep Learning and Reinforcement Learning’’ session of the symposium, International Symposium on Artificial Intelligence and Brain Science. In this session, we discussed whether we can achieve comprehensive understanding of human intelligence based on the recent advances of deep learning and reinforcement learning algorithms. Speakers contributed to provide talks about their recent studies that can be key technologies to achieve human-level intelligence.},
+    	abstract = {Deep learning (DL) and reinforcement learning (RL) methods seem to be a part of indispensable factors to achieve human-level or super-human AI systems. On the other hand, both DL and RL have strong connections with our brain functions and with neuroscientific findings. In this review, we summarize talks and discussions in the ''Deep Learning and Reinforcement Learning'' session of the symposium, International Symposium on Artificial Intelligence and Brain Science. In this session, we discussed whether we can achieve comprehensive understanding of human intelligence based on the recent advances of deep learning and reinforcement learning algorithms. Speakers contributed to provide talks about their recent studies that can be key technologies to achieve human-level intelligence.},
     	language = {en},
     	urldate = {2026-05-04},
     	journal = {Neural Networks},
@@ -1550,7 +1543,7 @@ def bibliography_slide_1(BIB_TEXT, mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in cited_entries[:ENTRIES_PER_PAGE])
         return mo.vstack([
-            page_number(19),
+            page_number(20),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References</h2>{items}'),
         ], align="start")
 
@@ -1577,7 +1570,7 @@ def bibliography_slide_2(BIB_TEXT, mo):
 
         items = "".join(format_ref_ieee(i, e) for i, e in page_entries)
         return mo.vstack([
-            page_number(20),
+            page_number(21),
             mo.Html(f'<h2 style="margin-bottom:0.5rem;">References (cont.)</h2>{items}'),
         ], align="start")
 

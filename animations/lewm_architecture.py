@@ -116,8 +116,8 @@ class LeWMArchitecture(Scene):
                         x_lab=x_lab, obs_lab=obs_lab, a_img=a_img)
 
         STEP = 0.1
-        encL = build_encoder(-EX, 0.0, r"x(t{-}2),\,x(t{-}1),\,x(t)", tex_size=16)
-        encR = build_encoder(EX, STEP, r"x(t{+}1)", tex_size=16)
+        encL = build_encoder(-EX, 0.0, r"x(t{-}2),\,x(t{-}1),\,x(t)", tex_size=22)
+        encR = build_encoder(EX, STEP, r"x(t{+}1)", tex_size=22)
 
         # x(t) is really a short stack of past frames — show faded ghost copies
         # offset behind the current observation to convey the temporal context.
@@ -134,19 +134,19 @@ class LeWMArchitecture(Scene):
         pred = labeled_box(
             [Text("Transformer", font_size=20, color=TEXT_COLOR),
              Tex(r"$\sim$10M params", font_size=18, color=TEXT_COLOR),
-             Text("AdaLN at every layer", font_size=13, color=ACTION_COLOR)],
+             Text("AdaLN at every layer", font_size=16, color=BLACK)],
             w=2.6, h=0.95,
         ).move_to([-0.7, 1.95, 0])
 
         z_to_pred = make_arrow(encL["enc"].get_top(), pred.get_left())
 
         # action conditioning (AdaLN) from below
-        a_box = RoundedRectangle(width=1.5, height=0.7, corner_radius=0.08,
+        a_box = RoundedRectangle(width=2.4, height=0.7, corner_radius=0.08,
                                  fill_color="#f0ebf7", fill_opacity=1,
                                  stroke_color=ACTION_COLOR, stroke_width=2).move_to([-0.7, 0.5, 0])
         a_text = VGroup(
-            MathTex(r"a(t)", color=ACTION_COLOR, font_size=18),
-            MathTex(r"(\Delta x,\,\Delta y)\in[-1,1]^2", color=ACTION_COLOR, font_size=14),
+            Text("Action Space", font_size=15, color=BLACK),
+            MathTex(r"(\Delta x,\,\Delta y)\in[-1,1]^2", color=BLACK, font_size=17),
         ).arrange(DOWN, buff=0.08).move_to(a_box.get_center())
         a_to_pred = make_arrow(a_box.get_top(), pred.get_bottom(), sw=2.5)
 

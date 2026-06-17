@@ -26,7 +26,7 @@ class JEPATraining(Scene):
             font_size=28, color=TEXT_COLOR,
         ).to_edge(UP, buff=0.4)
         self.play(Write(title), run_time=0.8)
-        self.wait(0.3)
+        self.wait(1.0)
 
         # ── Helper: neural-net icon ────────────────────────────────────────────
         def make_nn(layers=(3, 4, 3), node_r=0.13, h_gap=0.55, v_gap=0.32):
@@ -161,7 +161,7 @@ class JEPATraining(Scene):
             ),
             run_time=1.0,
         )
-        self.wait(0.2)
+        self.wait(1.2)
 
         # ── Stage 2: encoders ────────────────────────────────────────────────
         self.play(
@@ -174,7 +174,7 @@ class JEPATraining(Scene):
             ),
             run_time=1.2,
         )
-        self.wait(0.3)
+        self.wait(1.2)
 
         # ── Stage 3: predictor ───────────────────────────────────────────────
         self.play(
@@ -183,12 +183,14 @@ class JEPATraining(Scene):
             FadeIn(pred_label),
             run_time=1.0,
         )
+        self.wait(1.0)
         self.play(
             FadeIn(latent_dot),
             FadeIn(latent_var),
             GrowArrow(arr_latent_pred),
             run_time=0.8,
         )
+        self.wait(1.0)
         self.play(
             LaggedStart(
                 GrowArrow(arr_pred_to_compare),
@@ -197,7 +199,7 @@ class JEPATraining(Scene):
             ),
             run_time=0.9,
         )
-        self.wait(0.3)
+        self.wait(1.2)
 
         # ── Stage 4: vector comparison ───────────────────────────────────────
         self.play(
@@ -208,5 +210,4 @@ class JEPATraining(Scene):
             ),
             run_time=0.9,
         )
-        self.wait(0.4)
-        self.wait(1.0)
+        self.wait(2.0)

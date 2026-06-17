@@ -57,17 +57,6 @@ with app.setup:
         4: {"bg": "#EDE9FE", "border": "#8B5CF6", "text": "#4C1D95", "label": "04 · Discussion"},
     }
 
-    def section_strip(num):
-        import marimo as mo
-        c = SECTION[num]
-        return mo.Html(
-            f'<div style="position:fixed;top:0.6rem;right:1.75rem;z-index:100;">'
-            f'<span style="font-size:0.6rem;font-weight:700;color:{c["text"]};letter-spacing:0.1em;'
-            f'text-transform:uppercase;background:{c["bg"]};padding:0.2rem 0.5rem;'
-            f'border-radius:0.25rem;">'
-            f'{c["label"]}</span></div>'
-        )
-
     def page_number(num):
         # Slide number in the bottom-right corner. Numbering starts at 1 on the
         # first content slide (after the title and outline slides) so viewers
@@ -357,7 +346,7 @@ def jepa_principle_animation_slide():
             '<source src="media/videos/jepa_training/1080p60/JEPATraining.mp4" type="video/mp4">'
             '</video>'
         )
-    _mo.vstack([section_strip(1), page_number(1), _video])
+    _mo.vstack([page_number(1), _video])
     return
 
 
@@ -374,7 +363,7 @@ def representation_collapse_question():
             img_src = "media/images/jepa_final_frame.png"
 
         return mo.vstack([
-            section_strip(1),
+
             page_number(2),
             mo.hstack(
                 [
@@ -418,7 +407,7 @@ def representation_collapse_answer():
             img_src = "media/images/jepa_final_frame.png"
 
         return mo.vstack([
-            section_strip(1),
+
             page_number(3),
             mo.hstack(
                 [
@@ -463,7 +452,7 @@ def sota_anticollapse_slide():
     def _():
         import marimo as mo
         return mo.vstack([
-            section_strip(1),
+
             page_number(4),
             mo.md("## State of the Art by *Anti-Collapse Strategy*"),
             mo.md("&nbsp;"),
@@ -494,7 +483,7 @@ def sota_target_task_slide():
     def _():
         import marimo as mo
         return mo.vstack([
-            section_strip(1),
+
             page_number(5),
             mo.md("## State of the Art by *Target Task*"),
             mo.md("&nbsp;"),
@@ -515,6 +504,7 @@ def sota_target_task_slide():
         ], align="start")
     _()
     return
+
 
 @app.cell
 def outline_recap_after_sota():
@@ -586,7 +576,7 @@ def lewm_architecture_animation_slide():
             '<source src="media/videos/lewm_architecture/1080p60/LeWMArchitecture.mp4" type="video/mp4">'
             '</video>'
         )
-    _mo.vstack([section_strip(2), page_number(7), _video])
+    _mo.vstack([page_number(7), _video])
     return
 
 
@@ -605,7 +595,7 @@ def vit_encoder_slide(mo):
         )
 
     mo.vstack([
-        section_strip(2),
+
         page_number(8),
         _video,
         mo.Html(
@@ -664,7 +654,7 @@ def adaln_formulas_slide(mo):
     )
 
     mo.vstack([
-        section_strip(2),
+
         page_number(9),
         _heading,
         mo.hstack([
@@ -710,7 +700,7 @@ def adaln_why_lewm_slide(mo):
         _img_src = "media/images/AdaLNTransformerBlock_ManimCE_v0.20.1.png"
 
     mo.vstack([
-        section_strip(2),
+
         page_number(10),
         _heading,
         mo.md("&nbsp;"),
@@ -736,7 +726,7 @@ def sigreg_optimal_distribution_slide(mo):
     )
 
     mo.vstack([
-        section_strip(2),
+
         page_number(11),
         _heading,
         mo.md("*The theoretically optimal target distribution for any downstream task*"),
@@ -806,7 +796,7 @@ def sigreg_algorithm_slide(mo):
     ], align="start")
 
     mo.vstack([
-        section_strip(2),
+
         page_number(12),
         _heading,
         mo.md("&nbsp;"),
@@ -841,7 +831,7 @@ def sigreg_mechanism_slide(mo):
     )
 
     mo.vstack([
-        section_strip(2),
+
         page_number(13),
         _heading,
         _video,
@@ -886,7 +876,7 @@ def latent_planning_concept_slide(mo):
     ], gap="2rem", align="start")
 
     mo.vstack([
-        section_strip(2),
+
         page_number(14),
         _heading,
         mo.md("*Finding the optimal action sequence entirely in imagination*"),
@@ -953,7 +943,7 @@ def latent_planning_cem_slide(mo):
     ], align="start")
 
     mo.vstack([
-        section_strip(2),
+
         page_number(15),
         _heading,
         mo.md("&nbsp;"),
@@ -1072,7 +1062,7 @@ def experiments_environments_slide(mo):
     )
 
     mo.vstack([
-        section_strip(3),
+
         page_number(16),
         _heading,
         _subtitle,
@@ -1122,7 +1112,7 @@ def experiments_physics_slide(mo):
     )
 
     mo.vstack([
-        section_strip(3),
+
         page_number(17),
         _heading,
         mo.Html('<div style="height:0.8rem;"></div>'),
@@ -1240,7 +1230,7 @@ def discussion_slide(mo):
     )
 
     mo.vstack([
-        section_strip(4),
+
         page_number(18),
         mo.md("## Discussion"),
         mo.md("&nbsp;"),

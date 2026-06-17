@@ -14,7 +14,7 @@ A 20-minute seminar presentation for the *World Models* seminar at TU Munich, co
 
 **Title and Outline** (not numbered)
 
-**01 · Background and State of the Art** (slides 1 to 6)
+**01 · Background and State of the Art** (slides 1 to 5)
 
 | Slide | Topic |
 | ----- | ----- |
@@ -22,8 +22,7 @@ A 20-minute seminar presentation for the *World Models* seminar at TU Munich, co
 | 2 | Representation collapse: what is it? |
 | 3 | Representation collapse: complete vs. dimensional |
 | 4 | State of the Art by anti-collapse strategy (EMA/stop-grad, frozen encoders, VICReg-style) |
-| 5 | State of the Art by target task (representation, generative control, latent WMs) |
-| 6 | Where LeWM fits: only end-to-end, reward-free, single provably collapse-free regularizer |
+| 5 | World model taxonomy by target task (Manim animation) |
 
 **02 · LeWorldModel** (slides 7 to 15)
 
@@ -34,10 +33,12 @@ A 20-minute seminar presentation for the *World Models* seminar at TU Munich, co
 | 9 | Action conditioning via AdaLN-Zero: scale / shift / gate from action embedding |
 | 10 | Why AdaLN-Zero over concatenation / addition |
 | 11 | SIGReg: why isotropic Gaussian (Lemmas 1 and 2, Theorem 1) |
-| 12 | SIGReg: Cramer-Wold sketching + Epps-Pulley normality test |
-| 13 | SIGReg: full objective L = MSE + lambda times SIGReg |
+| 12 | SIGReg: Cramér-Wold sketching + Epps-Pulley normality test |
+| 13 | SIGReg: collapse mechanism (Manim animation) |
 | 14 | Latent planning concept: MPC in latent space |
 | 15 | Latent planning via CEM: action sequence optimisation |
+
+*Note: slide 6 is unused — it was an outline transition that has no page number.*
 
 **03 · Experiments** (slides 16 to 17)
 
@@ -46,13 +47,12 @@ A 20-minute seminar presentation for the *World Models* seminar at TU Munich, co
 | 16 | Evaluation environments: PushT, Cube, TwoRooms, Reacher |
 | 17 | Physics emerges in latent space (probing); surprise detection |
 
-**04 · Discussion** (slide 18)
+**04 · Discussion** (slides 18 to 19)
 
 | Slide | Topic |
 | ----- | ----- |
-| 18 | Authors' claims, personal critical assessment, open questions, future directions |
-
-**Bibliography** (slides 19 to 20)
+| 18 | Key findings: stable training, planning speed, latent structure |
+| 19 | Limitations & future work: horizon, determinism, generalization, CEM scaling |
 
 ## Dependencies
 
@@ -119,3 +119,9 @@ and the result is not obviously better-looking.
 **Summary:** Use this stack when animations or programmatic content are central to the talk. For
 standard lecture slides where layout speed matters more than animation quality, a GUI tool is still
 faster.
+
+### Alternative: fully generated website
+
+As an alternative to the Marimo GUI, the presentation could be compiled to a **static website**
+— a single self-contained HTML file (or a small bundle) with all slides as pages, the Manim
+`.mp4`s embedded, and a minimal JavaScript slide player for keyboard navigation.

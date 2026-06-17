@@ -24,8 +24,8 @@ class WorldModelTaxonomy(Scene):
     # ── Layout constants ─────────────────────────────────────────────────────────
     LBL_X  = -5.4
     LBL_W  = 1.95
-    LBL_H  = 1.55
-    ROW_Y  = [2.2, 0.3, -1.6]
+    LBL_H  = 1.80
+    ROW_Y  = [2.1, 0.0, -2.1]
     CSTART = -4.05
     CEND   =  6.55
 
@@ -34,9 +34,12 @@ class WorldModelTaxonomy(Scene):
 
         title = self._title()
         lb1, lb2, lb3 = [self._lbl_box(*args) for args in [
-            ("renders",   self.ROW_Y[0], "actions",    "pixels"),
-            ("simulates", self.ROW_Y[1], "actions",    "world state"),
-            ("plans",     self.ROW_Y[2], "obs + goal", "actions"),
+            ("renders",   self.ROW_Y[0], "actions",    "pixels",
+             ("Cosmos-Predict2.5", "Ali et al., 2025")),
+            ("simulates", self.ROW_Y[1], "actions",    "world state",
+             ("Motus", "Bi et al., 2025")),
+            ("plans",     self.ROW_Y[2], "obs + goal", "actions",
+             ("LeWorldModel", "Maes et al., 2026")),
         ]]
         c1 = self._renderer_row(self.ROW_Y[0])
         c2 = self._simulator_row(self.ROW_Y[1])
@@ -82,7 +85,7 @@ class WorldModelTaxonomy(Scene):
             font_size=28, color=self.TEXT_C,
         ).to_edge(UP, buff=0.4)
 
-    def _lbl_box(self, italic_word, y, in_val, out_val):
+    def _lbl_box(self, italic_word, y, in_val, out_val, example=None):
         box = RoundedRectangle(
             corner_radius=0.1,
             width=self.LBL_W, height=self.LBL_H,
@@ -90,19 +93,32 @@ class WorldModelTaxonomy(Scene):
             stroke_color=self.BOX_STROKE, stroke_width=2,
         ).move_to([self.LBL_X, y, 0])
         w1 = Tex(r"\textit{" + italic_word + r"}", font_size=28, color=self.TEXT_C,
-                 ).move_to([self.LBL_X, y + 0.44, 0])
+                 ).move_to([self.LBL_X, y + 0.57, 0])
         divider = Line(
-            [self.LBL_X - self.LBL_W * 0.42, y + 0.13, 0],
-            [self.LBL_X + self.LBL_W * 0.42, y + 0.13, 0],
+            [self.LBL_X - self.LBL_W * 0.42, y + 0.27, 0],
+            [self.LBL_X + self.LBL_W * 0.42, y + 0.27, 0],
             stroke_color=self.BOX_STROKE, stroke_width=0.8,
         )
         w3 = Tex(r"\textrm{IN} $\to$ \textrm{" + in_val + r"}",
                  font_size=16, color=self.TEXT_C,
-                 ).move_to([self.LBL_X, y - 0.16, 0])
+                 ).move_to([self.LBL_X, y + 0.04, 0])
         w4 = Tex(r"\textrm{OUT} $\to$ \textrm{" + out_val + r"}",
                  font_size=16, color=self.TEXT_C,
-                 ).move_to([self.LBL_X, y - 0.50, 0])
-        return VGroup(box, w1, divider, w3, w4)
+                 ).move_to([self.LBL_X, y - 0.24, 0])
+        elements = [box, w1, divider, w3, w4]
+        if example:
+            paper_name, authors = example
+            sep = Line(
+                [self.LBL_X - self.LBL_W * 0.42, y - 0.48, 0],
+                [self.LBL_X + self.LBL_W * 0.42, y - 0.48, 0],
+                stroke_color=self.BOX_STROKE, stroke_width=0.5,
+            )
+            cite_title = Tex(r"\textit{" + paper_name + r"}", font_size=13,
+                             color=self.TEXT_C).move_to([self.LBL_X, y - 0.62, 0])
+            cite_auth = Tex(r"\textrm{" + authors + r"}", font_size=12,
+                            color=self.TEXT_C).move_to([self.LBL_X, y - 0.76, 0])
+            elements += [sep, cite_title, cite_auth]
+        return VGroup(*elements)
 
     def _mountain_icon(self, cx, cy, w=1.85, h=0.95):
         bg = Rectangle(

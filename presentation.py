@@ -611,43 +611,28 @@ def adaln_formulas_slide(mo):
     )
 
     _standard_ln = mo.vstack([
-        mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Standard LN &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Ba et al. [{cite("ba_layer_normalization_2016")}]</span></h3>'),
-        mo.md(r"$$y = \gamma \cdot \frac{x - \mu}{\sigma} + \beta$$"),
+        mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Standard LN &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Ba et al., &ldquo;Layer Normalization&rdquo;</span></h3>'),
+        mo.md(r"$$y = \text{scale} \cdot \frac{x - \mu}{\sigma} + \text{shift}$$"),
         mo.md(
-            "- $\\gamma, \\beta$ are **fixed** learned parameters\n"
-            "- Same for every input, no external conditioning"
+            "- Scale & shift are **fixed** learned parameters\n"
+
         ),
     ], align="start")
 
     _adaptive_ln = mo.vstack([
-        mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">AdaLN-Zero &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Peebles & Xie [{cite("peebles_dit_2022")}]</span></h3>'),
-        mo.md(r"$$y = \underbrace{(1+\Sigma(c))}_{\text{scale}} \cdot \frac{x-\mu}{\sigma} + \underbrace{\Delta(c)}_{\text{shift}}, \quad x \leftarrow x + \underbrace{G(c)}_{\text{gate}} \cdot \text{sublayer}(y)$$"),
-        mo.md(r"$$[\Delta,\Sigma,G]_{\text{attn}},[\Delta,\Sigma,G]_{\text{mlp}} = \text{SiLU}(c)\,W + b$$"),
+        mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">AdaLN-Zero &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Peebles & Xie, &ldquo;Scalable Diffusion Models with Transformers&rdquo;</span></h3>'),
+        mo.md(r"$$y = \underbrace{(1+\Sigma(a))}_{\text{scale}} \cdot \frac{x-\mu}{\sigma} + \underbrace{\Delta(a)}_{\text{shift}}$$"),
+        mo.md(r"$$x \leftarrow x + \underbrace{G(a)}_{\text{gate}} \cdot \text{sublayer}(y)$$"),
         mo.md(
-            "- $\\Delta, \\Sigma, G$ **from conditioning signal** $c$ (the action)\n"
-            "- **6 outputs**: shift / scale / gate for attn & MLP\n"
-            "- **Zero-init**: $W=0, b=0$ — identity at init"
+            "- Scale & shift **depend** on the action **a**\n"
         ),
     ], align="start")
-
-    _silu_img_url = "https://pytorch.org/docs/2.12/_images/SiLU.png"
-    _silu_panel = mo.Html(
-        f'<div style="margin-left:auto;width:fit-content;text-align:center;transform:scale(0.65);transform-origin:top right;">'
-        f'<img src="{_silu_img_url}" style="max-width:100%;height:auto;display:block;" />'
-        f'<p style="margin:0.3rem 0 0.1rem 0;font-size:1.1rem;font-weight:600;color:#334155;">SiLU(x) = x · σ(x)</p>'
-        f'<a href="https://docs.pytorch.org/docs/2.12/generated/torch.nn.SiLU.html" '
-        f'style="font-size:1rem;color:#3B82F6;">torch.nn.SiLU</a>'
-        f'</div>'
-    )
 
     mo.vstack([
 
         page_number(9),
         _heading,
-        mo.hstack([
-            mo.vstack([_standard_ln, mo.md("&nbsp;"), _adaptive_ln], align="start"),
-            _silu_panel,
-        ], widths=[1, 1], gap="2rem", align="start"),
+        mo.vstack([_standard_ln, mo.md("&nbsp;"), _adaptive_ln], align="start"),
     ])
     return
 
@@ -1539,11 +1524,6 @@ def bibliography_slide_2(BIB_TEXT, mo):
         ], align="start")
 
     _()
-    return
-
-
-@app.cell
-def _():
     return
 
 

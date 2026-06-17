@@ -381,7 +381,7 @@ def representation_collapse_question():
                     mo.vstack(
                         [
                             mo.md("## Representation Collapse"),
-                            mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
+                            mo.md("*The Core Problem of JEPA-Based Architectures*"),
                             mo.md("&nbsp;"),
                             mo.md("&nbsp;"),
                             mo.md("What is the easiest way a model could achieve **(near-)perfect prediction loss?**"),
@@ -425,7 +425,7 @@ def representation_collapse_answer():
                     mo.vstack(
                         [
                             mo.md("## Representation Collapse"),
-                            mo.md("*THE CORE PROBLEM OF JEPA-BASED ARCHITECTURES*"),
+                            mo.md("*The Core Problem of JEPA-Based Architectures*"),
                             mo.md("&nbsp;"),
                             mo.md("""
     **01 Complete Collapse**
@@ -465,8 +465,7 @@ def sota_anticollapse_slide():
         return mo.vstack([
             section_strip(1),
             page_number(4),
-            mo.md("## State of the Art —by *Anti-Collapse Strategy*"),
-            mo.md("*HOW DOES EACH METHOD AVOID REPRESENTATION COLLAPSE?*"),
+            mo.md("## State of the Art by *Anti-Collapse Strategy*"),
             mo.md("&nbsp;"),
             sota_table(
                 ["Strategy", "Mechanism", "Limitation"],
@@ -497,8 +496,7 @@ def sota_target_task_slide():
         return mo.vstack([
             section_strip(1),
             page_number(5),
-            mo.md("## State of the Art —by *Target Task*"),
-            mo.md("*WHAT PROBLEM IS THE WORLD MODEL ASKED TO SOLVE?*"),
+            mo.md("## State of the Art by *Target Task*"),
             mo.md("&nbsp;"),
             sota_table(
                 ["Family", "What it does", "Representative work"],
@@ -669,7 +667,6 @@ def adaln_formulas_slide(mo):
         section_strip(2),
         page_number(9),
         _heading,
-        mo.md("*HOW THE ACTION EMBEDDING MODULATES EVERY PREDICTOR LAYER*"),
         mo.hstack([
             mo.vstack([_standard_ln, mo.md("&nbsp;"), _adaptive_ln], align="start"),
             _silu_panel,
@@ -742,7 +739,7 @@ def sigreg_optimal_distribution_slide(mo):
         section_strip(2),
         page_number(11),
         _heading,
-        mo.md("*THE THEORETICALLY OPTIMAL TARGET FOR ANY DOWNSTREAM TASK*"),
+        mo.md("*The theoretically optimal target distribution for any downstream task*"),
         mo.md("&nbsp;"),
         mo.Html('<h3 style="margin:0 0 0.5rem 0;color:#334155;">Two lemmas against anisotropy</h3>'),
         mo.md(
@@ -780,7 +777,6 @@ def sigreg_algorithm_slide(mo):
     )
 
     _left = mo.vstack([
-        mo.Html('<h3 style="margin:0 0 0.3rem 0;color:#334155;">The sketching algorithm</h3>'),
         mo.md(
             "**Step 1**: Sample $M$ random unit-norm directions:\n\n"
             "$$\\boldsymbol{u}^{(m)} \\sim \\mathcal{U}(S^{d-1}), \\quad m = 1, \\ldots, M$$\n\n"
@@ -861,7 +857,7 @@ def latent_planning_concept_slide(mo):
     _PLAN = "#0EA5E9"
 
     _heading = mo.Html(
-        f'<h2 style="margin:0;line-height:1.2;">Latent Planning —Planning in Imagination</h2>'
+        f'<h2 style="margin:0;line-height:1.2;">Latent Planning</h2>'
     )
 
     if _sys.platform != "emscripten":
@@ -893,7 +889,7 @@ def latent_planning_concept_slide(mo):
         section_strip(2),
         page_number(14),
         _heading,
-        mo.md("*FINDING THE OPTIMAL ACTION SEQUENCE ENTIRELY IN IMAGINATION*"),
+        mo.md("*Finding the optimal action sequence entirely in imagination*"),
         mo.md("&nbsp;"),
         _fig,
         mo.md("&nbsp;"),
@@ -1036,7 +1032,7 @@ def experiments_environments_slide(mo):
     )
     _subtitle = mo.Html(
         '<p style="margin:0;color:#64748B;font-size:1.1rem;">'
-        'Four tasks spanning 2D/3D manipulation, navigation, and motion planning'
+        'Four tasks spanning 2D/3D manipulation and navigation'
         '</p>'
     )
 
@@ -1217,7 +1213,7 @@ def discussion_slide(mo):
         + _bullet("Competitive across all tasks, with simplicity",
                   "End-to-end training from pixels, no pretrained encoder, no EMA or stop-gradient, fewer loss hyperparameters than pixel-based rivals")
         + _bullet("SIGReg (from LeJEPA) is the key enabler",
-                  "Imported from Balestriero & LeCun 2025, integrated here into end-to-end raining.")
+                  "Imported from Balestriero & LeCun 2025, integrated here into end-to-end MBRL training. Aligns embeddings with an isotropic Gaussian via Epps–Pulley projections — no contrastive pairs needed.")
         + _bullet("No pixel reconstruction",
                   "Unlike DreamerV3, IRIS and DIAMOND, it predicts only in latent space. No decoder, no generation overhead.")
         + _bullet("No pretrained visual backbone",

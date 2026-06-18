@@ -215,7 +215,6 @@ def _():
         SECTION,
         VIDEO_STYLE,
         cite_compact,
-        cite_full,
         page_number,
         render_scene,
         sota_table,
@@ -324,7 +323,13 @@ def jepa_principle_animation_slide(VIDEO_STYLE, page_number, render_scene):
             '<source src="media/videos/jepa_training/1080p60/JEPATraining.mp4" type="video/mp4">'
             '</video>'
         )
-    _mo.vstack([page_number(1), _video])
+    _credit = _mo.Html(
+        '<p style="font-size:0.7rem;color:#888;text-align:right;margin-top:0.25rem;">'
+        'Adapted from: <a href="https://youtu.be/kYkIdXwW2AE" '
+        'target="_blank" style="color:#888;">Yann LeCun\'s $1B Bet Against LLMs [Part 1]</a>'
+        '</p>'
+    )
+    _mo.vstack([page_number(1), _video, _credit])
     return
 
 
@@ -467,7 +472,13 @@ def sota_target_task_slide(VIDEO_STYLE, page_number, render_scene):
             '<source src="media/videos/world_model_taxonomy/1080p60/WorldModelTaxonomy.mp4" type="video/mp4">'
             '</video>'
         )
-    _mo.vstack([page_number(5), _video])
+    _credit = _mo.Html(
+        '<p style="font-size:0.7rem;color:#888;text-align:right;margin-top:0.25rem;">'
+        'Adapted from: <a href="https://drfeifei.substack.com/p/a-functional-taxonomy-of-world-models" '
+        'target="_blank" style="color:#888;">A Functional Taxonomy of World Models — Fei-Fei Li</a>'
+        '</p>'
+    )
+    _mo.vstack([page_number(5), _video, _credit])
     return
 
 
@@ -546,7 +557,7 @@ def lewm_architecture_animation_slide(VIDEO_STYLE, page_number, render_scene):
 
 
 @app.cell
-def vit_encoder_slide(VIDEO_STYLE, cite_full, mo, page_number, render_scene):
+def vit_encoder_slide(VIDEO_STYLE, mo, page_number, render_scene):
     import sys as _sys
     if _sys.platform != "emscripten":
         _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
@@ -564,9 +575,10 @@ def vit_encoder_slide(VIDEO_STYLE, cite_full, mo, page_number, render_scene):
         page_number(8),
         _video,
         mo.Html(
-            f'<div style="text-align:right;font-size:0.9rem;color:#000000;margin-top:0.25rem;">'
-            f'{cite_full("dosovitskiy_vit_2021")}'
-            f'</div>'
+            '<p style="font-size:0.7rem;color:#888;text-align:right;margin-top:0.25rem;">'
+            '"An Image is Worth 16×16 Words: Transformers for Image Recognition at Scale"'
+            ' — Dosovitskiy et al., ICLR 2021'
+            '</p>'
         ),
     ])
     return
@@ -786,8 +798,14 @@ def latent_planning_concept_slide(mo, page_number):
 
     _fig = mo.image(
         src=_fig_src,
-        caption="Figure 4. LeWorldModel Latent Planning — Maes et al. (arXiv 2026)",
         width="100%",
+    )
+
+    _fig_credit = mo.Html(
+        '<p style="font-size:0.7rem;color:#888;text-align:right;margin-top:0.25rem;">'
+        'From "LeWorldModel: Learning a World Model with Latent Imagination for Model-Based Reinforcement Learning"'
+        ' — Maes et al. (arXiv 2026)'
+        '</p>'
     )
 
     def _item(n, title, body):
@@ -811,6 +829,7 @@ def latent_planning_concept_slide(mo, page_number):
         mo.md("*Finding the optimal action sequence entirely in imagination*"),
         mo.md("&nbsp;"),
         _fig,
+        _fig_credit,
         mo.md("&nbsp;"),
         _bullets,
     ], align="start")
@@ -990,6 +1009,13 @@ def experiments_environments_slide(mo, page_number):
         "- **Speed**: LeWM plans in **<1 s** → **48× faster** than DINO-WM at equal compute budget"
     )
 
+    _fig_credit = mo.Html(
+        '<p style="font-size:0.7rem;color:#888;text-align:right;margin-top:0.25rem;">'
+        'From "LeWorldModel: Learning a World Model with Latent Imagination for Model-Based Reinforcement Learning"'
+        ' — Maes et al. (arXiv 2026)'
+        '</p>'
+    )
+
     mo.vstack([
 
         page_number(16),
@@ -997,6 +1023,7 @@ def experiments_environments_slide(mo, page_number):
         _subtitle,
         mo.md("&nbsp;"),
         _env_panels,
+        _fig_credit,
         mo.md("&nbsp;"),
         _results,
     ], align="start")
@@ -1035,6 +1062,13 @@ def experiments_physics_slide(mo, page_number):
          '</div>'
     )
 
+    _fig_credit = mo.Html(
+        '<p style="font-size:0.7rem;color:#888;text-align:right;margin-top:0.25rem;">'
+        'From "LeWorldModel: Learning a World Model with Latent Imagination for Model-Based Reinforcement Learning"'
+        ' — Maes et al. (arXiv 2026)'
+        '</p>'
+    )
+
     mo.vstack([
         page_number(17),
         _heading,
@@ -1042,6 +1076,7 @@ def experiments_physics_slide(mo, page_number):
         _content,
         mo.Html('<div style="height:2.5rem;"></div>'),
         _fig,
+        _fig_credit,
     ], align="start", gap="1rem")
     return
 
@@ -1131,7 +1166,7 @@ def findings_limitations_slide(mo, page_number):
 
 @app.cell
 def discussion_slide(mo, page_number):
-    _DISC = "#8B5CF6"
+    f_DISC = "#8B5CF6"
 
     def _bullet(head):
         return (

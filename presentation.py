@@ -1171,13 +1171,13 @@ def discussion_slide(mo, page_number):
     def _bullet(head):
         return (
             '<div style="display:flex;gap:0.7rem;margin:1.2rem 0;line-height:1.5;">'
-            f'<span style="color:{_DISC};font-weight:700;flex-shrink:0;margin-top:0.1rem;font-size:1.5rem;">&#9658;</span>'
+            f'<span style="color:{f_DISC};font-weight:700;flex-shrink:0;margin-top:0.1rem;font-size:1.5rem;">&#9658;</span>'
             f'<span style="font-size:1.5rem;"><strong>{head}</strong></span>'
             '</div>'
         )
 
     _limitations_html = "".join([
-        _bullet("Short horizon + offline ceiling &#8594 Hierarchichal JEPAs" ),
+        _bullet("Short horizon &#8594 Hierarchichal JEPAs" ),
         _bullet("Deterministic predictor: Multimodal dynamics (contacts, collisions) unrepresentable"),
         _bullet("Not a foundation model: Action conditioning &#8594 Must retrain per environment"),
         _bullet("Latent planning with CEM does not scale to high-DoF"),

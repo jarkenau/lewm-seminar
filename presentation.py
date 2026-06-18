@@ -963,9 +963,9 @@ def experiments_environments_slide(mo, page_number):
         ("env_reacher", "Reacher (2D)"),
     ]:
         if _esys.platform != "emscripten":
-            _src = (_epathlib.Path(__file__).parent / f"assets/{_name}.png").read_bytes()
+            _src = (_epathlib.Path(__file__).parent / f"media/images/{_name}.png").read_bytes()
         else:
-            _src = f"assets/{_name}.png"
+            _src = f"media/images/{_name}.png"
         _env_imgs[_label] = _src
 
     _env_panels = mo.hstack(

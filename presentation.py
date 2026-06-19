@@ -561,15 +561,21 @@ def lewm_architecture_animation_slide(VIDEO_STYLE, page_number, render_scene):
 
 
 @app.cell
-def vit_encoder_slide(VIDEO_STYLE, mo, page_number, render_scene):
+def vit_encoder_slide(VIDEO_STYLE, mo, page_number):
     import sys as _sys
-    if _sys.platform != "emscripten":
-        _sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))
-        from animations.vit_tiny_encoder import ViTTinyEncoder
-        _video = render_scene(ViTTinyEncoder)
+    import base64 as _base64
+    import pathlib as _pathlib
+    _mp4 = _pathlib.Path(__file__).parent / "media/videos/vit_tiny_encoder/1080p60/ViTTinyEncoder.mp4"
+    if _sys.platform != "emscripten" and _mp4.exists():
+        _b64 = _base64.b64encode(_mp4.read_bytes()).decode()
+        _video = mo.Html(
+            f'<video autoplay muted controls style="{VIDEO_STYLE}">'
+            f'<source src="data:video/mp4;base64,{_b64}" type="video/mp4">'
+            f'</video>'
+        )
     else:
         _video = mo.Html(
-            f'<video autoplay muted loop controls style="{VIDEO_STYLE}">'
+            f'<video autoplay muted controls style="{VIDEO_STYLE}">'
             '<source src="media/videos/vit_tiny_encoder/1080p60/ViTTinyEncoder.mp4" type="video/mp4">'
             '</video>'
         )
@@ -1151,6 +1157,11 @@ def discussion_slide(mo, page_number):
         mo.md("&nbsp;"),
         mo.Html(_limitations_html),
     ], align="start")
+    return
+
+
+@app.cell
+def _():
     return
 
 

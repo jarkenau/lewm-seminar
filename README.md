@@ -24,35 +24,33 @@ A 20-minute seminar presentation for the *World Models* seminar at TU Munich, co
 | 4 | State of the Art by anti-collapse strategy (EMA/stop-grad, frozen encoders, VICReg-style) |
 | 5 | World model taxonomy by target task (Manim animation) |
 
-**02 · LeWorldModel** (slides 7 to 15)
+**02 · LeWorldModel** (slides 7 to 13)
 
 | Slide | Topic |
 | ----- | ----- |
 | 7 | Architecture overview: ViT-Tiny encoder + AR predictor (Manim animation) |
-| 8 | ViT-Tiny encoder: patch tokenisation to CLS token embedding |
+| 8 | ViT-Tiny encoder: patch tokenisation to CLS token embedding (Manim animation) |
 | 9 | Action conditioning via AdaLN-Zero: scale / shift / gate from action embedding |
-| 10 | Why AdaLN-Zero over concatenation / addition |
-| 11 | SIGReg: why isotropic Gaussian (Lemmas 1 and 2, Theorem 1) |
-| 12 | SIGReg: Cramér-Wold sketching + Epps-Pulley normality test |
-| 13 | SIGReg: collapse mechanism (Manim animation) |
-| 14 | Latent planning concept: MPC in latent space |
-| 15 | Latent planning via CEM: action sequence optimisation |
+| 10 | SIGReg: why isotropic Gaussian is uniquely optimal |
+| 11 | SIGReg algorithm: Cramér-Wold sketching + normality test |
+| 12 | SIGReg: enforcing the Gaussian target (Manim animation) |
+| 13 | Latent planning via MPC + CEM |
 
-*Note: slide 6 is unused — it was an outline transition that has no page number.*
+*Note: slide 6 is unused — it is an outline recap transition with no page number.*
 
-**03 · Experiments** (slides 16 to 17)
+**03 · Experiments** (slides 14 to 15)
 
 | Slide | Topic |
 | ----- | ----- |
-| 16 | Evaluation environments: PushT, Cube, TwoRooms, Reacher |
-| 17 | Physics emerges in latent space (probing); surprise detection |
+| 14 | Evaluation environments: Push-T, OGBench-Cube, Two-Room, Reacher |
+| 15 | Violation of Expectation: physics structure in latent space and surprise detection |
 
-**04 · Discussion** (slides 18 to 19)
+**04 · Discussion** (slides 16 to 17)
 
 | Slide | Topic |
 | ----- | ----- |
-| 18 | Key findings: stable training, planning speed, latent structure |
-| 19 | Limitations & future work: horizon, determinism, generalization, CEM scaling |
+| 16 | Key findings: stable training, SIGReg sufficiency, planning speed, latent structure |
+| 17 | Limitations & future work: short horizon, determinism, generalization, CEM scaling |
 
 ## Dependencies
 

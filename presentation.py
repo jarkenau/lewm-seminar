@@ -445,7 +445,7 @@ def sota_anticollapse_slide(cite_compact, page_number, sota_table):
                 ["Strategy", "Mechanism", "Limitation"],
                 [
                     [f'EMA + stop-gradient<br><small style="color:#64748B;">{cite_compact("grill_byol_2020")}</small>',
-                     "Asymmetric self-distillation from a moving-average teacher",
+                     "Online network trains against a target network updated via EMA",
                      "No well-defined objective, purely heuristic"],
                     [f'Frozen pretrained encoder<br><small style="color:#64748B;">{cite_compact("zhou_dino-wm_2024")}</small>',
                      "Encoder is fixed, so it cannot collapse",
@@ -453,6 +453,9 @@ def sota_anticollapse_slide(cite_compact, page_number, sota_table):
                     [f'Explicit regularization<br><small style="color:#64748B;">{cite_compact("bardes_vicreg_2022")} &ensp; {cite_compact("sobal_pldm_2025")}</small>',
                      "Variance / covariance penalty terms",
                      "Training instabilities; up to 6 loss hyperparameters"],
+                    [f'Isotropic Gaussian regularization<br><small style="color:#64748B;">{cite_compact("balestriero_lejepa_2025")}</small>',
+                     "Enforces Gaussian-distributed embeddings with provable anti-collapse guarantees",
+                     "Imposes isotropic Gaussian prior; may not suit all environments"],
                 ],
             ),
         ], align="start")

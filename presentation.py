@@ -606,18 +606,9 @@ def adaln_formulas_slide(mo, page_number):
         f'<span style="display:inline-flex;align-items:center;justify-content:center;'
         f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_ACTION};'
         f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">2</span>'
-        f'<h2 style="margin:0;line-height:1.2;">Action Conditioning via AdaLN-Zero</h2>'
+        f'<h2 style="margin:0;line-height:1.2;">Injecting Actions via Layer Normalization</h2>'
         f'</div>'
     )
-
-    _standard_ln = mo.vstack([
-        mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">Standard LN &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Ba et al., &ldquo;Layer Normalization&rdquo;, 2016</span></h3>'),
-        mo.md(r"$$y = \text{scale} \cdot \frac{x - \mu}{\sigma} + \text{shift}$$"),
-        mo.md(
-            "- Scale & shift are **fixed** learned parameters\n"
-
-        ),
-    ], align="start")
 
     _adaptive_ln = mo.vstack([
         mo.Html(f'<h3 style="margin:0 0 0.3rem 0;color:#334155;">AdaLN-Zero &nbsp;<span style="font-size:0.8rem;font-weight:400;color:#64748B;">Peebles &amp; Xie, &ldquo;Scalable Diffusion Models with Transformers&rdquo;, ICCV 2023</span></h3>'),
@@ -625,42 +616,8 @@ def adaln_formulas_slide(mo, page_number):
         mo.md(r"$$x \leftarrow x + \underbrace{G(a)}_{\text{gate}} \cdot \text{sublayer}(y)$$"),
         mo.md(
             "- Scale & shift **depend** on the action **a**\n"
-        ),
-    ], align="start")
-
-    mo.vstack([
-
-        page_number(9),
-        _heading,
-        mo.vstack([_standard_ln, mo.md("&nbsp;"), _adaptive_ln], align="start"),
-    ])
-    return
-
-
-@app.cell
-def adaln_why_lewm_slide(mo, page_number):
-    import sys as _sys
-    import pathlib as _pathlib
-
-    _ACTION = "#8E6FBF"
-
-    _heading = mo.Html(
-        f'<div style="display:flex;align-items:center;gap:0.6rem;">'
-        f'<span style="display:inline-flex;align-items:center;justify-content:center;'
-        f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_ACTION};'
-        f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">2</span>'
-        f'<h2 style="margin:0;line-height:1.2;">Why AdaLN-Zero in LeWM?</h2>'
-        f'</div>'
-    )
-
-    _text = mo.vstack([
-        mo.md(
-            "**01 Why inject the action at every layer?**\n\n"
-            "- *Concat / add at input*: signal fades as it passes through 6 transformer layers\n"
-            "- *AdaLN per layer*: action re-conditions every intermediate representation\n\n"
-            "**02 Zero initialization**\n\n"
-            "- **Phase 1:** $G{=}0$, predictor is a pure skip, SIGReg anchors latent geometry\n"
-            "- **Phase 2:** gates open, $G$ admits action-conditioned residuals"
+            "- Why per layer? Signal from concat/add fades\n"
+            "- Zero-init: $G{=}0$ at start → predictor is identity; gates open as training progresses"
         ),
     ], align="start")
 
@@ -670,12 +627,11 @@ def adaln_why_lewm_slide(mo, page_number):
         _img_src = "media/images/AdaLNTransformerBlock_ManimCE_v0.20.1.png"
 
     mo.vstack([
-
-        page_number(10),
+        page_number(9),
         _heading,
         mo.md("&nbsp;"),
         mo.hstack([
-            _text,
+            _adaptive_ln,
             mo.image(_img_src),
         ], widths=[1, 1], gap="2rem", align="start"),
     ], align="start")
@@ -730,7 +686,7 @@ def sigreg_optimal_distribution_slide(mo, page_number):
     ], align="center")
 
     mo.vstack([
-        page_number(11),
+        page_number(10),
         _heading,
         mo.md("&nbsp;"),
         mo.hstack([_left, _right], widths=[2, 1], gap="2rem", align="start"),
@@ -768,7 +724,7 @@ def sigreg_algorithm_slide(mo, page_number):
 
     mo.vstack([
 
-        page_number(12),
+        page_number(11),
         _heading,
         mo.md("&nbsp;"),
         _left,
@@ -803,7 +759,7 @@ def sigreg_mechanism_slide(VIDEO_STYLE, mo, page_number, render_scene):
 
     mo.vstack([
 
-        page_number(13),
+        page_number(12),
         _heading,
         _video,
     ], align="start")
@@ -854,7 +810,7 @@ def latent_planning_concept_slide(mo, page_number):
 
     mo.vstack([
 
-        page_number(14),
+        page_number(13),
         _heading,
         mo.md("*Finding the optimal action sequence entirely in imagination*"),
         mo.md("&nbsp;"),
@@ -984,7 +940,7 @@ def experiments_environments_slide(mo, page_number):
 
     mo.vstack([
 
-        page_number(15),
+        page_number(14),
         _heading,
         _subtitle,
         mo.md("&nbsp;"),
@@ -1036,7 +992,7 @@ def experiments_physics_slide(mo, page_number):
     )
 
     mo.vstack([
-        page_number(16),
+        page_number(15),
         _heading,
         mo.Html('<div style="height:0.8rem;"></div>'),
         _content,
@@ -1124,7 +1080,7 @@ def findings_limitations_slide(mo, page_number):
     ])
 
     mo.vstack([
-        page_number(17),
+        page_number(16),
         mo.md("## Key Findings"),
         mo.md("&nbsp;"),
         mo.Html(_findings_html),
@@ -1152,16 +1108,11 @@ def discussion_slide(mo, page_number):
     ])
 
     mo.vstack([
-        page_number(18),
+        page_number(17),
         mo.md("## Limitations & Future Work"),
         mo.md("&nbsp;"),
         mo.Html(_limitations_html),
     ], align="start")
-    return
-
-
-@app.cell
-def _():
     return
 
 

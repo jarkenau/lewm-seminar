@@ -678,6 +678,9 @@ def adaln_why_lewm_slide(mo, page_number):
 
 @app.cell
 def sigreg_optimal_distribution_slide(mo, page_number):
+    import sys as _sys
+    import pathlib as _pathlib
+
     _SIG = "#10B981"
 
     _heading = mo.Html(
@@ -685,13 +688,11 @@ def sigreg_optimal_distribution_slide(mo, page_number):
         f'<span style="display:inline-flex;align-items:center;justify-content:center;'
         f'width:1.7rem;height:1.7rem;border-radius:50%;background:{_SIG};'
         f'color:white;font-weight:700;font-size:1.1rem;flex-shrink:0;">3</span>'
-        f'<h2 style="margin:0;line-height:1.2;">Which distribution should the latent space follow?</h2>'
+        f'<h2 style="margin:0;line-height:1.2;">Regularization: Constraining the latent space</h2>'
         f'</div>'
     )
 
-    mo.vstack([
-        page_number(11),
-        _heading,
+    _left = mo.vstack([
         mo.Html(
             f'<p style="margin:0;font-size:1rem;color:#64748B;">'
             f'Balestriero &amp; LeCun, arXiv 2025 &mdash; <em>LeJEPA: Provable and Scalable Self-Supervised Learning Without the Heuristics</em>'
@@ -708,6 +709,25 @@ def sigreg_optimal_distribution_slide(mo, page_number):
             '<p style="margin:0;">&#8594; <strong>Conclusion:</strong> Isotropic Gaussian is uniquely optimal</p>'
             '</div>'
         ),
+    ], align="start")
+
+    if _sys.platform != "emscripten":
+        _arch_img = (_pathlib.Path(__file__).parent / "media/images/lewm_architecture_last_frame.png").read_bytes()
+    else:
+        _arch_img = "media/images/lewm_architecture_last_frame.png"
+
+    _right = mo.vstack([
+        mo.md("&nbsp;"),
+        mo.md("&nbsp;"),
+        mo.Html('<p style="margin:0 0 0.4rem 0;font-size:0.8rem;color:#94A3B8;text-align:center;">LeWM Architecture</p>'),
+        mo.image(_arch_img),
+    ], align="center")
+
+    mo.vstack([
+        page_number(11),
+        _heading,
+        mo.md("&nbsp;"),
+        mo.hstack([_left, _right], widths=[2, 1], gap="2rem", align="start"),
     ], align="start")
     return
 
